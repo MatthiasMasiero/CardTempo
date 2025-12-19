@@ -1,100 +1,381 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  CreditCard,
+  TrendingUp,
+  Calendar,
+  ArrowRight,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+  Star,
+} from 'lucide-react';
+
+export default function LandingPage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-6 w-6 text-primary" />
+            <span className="font-semibold text-lg">Credit Optimizer</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              How It Works
+            </Link>
+            <Link href="#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              FAQ
+            </Link>
+            <Link href="/calculator">
+              <Button variant="outline" size="sm">
+                Calculator
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button size="sm">Sign In</Button>
+            </Link>
+          </nav>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+
+      {/* Hero Section */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-6">
+              Optimize Your Credit Card Payments to{' '}
+              <span className="text-primary">Boost Your Score</span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Most people pay on the due date, but banks report balances on the statement date.
+              Learn the optimal time to pay and potentially improve your score by 15-50 points.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/calculator">
+                <Button size="lg" className="w-full sm:w-auto gap-2">
+                  Calculate My Optimal Strategy
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="#how-it-works">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  Learn How It Works
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem/Solution Visual */}
+      <section id="how-it-works" className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-4">
+              The Secret Banks Don&apos;t Tell You
+            </h2>
+            <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+              Credit bureaus see your balance on the <strong>statement date</strong>, not the due date.
+              This means timing your payments strategically can dramatically improve your reported utilization.
+            </p>
+
+            {/* Timeline Diagram */}
+            <Card className="p-8 bg-gradient-to-r from-slate-50 to-white">
+              <CardContent className="p-0">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                  {/* Statement Date */}
+                  <div className="flex-1 text-center">
+                    <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-4">
+                      <Calendar className="h-8 w-8 text-yellow-600" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Statement Date</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Balance is reported to credit bureaus
+                    </p>
+                    <div className="mt-2 inline-flex items-center gap-1 text-yellow-600 text-xs font-medium">
+                      <AlertTriangle className="h-3 w-3" />
+                      Critical Date
+                    </div>
+                  </div>
+
+                  <ArrowRight className="h-6 w-6 text-muted-foreground hidden md:block" />
+
+                  {/* Balance Reported */}
+                  <div className="flex-1 text-center">
+                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                      <TrendingUp className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Bureaus Calculate Score</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Utilization affects ~30% of your score
+                    </p>
+                    <div className="mt-2 inline-flex items-center gap-1 text-blue-600 text-xs font-medium">
+                      <Clock className="h-3 w-3" />
+                      21-25 days later
+                    </div>
+                  </div>
+
+                  <ArrowRight className="h-6 w-6 text-muted-foreground hidden md:block" />
+
+                  {/* Due Date */}
+                  <div className="flex-1 text-center">
+                    <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                      <CreditCard className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Due Date</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Standard payment deadline
+                    </p>
+                    <div className="mt-2 inline-flex items-center gap-1 text-green-600 text-xs font-medium">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Avoid Interest
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <p className="text-center text-sm">
+                    <strong>The Strategy:</strong> Pay down your balance <span className="text-primary font-semibold">before</span> the statement date
+                    so a lower balance is reported, then pay the remaining small amount by the due date.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 bg-slate-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Why This Works
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="p-6">
+              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
+                <TrendingUp className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold mb-2">Lower Utilization Reported</h3>
+              <p className="text-sm text-muted-foreground">
+                Credit bureaus see a 5% utilization instead of 50%+, directly improving your score.
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4">
+                <CheckCircle2 className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="font-semibold mb-2">No Extra Interest</h3>
+              <p className="text-sm text-muted-foreground">
+                You still pay the full balance by the due date, so you never pay any interest.
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4">
+                <Calendar className="h-6 w-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold mb-2">Fast Results</h3>
+              <p className="text-sm text-muted-foreground">
+                See score improvements within one billing cycle - often within 30 days.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            What Users Are Saying
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              {
+                quote: "I went from 45% utilization to 5% reported, and my score jumped 32 points in just one month!",
+                author: "Sarah M.",
+                role: "First-time homebuyer"
+              },
+              {
+                quote: "I always paid on time but couldn't figure out why my score was stuck. This was the missing piece.",
+                author: "James K.",
+                role: "Small business owner"
+              },
+              {
+                quote: "The calculator showed me exactly when and how much to pay. Simple and effective.",
+                author: "Michelle R.",
+                role: "Recent graduate"
+              }
+            ].map((testimonial, i) => (
+              <Card key={i} className="p-6">
+                <div className="flex gap-1 mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground mb-4 italic">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </p>
+                <div>
+                  <p className="font-semibold text-sm">{testimonial.author}</p>
+                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 bg-slate-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">
+              Frequently Asked Questions
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>
+                  Is this actually legitimate? Will it really help my credit score?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Yes! This is based on how credit scoring actually works. Credit utilization
+                  (how much of your available credit you&apos;re using) accounts for about 30% of your
+                  FICO score. By strategically timing your payments, you control what balance
+                  gets reported to the bureaus. This is completely legal and used by financial
+                  advisors everywhere.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-2">
+                <AccordionTrigger>
+                  When exactly do I need to make payments?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Make your &ldquo;optimization payment&rdquo; 2-3 days before your statement closing date
+                  to bring your balance down to 5-9% of your limit. Then pay the remaining small
+                  balance by your due date. Our calculator will give you the exact dates and amounts
+                  for each of your cards.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-3">
+                <AccordionTrigger>
+                  What&apos;s the ideal credit utilization percentage?
+                </AccordionTrigger>
+                <AccordionContent>
+                  For the best credit score impact, aim for 1-9% utilization on each card.
+                  Keeping some balance (rather than $0) shows you actively use credit responsibly.
+                  Our calculator targets 5% as the sweet spot between showing activity and keeping
+                  utilization low.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-4">
+                <AccordionTrigger>
+                  How fast will I see results?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Credit card issuers typically report to bureaus once per month, around your
+                  statement date. So you can see score changes within one billing cycle - often
+                  within 30 days of optimizing your payment timing.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-5">
+                <AccordionTrigger>
+                  Will I pay any interest using this method?
+                </AccordionTrigger>
+                <AccordionContent>
+                  No! You&apos;re still paying your full balance before the due date. You&apos;re just
+                  splitting it into two payments: one before the statement date (to optimize
+                  reported utilization) and one before the due date (to pay the remaining amount).
+                  You avoid all interest charges.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-6">
+                <AccordionTrigger>
+                  What if I have multiple credit cards?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Our calculator handles multiple cards! It will create an optimized payment plan
+                  for each card, prioritizing cards with the highest utilization. It also shows
+                  your overall utilization across all cards.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-7">
+                <AccordionTrigger>
+                  How is this different from just paying on time?
+                </AccordionTrigger>
+                <AccordionContent>
+                  Paying on time avoids late fees and interest, which is great! But the balance
+                  that gets reported to credit bureaus is determined by your statement date, not
+                  your due date. If you pay on the due date with a high balance on your statement
+                  date, bureaus see high utilization even though you paid in full.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-primary text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to Optimize Your Credit?
+            </h2>
+            <p className="text-primary-foreground/80 mb-8">
+              Enter your credit card details and get a personalized payment plan in seconds.
+              No sign-up required to use the calculator.
+            </p>
+            <Link href="/calculator">
+              <Button size="lg" variant="secondary" className="gap-2">
+                Start Optimizing Now
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 bg-slate-900 text-slate-400">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              <span className="font-semibold text-white">Credit Optimizer</span>
+            </div>
+            <p className="text-sm">
+              For educational purposes. Not financial advice. Results may vary.
+            </p>
+            <div className="flex gap-6 text-sm">
+              <Link href="#" className="hover:text-white transition-colors">
+                Privacy
+              </Link>
+              <Link href="#" className="hover:text-white transition-colors">
+                Terms
+              </Link>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

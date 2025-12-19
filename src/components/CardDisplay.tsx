@@ -1,0 +1,111 @@
+'use client';
+
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { CreditCard as CreditCardIcon, Trash2, Edit2 } from 'lucide-react';
+import { CreditCard } from '@/types';
+import { formatCurrency, formatPercentage } from '@/lib/calculator';
+
+interface CardDisplayProps {
+  card: CreditCard;
+  onRemove: () => void;
+  onEdit?: () => void;
+}
+
+export function CardDisplay({ card, onRemove, onEdit }: CardDisplayProps) {
+  const utilization = (card.currentBalance / card.creditLimit) * 100;
+
+  const getUtilizationColor = (util: number) => {
+    if (util > 100) return 'bg-red-500';
+    if (util > 30) return 'bg-red-500';
+    if (util > 10) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  const getUtilizationBadge = (util: number) => {
+    if (util > 100) return { label: 'Over Limit', variant: 'destructive' as const };
+    if (util > 30) return { label: 'High', variant: 'destructive' as const };
+    if (util > 10) return { label: 'Medium', variant: 'secondary' as const };
+    return { label: 'Good', variant: 'default' as const };
+  };
+
+  const badge = getUtilizationBadge(utilization);
+
+  return (
+    <Card className="relative overflow-hidden">
+      {/* Card Header with gradient based on utilization */}
+      <div
+        className={`h-2 ${
+          utilization > 30
+            ? 'bg-gradient-to-r from-red-500 to-red-400'
+            : utilization > 10
+            ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+            : 'bg-gradient-to-r from-green-500 to-green-400'
+        }`}
+      />
+      <CardContent className="pt-4">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <CreditCardIcon className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold">{card.nickname}</h3>
+              <p className="text-xs text-muted-foreground">
+                Statement: {card.statementDate} | Due: {card.dueDate}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onEdit}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRemove}
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Balance</span>
+            <span className="font-medium">{formatCurrency(card.currentBalance)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Limit</span>
+            <span className="font-medium">{formatCurrency(card.creditLimit)}</span>
+          </div>
+          <div className="pt-2 border-t">
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-muted-foreground">Utilization</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">{formatPercentage(utilization)}</span>
+                <Badge variant={badge.variant} className="text-xs">
+                  {badge.label}
+                </Badge>
+              </div>
+            </div>
+            <Progress
+              value={Math.min(utilization, 100)}
+              className={`h-2 ${getUtilizationColor(utilization)}`}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

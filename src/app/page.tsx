@@ -17,26 +17,41 @@ import {
   CheckCircle2,
   AlertTriangle,
   Clock,
-  Star,
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <CreditCard className="h-6 w-6 text-primary" />
             <span className="font-semibold text-lg">Credit Optimizer</span>
-          </div>
+          </button>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              onClick={() => scrollToSection('how-it-works')}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               How It Works
-            </Link>
-            <Link href="#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            </button>
+            <button
+              onClick={() => scrollToSection('faq')}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               FAQ
-            </Link>
+            </button>
             <Link href="/calculator">
               <Button variant="outline" size="sm">
                 Calculator
@@ -68,11 +83,14 @@ export default function LandingPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="#how-it-works">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                  Learn How It Works
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={() => scrollToSection('how-it-works')}
+              >
+                Learn How It Works
+              </Button>
             </div>
           </div>
         </div>
@@ -196,51 +214,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            What Users Are Saying
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {[
-              {
-                quote: "I went from 45% utilization to 5% reported, and my score jumped 32 points in just one month!",
-                author: "Sarah M.",
-                role: "First-time homebuyer"
-              },
-              {
-                quote: "I always paid on time but couldn't figure out why my score was stuck. This was the missing piece.",
-                author: "James K.",
-                role: "Small business owner"
-              },
-              {
-                quote: "The calculator showed me exactly when and how much to pay. Simple and effective.",
-                author: "Michelle R.",
-                role: "Recent graduate"
-              }
-            ].map((testimonial, i) => (
-              <Card key={i} className="p-6">
-                <div className="flex gap-1 mb-4">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground mb-4 italic">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </p>
-                <div>
-                  <p className="font-semibold text-sm">{testimonial.author}</p>
-                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-slate-50">
+      <section id="faq" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">

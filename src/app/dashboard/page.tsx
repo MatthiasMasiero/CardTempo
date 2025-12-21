@@ -23,6 +23,7 @@ import {
   Clock,
   Calculator,
   RefreshCw,
+  Zap,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -122,6 +123,28 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <Link href="/dashboard/scenarios">
+              <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-xl transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Zap className="h-6 w-6" />
+                        <h3 className="text-xl font-bold">Test What-If Scenarios</h3>
+                      </div>
+                      <p className="text-blue-100">
+                        See how different decisions affect your credit score before making them
+                      </p>
+                    </div>
+                    <div className="text-4xl">→</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <Card>
@@ -158,7 +181,11 @@ export default function DashboardPage() {
                 <div className="text-center">
                   <TrendingUp className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                   <p className="text-3xl font-bold text-green-600">
-                    {result ? `+${result.estimatedScoreImpact.min}-${result.estimatedScoreImpact.max}` : 'N/A'}
+                    {result
+                      ? result.estimatedScoreImpact.min === result.estimatedScoreImpact.max
+                        ? `+${result.estimatedScoreImpact.min}`
+                        : `+${result.estimatedScoreImpact.min} to +${result.estimatedScoreImpact.max}`
+                      : 'N/A'}
                   </p>
                   <p className="text-xs text-muted-foreground">Est. Score Impact</p>
                 </div>

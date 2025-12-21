@@ -199,25 +199,91 @@ export function calculateCardPaymentPlan(
 
 /**
  * Calculate estimated credit score impact based on utilization improvement
+ *
+ * Credit utilization accounts for 30-35% of FICO score (210-280 points out of 850)
+ * Improving utilization can have significant impact on score
+ *
+ * Estimates are conservative and based on:
+ * - Industry research on credit scoring models
+ * - Utilization is 30% of FICO score
+ * - Assumes good payment history (otherwise impact is lower)
  */
-function calculateScoreImpact(utilizationImprovement: number): { min: number; max: number } {
-  if (utilizationImprovement <= 0) {
+export function calculateScoreImpact(utilizationImprovement: number): { min: number; max: number } {
+  // Handle negative impact (utilization increased)
+  if (utilizationImprovement < 0) {
+    const utilizationIncrease = Math.abs(utilizationImprovement);
+
+    // Very small increase (0-5% utilization increase)
+    if (utilizationIncrease <= 5) {
+      return { min: -15, max: -5 };
+    }
+
+    // Small increase (5-10% utilization increase)
+    if (utilizationIncrease <= 10) {
+      return { min: -25, max: -10 };
+    }
+
+    // Moderate increase (10-20% utilization increase)
+    if (utilizationIncrease <= 20) {
+      return { min: -45, max: -25 };
+    }
+
+    // Large increase (20-30% utilization increase)
+    if (utilizationIncrease <= 30) {
+      return { min: -70, max: -45 };
+    }
+
+    // Very large increase (30-40% utilization increase)
+    if (utilizationIncrease <= 40) {
+      return { min: -90, max: -70 };
+    }
+
+    // Extreme increase (40%+ utilization increase)
+    return { min: -120, max: -90 };
+  }
+
+  // No change
+  if (utilizationImprovement === 0) {
     return { min: 0, max: 0 };
   }
 
+  // Very small improvement (0-5% utilization drop)
   if (utilizationImprovement <= 5) {
-    return { min: 0, max: 5 };
-  }
-
-  if (utilizationImprovement <= 15) {
     return { min: 5, max: 15 };
   }
 
-  if (utilizationImprovement <= 25) {
-    return { min: 15, max: 30 };
+  // Small improvement (5-10% utilization drop)
+  // Example: 40% → 35% utilization
+  if (utilizationImprovement <= 10) {
+    return { min: 10, max: 25 };
   }
 
-  return { min: 30, max: 50 };
+  // Moderate improvement (10-20% utilization drop)
+  // Example: 45% → 30% or 35% → 20%
+  if (utilizationImprovement <= 20) {
+    return { min: 25, max: 45 };
+  }
+
+  // Good improvement (20-30% utilization drop)
+  // Example: 50% → 25% or 40% → 15%
+  if (utilizationImprovement <= 30) {
+    return { min: 45, max: 70 };
+  }
+
+  // Excellent improvement (30-40% utilization drop)
+  // Example: 60% → 25% or 50% → 15%
+  if (utilizationImprovement <= 40) {
+    return { min: 70, max: 100 };
+  }
+
+  // Outstanding improvement (40-50% utilization drop)
+  if (utilizationImprovement <= 50) {
+    return { min: 100, max: 130 };
+  }
+
+  // Extreme improvement (50%+ utilization drop)
+  // Example: 80% → 10% or 90% → 5%
+  return { min: 130, max: 160 };
 }
 
 /**

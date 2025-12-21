@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { PaymentTimeline } from '@/components/PaymentTimeline';
+import { EmailReminderModal } from '@/components/EmailReminderModal';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
 import {
@@ -28,6 +29,9 @@ import {
   Mail,
   RefreshCw,
   UserPlus,
+  Bell,
+  Download,
+  Loader2,
 } from 'lucide-react';
 
 export default function ResultsPage() {
@@ -35,6 +39,7 @@ export default function ResultsPage() {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -52,6 +57,43 @@ export default function ResultsPage() {
 
   const handleRecalculate = () => {
     calculateResults();
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!result) return;
+
+    setDownloadingPDF(true);
+    try {
+      const response = await fetch('/api/pdf/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ result }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      // Create blob from response
+      const blob = await response.blob();
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `credit-optimization-plan-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF. Please try again.');
+    } finally {
+      setDownloadingPDF(false);
+    }
   };
 
   // Hydration fix
@@ -184,7 +226,9 @@ export default function ResultsPage() {
                     <TrendingUp className="h-6 w-6 text-yellow-600" />
                   </div>
                   <p className="text-2xl font-bold text-green-600">
-                    +{result.estimatedScoreImpact.min}-{result.estimatedScoreImpact.max}
+                    {result.estimatedScoreImpact.min === result.estimatedScoreImpact.max
+                      ? `+${result.estimatedScoreImpact.min}`
+                      : `+${result.estimatedScoreImpact.min} to +${result.estimatedScoreImpact.max}`}
                   </p>
                   <p className="text-xs text-muted-foreground">Est. Score Impact</p>
                 </div>
@@ -235,7 +279,35 @@ export default function ResultsPage() {
                     Email yourself this plan, or create an account to save your cards and get payment reminders.
                   </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant="default"
+                    className="gap-2"
+                    onClick={handleDownloadPDF}
+                    disabled={downloadingPDF}
+                  >
+                    {downloadingPDF ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        Download PDF
+                      </>
+                    )}
+                  </Button>
+                  <EmailReminderModal
+                    cardPlans={result.cards}
+                    userEmail={email}
+                    trigger={
+                      <Button variant="outline" className="gap-2">
+                        <Bell className="h-4 w-4" />
+                        Set Reminders
+                      </Button>
+                    }
+                  />
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="gap-2">

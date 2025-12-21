@@ -52,6 +52,9 @@ export default function LandingPage() {
             >
               FAQ
             </button>
+            <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Blog
+            </Link>
             <Link href="/calculator">
               <Button variant="outline" size="sm">
                 Calculator

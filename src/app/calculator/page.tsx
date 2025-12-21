@@ -218,7 +218,9 @@ export default function CalculatorPage() {
                       </div>
                       <div>
                         <p className="text-2xl font-bold text-purple-600">
-                          +{result.estimatedScoreImpact.min}-{result.estimatedScoreImpact.max}
+                          {result.estimatedScoreImpact.min === result.estimatedScoreImpact.max
+                            ? `+${result.estimatedScoreImpact.min} pts`
+                            : `+${result.estimatedScoreImpact.min} to +${result.estimatedScoreImpact.max} pts`}
                         </p>
                         <p className="text-xs text-muted-foreground">Score Impact</p>
                       </div>

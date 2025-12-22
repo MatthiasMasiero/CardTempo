@@ -1,5 +1,5 @@
-import { CreditCard, OptimizationResult } from '@/types';
-import { calculateOptimalPayments, calculateScoreImpact } from './calculator';
+import { CreditCard } from '@/types';
+import { calculateScoreImpact } from './calculator';
 import { addDays, isBefore } from 'date-fns';
 
 export interface ScenarioResult {
@@ -79,7 +79,7 @@ export function calculatePaymentAdjustment(
   cards: CreditCard[],
   cardId: string,
   newPaymentAmount: number,
-  paymentDate: Date
+  _paymentDate: Date
 ): ScenarioResult {
   const baseline = calculateBaseline(cards);
   const updatedCards = cards.map(card => {
@@ -362,18 +362,18 @@ export function calculateNewCard(
   );
 
   const utilizationImprovement = baseline.overallUtilization - result.overallUtilization;
-  let scoreImpact = calculateScoreImpact(utilizationImprovement);
+  const scoreImpact = calculateScoreImpact(utilizationImprovement);
 
-  // Adjust for hard inquiry
-  let scoreChange = {
-    min: scoreImpact.min,
-    max: scoreImpact.max,
-  };
-
-  if (includeHardInquiry) {
-    scoreChange.min -= 10;
-    scoreChange.max -= 5;
-  }
+  // Adjust for hard inquiry - calculate directly to avoid mutation
+  const scoreChange = includeHardInquiry
+    ? {
+        min: scoreImpact.min - 10,
+        max: scoreImpact.max - 5,
+      }
+    : {
+        min: scoreImpact.min,
+        max: scoreImpact.max,
+      };
 
   recommendations.push(
     `Estimated net score change: ${scoreChange.min > 0 ? '+' : ''}${scoreChange.min} to ${scoreChange.max > 0 ? '+' : ''}${scoreChange.max} points after 6 months.`

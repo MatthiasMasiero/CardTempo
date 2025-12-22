@@ -10,6 +10,11 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
   CreditCard,
   TrendingUp,
   Calendar,
@@ -17,14 +22,23 @@ import {
   CheckCircle2,
   AlertTriangle,
   Clock,
+  LayoutDashboard,
+  User,
+  LogOut,
 } from 'lucide-react';
+import { useAuthStore } from '@/store/auth-store';
 
 export default function LandingPage() {
+  const { isAuthenticated, user, logout } = useAuthStore();
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -60,9 +74,45 @@ export default function LandingPage() {
                 Calculator
               </Button>
             </Link>
-            <Link href="/login">
-              <Button size="sm">Sign In</Button>
-            </Link>
+            {isAuthenticated ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    Account
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-0" align="end">
+                  <div className="flex flex-col">
+                    <div className="px-4 py-3 border-b">
+                      <p className="text-sm font-medium">Signed in as</p>
+                      <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                    <div className="p-2">
+                      <Link href="/dashboard" className="block">
+                        <Button variant="ghost" className="w-full justify-start gap-2" size="sm">
+                          <LayoutDashboard className="h-4 w-4" />
+                          Dashboard
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        size="sm"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Link href="/login">
+                <Button size="sm">Sign In</Button>
+              </Link>
+            )}
           </nav>
         </div>
       </header>
@@ -79,21 +129,31 @@ export default function LandingPage() {
               Most people pay on the due date, but banks report balances on the statement date.
               Learn the optimal time to pay and potentially improve your score by 15-50 points.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/calculator">
-                <Button size="lg" className="w-full sm:w-auto gap-2">
-                  Calculate My Optimal Strategy
-                  <ArrowRight className="h-4 w-4" />
+            <div className="flex flex-col gap-4 items-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/calculator">
+                  <Button size="lg" className="w-full sm:w-auto gap-2">
+                    Calculate My Optimal Strategy
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto"
+                  onClick={() => scrollToSection('how-it-works')}
+                >
+                  Learn How It Works
                 </Button>
-              </Link>
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-auto"
-                onClick={() => scrollToSection('how-it-works')}
-              >
-                Learn How It Works
-              </Button>
+              </div>
+              {isAuthenticated && (
+                <Link href="/dashboard">
+                  <Button size="lg" variant="default" className="w-full sm:w-auto gap-2 bg-green-600 hover:bg-green-700">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Return to Dashboard
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreditCardForm } from '@/components/CreditCardForm';
 import { CardDisplay } from '@/components/CardDisplay';
 import { useCalculatorStore } from '@/store/calculator-store';
+import { useAuthStore } from '@/store/auth-store';
 import { CreditCard, CreditCardFormData } from '@/types';
 import {
   CreditCard as CreditCardIcon,
@@ -14,11 +15,13 @@ import {
   Calculator,
   ArrowRight,
   ArrowLeft,
+  LayoutDashboard,
 } from 'lucide-react';
 
 export default function CalculatorPage() {
   const { cards, addCard, removeCard, calculateResults, result, clearResults } =
     useCalculatorStore();
+  const { isAuthenticated } = useAuthStore();
 
   const [showForm, setShowForm] = useState(cards.length === 0);
   const [mounted, setMounted] = useState(false);
@@ -91,11 +94,20 @@ export default function CalculatorPage() {
                 Home
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Sign In
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       </header>

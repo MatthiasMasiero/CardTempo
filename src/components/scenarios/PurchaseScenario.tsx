@@ -22,7 +22,7 @@ interface PurchaseScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function PurchaseScenario({ cards, onUpdate, baseline }: PurchaseScenarioProps) {
+export function PurchaseScenario({ cards, onUpdate }: PurchaseScenarioProps) {
   const [selectedCardId, setSelectedCardId] = useState<string>(cards[0]?.id || '');
   const [purchaseAmount, setPurchaseAmount] = useState<number>(500);
   const [sliderValue, setSliderValue] = useState<number>(500);
@@ -259,11 +259,11 @@ export function PurchaseScenario({ cards, onUpdate, baseline }: PurchaseScenario
         <CardContent className="space-y-3 text-sm text-gray-700">
           <p>
             <strong>Time your large purchases wisely!</strong> The balance reported to credit bureaus
-            is what's on your account when your statement closes, not when you make the purchase.
+            is what&apos;s on your account when your statement closes, not when you make the purchase.
           </p>
           <p>
             <strong>Best strategy for big purchases:</strong> Make the purchase right after your
-            statement closes. This gives you ~30 days to pay it down before it's reported to bureaus.
+            statement closes. This gives you ~30 days to pay it down before it&apos;s reported to bureaus.
           </p>
           <p>
             <strong>Utilization impact:</strong> A large purchase can temporarily spike your utilization.

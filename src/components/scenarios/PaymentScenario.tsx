@@ -14,7 +14,6 @@ import {
 import { Slider } from '@/components/ui/slider';
 import { CreditCard } from '@/types';
 import { ScenarioResult, calculatePaymentAdjustment } from '@/lib/scenarioCalculations';
-import { ScenarioAlert } from './ScenarioAlert';
 import { DollarSign } from 'lucide-react';
 
 interface PaymentScenarioProps {
@@ -23,7 +22,7 @@ interface PaymentScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function PaymentScenario({ cards, onUpdate, baseline }: PaymentScenarioProps) {
+export function PaymentScenario({ cards, onUpdate }: PaymentScenarioProps) {
   const [selectedCardId, setSelectedCardId] = useState<string>(cards[0]?.id || '');
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [sliderValue, setSliderValue] = useState<number>(0);
@@ -265,7 +264,7 @@ export function PaymentScenario({ cards, onUpdate, baseline }: PaymentScenarioPr
           </p>
           <p>
             <strong>Target under 10% utilization</strong> for best credit scores. Even
-            better: keep it between 1-9% to show you use credit but don't depend on it.
+            better: keep it between 1-9% to show you use credit but don&apos;t depend on it.
           </p>
           <p>
             <strong>Two-payment strategy:</strong> Pay most of your balance before the

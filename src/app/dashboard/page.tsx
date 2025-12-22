@@ -18,6 +18,7 @@ import {
   Calendar,
   Bell,
   Settings,
+  DollarSign,
   LogOut,
   TrendingUp,
   Clock,
@@ -123,28 +124,6 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mb-8">
-            <Link href="/dashboard/scenarios">
-              <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-xl transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Zap className="h-6 w-6" />
-                        <h3 className="text-xl font-bold">Test What-If Scenarios</h3>
-                      </div>
-                      <p className="text-blue-100">
-                        See how different decisions affect your credit score before making them
-                      </p>
-                    </div>
-                    <div className="text-4xl">→</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <Card>
@@ -248,36 +227,90 @@ export default function DashboardPage() {
                   </Link>
                 </Card>
               ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {cards.map((card) => (
-                    <CardDisplay
-                      key={card.id}
-                      card={card}
-                      onRemove={() => removeCard(card.id)}
-                    />
-                  ))}
-                </div>
-              )}
+                <>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {cards.map((card) => (
+                      <CardDisplay
+                        key={card.id}
+                        card={card}
+                        onRemove={() => removeCard(card.id)}
+                      />
+                    ))}
+                  </div>
 
-              {result && cards.length > 0 && (
-                <Card className="mt-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                      <div>
-                        <h3 className="font-semibold mb-1">View Your Optimized Payment Plan</h3>
-                        <p className="text-sm text-muted-foreground">
-                          See detailed payment dates and amounts for each card
-                        </p>
-                      </div>
-                      <Link href="/results">
-                        <Button className="gap-2">
-                          <Calculator className="h-4 w-4" />
-                          View Results
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                  {/* View Results CTA */}
+                  {result && (
+                    <Link href="/results" className="block mt-6">
+                      <Card className="bg-gradient-to-r from-primary to-primary/90 text-white hover:shadow-lg transition-all cursor-pointer border border-primary/20">
+                        <CardContent className="p-5">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-white/20 p-2.5 rounded-lg">
+                                <Calculator className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-base mb-0.5">Optimized Payment Plan Ready</h3>
+                                <p className="text-primary-foreground/80 text-sm">
+                                  View detailed payment schedule and recommendations
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              className="bg-white text-primary hover:bg-white/90 font-semibold gap-2 shrink-0"
+                            >
+                              View Results
+                              <span className="text-lg">→</span>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  )}
+
+                  {/* Quick Action Cards */}
+                  <div className="mt-8 space-y-4">
+                    <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+
+                    <Link href="/dashboard/priority">
+                      <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transition-shadow cursor-pointer">
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <DollarSign className="h-6 w-6" />
+                                <h3 className="text-xl font-bold">Smart Payment Allocation</h3>
+                              </div>
+                              <p className="text-green-100">
+                                Limited budget? Find the optimal way to distribute payments across your cards
+                              </p>
+                            </div>
+                            <div className="text-4xl">→</div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/dashboard/scenarios">
+                      <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-xl transition-shadow cursor-pointer">
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Zap className="h-6 w-6" />
+                                <h3 className="text-xl font-bold">Test What-If Scenarios</h3>
+                              </div>
+                              <p className="text-blue-100">
+                                See how different decisions affect your credit score before making them
+                              </p>
+                            </div>
+                            <div className="text-4xl">→</div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </div>
+                </>
               )}
             </TabsContent>
 

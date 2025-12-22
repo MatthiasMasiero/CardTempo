@@ -14,7 +14,7 @@ import {
   RefreshCw,
   Sparkles,
   Zap,
-  Target,
+  ArrowRight,
 } from 'lucide-react';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { ScenarioComparison } from '@/components/scenarios/ScenarioComparison';
@@ -214,9 +214,9 @@ export default function ScenariosPage() {
                         <CardDescription>{scenario.description}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex items-center text-blue-600 font-medium">
-                          Try It
-                          <Target className="w-4 h-4 ml-2" />
+                        <div className="flex items-center text-blue-600 font-medium group-hover:gap-2 transition-all">
+                          <span>Explore Scenario</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </CardContent>
                     </Card>
@@ -225,14 +225,44 @@ export default function ScenariosPage() {
               </>
             ) : (
               <div>
-                <Button
-                  variant="ghost"
-                  onClick={() => setActiveScenario(null)}
-                  className="mb-6"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Scenarios
-                </Button>
+                {/* Scenario Tabs */}
+                <div className="mb-6">
+                  <div className="border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-4 overflow-x-auto">
+                      {/* Back to Overview Tab */}
+                      <button
+                        onClick={() => setActiveScenario(null)}
+                        className="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      >
+                        <div className="flex items-center gap-2">
+                          <ArrowLeft className="w-4 h-4" />
+                          All Scenarios
+                        </div>
+                      </button>
+
+                      {/* Scenario Tabs */}
+                      {scenarios.map((scenario) => {
+                        const isActive = activeScenario === scenario.id;
+                        return (
+                          <button
+                            key={scenario.id}
+                            onClick={() => setActiveScenario(scenario.id)}
+                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                              isActive
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <scenario.icon className="w-4 h-4" />
+                              <span className="hidden sm:inline">{scenario.title}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                </div>
 
                 {/* Render Active Scenario */}
                 {activeScenario === 'payment' && baselineScenario && (

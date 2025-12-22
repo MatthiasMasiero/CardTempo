@@ -16,8 +16,11 @@ import {
 } from '@/components/ui/dialog';
 import { PaymentTimeline } from '@/components/PaymentTimeline';
 import { EmailReminderModal } from '@/components/EmailReminderModal';
+import { CalendarExportModal } from '@/components/CalendarExportModal';
 import { useCalculatorStore } from '@/store/calculator-store';
+import { useAuthStore } from '@/store/auth-store';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
+import { PaymentEvent } from '@/lib/calendarUtils';
 import {
   CreditCard as CreditCardIcon,
   ArrowLeft,
@@ -32,14 +35,18 @@ import {
   Bell,
   Download,
   Loader2,
+  Calendar,
+  LayoutDashboard,
 } from 'lucide-react';
 
 export default function ResultsPage() {
   const { result, cards, calculateResults } = useCalculatorStore();
+  const { isAuthenticated } = useAuthStore();
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -57,6 +64,46 @@ export default function ResultsPage() {
 
   const handleRecalculate = () => {
     calculateResults();
+  };
+
+  // Convert payment plans to calendar events
+  const getCalendarEvents = (): PaymentEvent[] => {
+    if (!result) return [];
+
+    const events: PaymentEvent[] = [];
+
+    result.cards.forEach(cardPlan => {
+      cardPlan.payments.forEach(payment => {
+        const event: PaymentEvent = {
+          cardName: cardPlan.card.nickname,
+          amount: payment.amount,
+          date: payment.date,
+          type: payment.purpose,
+          currentBalance: cardPlan.card.currentBalance,
+          newBalance: payment.purpose === 'optimization'
+            ? cardPlan.card.currentBalance - payment.amount
+            : 0,
+          utilization: payment.purpose === 'optimization'
+            ? cardPlan.newUtilization
+            : undefined,
+          scoreImpact: result.estimatedScoreImpact.min === result.estimatedScoreImpact.max
+            ? `+${result.estimatedScoreImpact.min} pts`
+            : `+${result.estimatedScoreImpact.min} to +${result.estimatedScoreImpact.max} pts`,
+        };
+        events.push(event);
+      });
+
+      // Optionally add statement closing date
+      events.push({
+        cardName: cardPlan.card.nickname,
+        amount: 0,
+        date: cardPlan.nextStatementDate,
+        type: 'statement',
+        currentBalance: cardPlan.card.currentBalance,
+      });
+    });
+
+    return events;
   };
 
   const handleDownloadPDF = async () => {
@@ -163,12 +210,21 @@ export default function ResultsPage() {
                 Edit Cards
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="outline" size="sm" className="gap-2">
-                <UserPlus className="h-4 w-4" />
-                Save Results
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Save Results
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       </header>
@@ -272,16 +328,28 @@ export default function ResultsPage() {
           {/* Call to Action */}
           <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
             <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Don&apos;t Lose Your Payment Plan</h3>
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h3 className="font-bold text-lg mb-2">
+                    {isAuthenticated ? 'Manage Your Payment Plan' : 'Don\'t Lose Your Payment Plan'}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    Email yourself this plan, or create an account to save your cards and get payment reminders.
+                    {isAuthenticated
+                      ? 'Export your plan or set up reminders to stay on track.'
+                      : 'Email yourself this plan, or create an account to save your cards and get payment reminders.'}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                   <Button
                     variant="default"
+                    className="gap-2"
+                    onClick={() => setShowCalendarModal(true)}
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Add to Calendar
+                  </Button>
+                  <Button
+                    variant="outline"
                     className="gap-2"
                     onClick={handleDownloadPDF}
                     disabled={downloadingPDF}
@@ -348,12 +416,14 @@ export default function ResultsPage() {
                       )}
                     </DialogContent>
                   </Dialog>
-                  <Link href="/signup">
-                    <Button className="gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      Create Account
-                    </Button>
-                  </Link>
+                  {!isAuthenticated && (
+                    <Link href="/signup">
+                      <Button className="gap-2">
+                        <UserPlus className="h-4 w-4" />
+                        Create Account
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -408,6 +478,15 @@ export default function ResultsPage() {
           </p>
         </div>
       </footer>
+
+      {/* Calendar Export Modal */}
+      {result && (
+        <CalendarExportModal
+          open={showCalendarModal}
+          onClose={() => setShowCalendarModal(false)}
+          events={getCalendarEvents()}
+        />
+      )}
     </div>
   );
 }

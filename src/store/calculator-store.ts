@@ -7,6 +7,7 @@ interface CalculatorState {
   cards: CreditCard[];
   result: OptimizationResult | null;
   targetUtilization: number;
+  currentUserId: string | null;
 
   // Actions
   addCard: (card: Omit<CreditCard, 'id'>) => void;
@@ -16,7 +17,13 @@ interface CalculatorState {
   setTargetUtilization: (value: number) => void;
   calculateResults: () => void;
   clearResults: () => void;
+  setUserId: (userId: string | null) => void;
 }
+
+// Helper to get user-specific storage key
+const getUserStorageKey = (userId: string | null) => {
+  return userId ? `credit-optimizer-${userId}` : 'credit-optimizer-guest';
+};
 
 export const useCalculatorStore = create<CalculatorState>()(
   persist(
@@ -24,6 +31,7 @@ export const useCalculatorStore = create<CalculatorState>()(
       cards: [],
       result: null,
       targetUtilization: 0.05, // 5% default
+      currentUserId: null,
 
       addCard: (card) => {
         const newCard: CreditCard = {
@@ -68,6 +76,32 @@ export const useCalculatorStore = create<CalculatorState>()(
       clearResults: () => {
         set({ result: null });
       },
+
+      setUserId: (userId) => {
+        const currentUserId = get().currentUserId;
+
+        // If userId changed, clear the current data and load user-specific data
+        if (userId !== currentUserId) {
+          set({ currentUserId: userId, cards: [], result: null });
+
+          // Load user-specific data from localStorage
+          if (typeof window !== 'undefined') {
+            const storageKey = getUserStorageKey(userId);
+            const stored = localStorage.getItem(storageKey);
+            if (stored) {
+              try {
+                const { state } = JSON.parse(stored);
+                set({
+                  cards: state.cards || [],
+                  targetUtilization: state.targetUtilization || 0.05,
+                });
+              } catch (e) {
+                console.error('Failed to parse stored data:', e);
+              }
+            }
+          }
+        }
+      },
     }),
     {
       name: 'credit-optimizer-storage',
@@ -75,6 +109,28 @@ export const useCalculatorStore = create<CalculatorState>()(
         cards: state.cards,
         targetUtilization: state.targetUtilization,
       }),
+      // Use dynamic storage name based on user ID
+      storage: {
+        getItem: (name) => {
+          if (typeof window === 'undefined') return null;
+          const state = useCalculatorStore.getState();
+          const key = getUserStorageKey(state.currentUserId);
+          const str = localStorage.getItem(key);
+          return str;
+        },
+        setItem: (name, value) => {
+          if (typeof window === 'undefined') return;
+          const state = useCalculatorStore.getState();
+          const key = getUserStorageKey(state.currentUserId);
+          localStorage.setItem(key, value);
+        },
+        removeItem: (name) => {
+          if (typeof window === 'undefined') return;
+          const state = useCalculatorStore.getState();
+          const key = getUserStorageKey(state.currentUserId);
+          localStorage.removeItem(key);
+        },
+      },
     }
   )
 );

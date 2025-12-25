@@ -405,10 +405,10 @@ export default function LandingPage() {
               For educational purposes. Not financial advice. Results may vary.
             </p>
             <div className="flex gap-6 text-sm">
-              <Link href="#" className="hover:text-white transition-colors">
+              <Link href="/privacy" className="hover:text-white transition-colors">
                 Privacy
               </Link>
-              <Link href="#" className="hover:text-white transition-colors">
+              <Link href="/terms" className="hover:text-white transition-colors">
                 Terms
               </Link>
             </div>

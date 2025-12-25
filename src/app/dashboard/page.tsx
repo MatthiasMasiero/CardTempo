@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CardDisplay } from '@/components/CardDisplay';
+import { CalendarView } from '@/components/CalendarView';
 import { useAuthStore } from '@/store/auth-store';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
@@ -383,20 +384,27 @@ export default function DashboardPage() {
 
             {/* Calendar Tab */}
             <TabsContent value="calendar">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Calendar</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">Calendar View Coming Soon</p>
-                    <p className="text-sm">
-                      For now, check your reminders tab for upcoming payments
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              {cards.length === 0 ? (
+                <Card>
+                  <CardContent className="p-12">
+                    <div className="text-center text-muted-foreground">
+                      <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="font-medium">No Cards Added Yet</p>
+                      <p className="text-sm mb-4">
+                        Add your credit cards to see your payment calendar
+                      </p>
+                      <Link href="/calculator">
+                        <Button className="gap-2">
+                          <Plus className="h-4 w-4" />
+                          Add Cards
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <CalendarView cards={cards} />
+              )}
             </TabsContent>
           </Tabs>
         </div>

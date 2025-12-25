@@ -43,6 +43,13 @@ export const useAuthStore = create<AuthState>()(
         void _password; // Used for actual authentication in production
         const user = createMockUser(email);
         set({ user, isAuthenticated: true, isLoading: false });
+
+        // Update calculator store with user ID
+        if (typeof window !== 'undefined') {
+          const { useCalculatorStore } = await import('./calculator-store');
+          useCalculatorStore.getState().setUserId(user.id);
+        }
+
         return true;
       },
 
@@ -54,11 +61,25 @@ export const useAuthStore = create<AuthState>()(
         void _password; // Used for actual authentication in production
         const user = createMockUser(email);
         set({ user, isAuthenticated: true, isLoading: false });
+
+        // Update calculator store with user ID
+        if (typeof window !== 'undefined') {
+          const { useCalculatorStore } = await import('./calculator-store');
+          useCalculatorStore.getState().setUserId(user.id);
+        }
+
         return true;
       },
 
       logout: () => {
         set({ user: null, isAuthenticated: false });
+
+        // Clear calculator store data by setting userId to null (guest mode)
+        if (typeof window !== 'undefined') {
+          import('./calculator-store').then(({ useCalculatorStore }) => {
+            useCalculatorStore.getState().setUserId(null);
+          });
+        }
       },
 
       updatePreferences: (preferences) => {

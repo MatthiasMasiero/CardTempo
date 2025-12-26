@@ -8,9 +8,9 @@
 - Next.js 14 (App Router)
 - React + TypeScript
 - Tailwind CSS + shadcn/ui components
-- Zustand (state management with persist middleware)
+- Zustand (state management)
 - date-fns (date utilities)
-- Supabase (database - ready but not connected)
+- Supabase (database + authentication - CONNECTED)
 - Resend (email service - ready but not configured)
 
 **Project Location:** `/Users/matthiasmasiero/Desktop/Code/credit-optimizer`
@@ -23,41 +23,71 @@
 
 #### 1. Authentication System
 **Files:**
-- `src/store/auth-store.ts` - Zustand store for auth state
-- `src/components/AuthSync.tsx` - Syncs auth with calculator store
+- `src/store/auth-store.ts` - Zustand store for auth state with Supabase integration
+- `src/components/AuthSync.tsx` - Syncs auth with calculator store, checks sessions on mount
 - `src/app/login/page.tsx` - Login page
 - `src/app/signup/page.tsx` - Signup page
 - `src/app/layout.tsx` - Includes AuthSync component
+- `src/middleware.ts` - Rate limiting and security headers
+- `src/lib/api-security.ts` - API security helpers
+- `SECURITY.md` - Security documentation
 
-**Status:** Working with mock authentication (accepts any email/password)
-- Sign up/login/logout functionality
-- User persistence in localStorage
+**Status:** ✅ REAL SUPABASE AUTHENTICATION (Not Mock)
+- Real email/password authentication via Supabase Auth
+- Users must create accounts with valid credentials
+- Session persistence (7-day default duration)
 - Protected routes (dashboard redirects if not authenticated)
 - Auth state synced across app
+- Automatic session restoration on page reload
+- Rate limiting (20 req/min global, 3 req/min for sensitive actions)
+- Security headers (XSS, clickjacking, CSP protection)
 
 **Important Implementation Details:**
+- User IDs are now stable Supabase UUIDs (not random client-side IDs)
 - When user logs in/signs up, `setUserId(user.id)` is called to load user-specific cards
 - When user logs out, `setUserId(null)` is called to clear cards and switch to guest mode
-- User object has random ID generated client-side: `Math.random().toString(36).substring(2, 15)`
+- Sessions checked on mount via `checkSession()` in AuthSync
+- Database trigger automatically creates user record in `public.users` on signup
+- Email confirmation DISABLED for development (reminder: re-enable for production)
 
 #### 2. User-Specific Data Storage
 **Files:**
-- `src/store/calculator-store.ts` - Zustand store with user-specific localStorage
+- `src/store/calculator-store.ts` - Zustand store with Supabase database integration
 - `src/components/AuthSync.tsx` - Syncs userId on mount
+- `supabase/migrations/20250119_email_reminders.sql` - Database schema
+- `test-signup.js` - Authentication testing script
+- `debug-localstorage.html` - localStorage debugging tool
 
 **How It Works:**
-- Each user has separate localStorage key: `credit-optimizer-{userId}` for authenticated users, `credit-optimizer-guest` for guests
-- `setUserId(userId)` method switches between user contexts and loads their data
-- Cards are saved to user-specific localStorage automatically
-- **CRITICAL BUG:** Cards reset on code updates because localStorage can be cleared by Next.js during hot reload - THIS IS WHY DATABASE IS NEEDED
+- ✅ Cards stored in Supabase `credit_cards` table (NOT localStorage)
+- Each user's cards linked via `user_id` foreign key
+- All card operations (add/update/remove) sync to database
+- Automatic one-time migration from localStorage to database on first login
+- Cross-device sync enabled (cards accessible from any device)
+- Optimistic UI updates with database synchronization
 
-**Storage Schema:**
-```typescript
-{
-  cards: CreditCard[],
-  targetUtilization: number
-}
+**Storage Schema (Database):**
+```sql
+CREATE TABLE credit_cards (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  nickname VARCHAR(100) NOT NULL,
+  credit_limit DECIMAL(10, 2) NOT NULL,
+  current_balance DECIMAL(10, 2) NOT NULL,
+  statement_date INTEGER NOT NULL,
+  due_date INTEGER NOT NULL,
+  apr DECIMAL(5, 2),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 ```
+
+**Migration Strategy:**
+- On login, check if user has cards in database
+- If database empty, check localStorage for existing cards
+- Migrate localStorage cards to database (one-time)
+- Clear localStorage after successful migration
+- All future operations use database only
 
 #### 3. Credit Card Calculator
 **Files:**
@@ -72,7 +102,7 @@
 - Calculate optimal payment strategy
 - Shows current vs optimized utilization
 - Estimates credit score impact
-- Cards persist in user-specific localStorage
+- Cards persist in Supabase database with cross-device sync
 
 **Key Types:**
 ```typescript
@@ -281,68 +311,66 @@ created_at TIMESTAMPTZ DEFAULT NOW()
 
 ---
 
-## Environment Variables Needed
+## Environment Variables
 
-**File to Create:** `.env.local`
+**File:** `.env.local` (✅ CONFIGURED)
 
 ```bash
-# Supabase (for database)
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+# Supabase (for database + authentication) - CONNECTED
+NEXT_PUBLIC_SUPABASE_URL=https://bpkervmpqebhvnadqvsz.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(200+ char JWT token)
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(200+ char JWT token)
 
-# Resend (for email reminders - optional)
+# Cron job security
+CRON_SECRET=fbcac281da31afaf61ed8d8f44492cf0d4a1d906450947b86434364a35221c4c
+
+# Resend (for email reminders - NOT YET CONFIGURED)
 RESEND_API_KEY=your_resend_api_key
 ```
+
+**Important Notes:**
+- Supabase keys are JWT tokens starting with "eyJ" (~200+ characters)
+- Keys found in Supabase Dashboard → Settings → API → Project API keys
+- NOT the "Publishable API keys" section (those are shorter, wrong format)
+- `.env.local` is git-ignored for security
+- Rate limiting configured in `src/middleware.ts`
 
 ---
 
 ## What's LEFT TO IMPLEMENT
 
-### 🚨 CRITICAL PRIORITY: Database Integration (Supabase)
+### ✅ DATABASE INTEGRATION - COMPLETED!
 
-**Current Problem:**
-- Cards are stored in localStorage only
-- **Cards reset on code updates/rebuilds** because Next.js may clear cache
-- No cross-device sync
-- Data tied to browser, not user account
+**Previous Problem:** Cards were stored in localStorage only, reset on code updates/rebuilds
 
-**Solution:** Connect Supabase database
+**✅ SOLVED - Now Using Supabase Database:**
+- Real Supabase authentication (email/password required)
+- Cards stored in `credit_cards` table with proper UUIDs
+- Cross-device sync working
+- Automatic localStorage migration on first login
+- All CRUD operations use database
+- Row Level Security (RLS) policies enforced
+- Optimistic UI updates
 
-**Steps Required:**
-1. User creates Supabase account (free at supabase.com)
-2. Create new project
-3. Get API credentials (Project URL + anon key)
-4. Add to `.env.local`
-5. Run database migration (SQL in `src/lib/supabase.ts`)
-6. Update data layer to use database instead of localStorage
-
-**Files That Need Changes:**
-- `src/store/calculator-store.ts` - Add database read/write alongside localStorage
-- `src/store/auth-store.ts` - Use Supabase auth instead of mock auth
-- Create database service layer in `src/lib/database.ts`
-
-**Migration Strategy:**
-```typescript
-// When user logs in:
-1. Check if cards exist in database
-2. If yes, load from database
-3. If no, check localStorage and migrate to database
-4. Save all future changes to database
-```
-
-**Already Done:**
-- Schema is 100% defined
-- RLS policies written
-- Hook pattern exists (`src/hooks/useCards.ts` shows approach)
-- Backward compatible design
+**What Was Done:**
+1. ✅ Connected Supabase (project created, credentials configured)
+2. ✅ Database migration SQL executed
+3. ✅ Updated `src/store/calculator-store.ts` to use database (removed persist middleware)
+4. ✅ Updated `src/store/auth-store.ts` to use Supabase Auth (removed mock auth)
+5. ✅ Fixed UUID generation (let Supabase auto-generate)
+6. ✅ Implemented automatic localStorage-to-database migration
+7. ✅ Added rate limiting and security headers
+8. ✅ Created database trigger for auto-creating user records
+9. ✅ Session persistence working (7-day default)
 
 ---
 
-### ⚠️ MEDIUM PRIORITY: Email Reminders Backend
+### ⚠️ HIGH PRIORITY: Email Reminders Backend
 
 **Current Status:**
 - UI is fully built and functional
 - API endpoint exists but doesn't actually send emails
+- Database NOW CONNECTED - ready to store reminders
 - Returns mock success responses
 
 **Files:**
@@ -353,27 +381,34 @@ RESEND_API_KEY=your_resend_api_key
 **What's Needed:**
 1. Sign up for Resend (free tier: 100 emails/day)
 2. Get API key and add to `.env.local`
-3. Uncomment database code in `src/app/api/reminders/route.ts`
+3. Uncomment/update database code in `src/app/api/reminders/route.ts`
 4. Set up Vercel cron job for scheduled reminders
 5. Create email templates
 
-**Current Code Comments:**
-```typescript
-// Line 31: TODO: Store in Supabase database when auth is connected
-// Line 88: TODO: Store reminder preferences
-// Lines 84-95: Commented out Supabase insert statements
-```
+**Now Easier Because:**
+- ✅ Database already connected
+- ✅ Authentication working
+- ✅ User system in place
+- Just need Resend API key and minor code updates
 
 ---
 
 ### 🔧 OPTIONAL IMPROVEMENTS
 
-#### 1. Settings Page - Email Change
+#### 1. Production Security Hardening
+**Tasks:**
+- Re-enable email confirmation in Supabase (currently disabled for development)
+- Add email verification flow
+- Implement password reset functionality
+- Add account deletion feature
+- Set up monitoring/alerting
+
+#### 2. Settings Page - Email Change
 **File:** `src/app/settings/page.tsx`
 **Current:** Shows "Contact support to change your email address"
-**Improvement:** Add actual email change functionality
+**Improvement:** Add actual email change functionality via Supabase Auth
 
-#### 2. Blog Features
+#### 3. Blog Features
 **Files:** `src/app/blog/` - Basic blog exists
 **Missing Features (from `docs/BLOG_FEATURE.md`):**
 - Search functionality
@@ -383,36 +418,108 @@ RESEND_API_KEY=your_resend_api_key
 - RSS feed
 - Comments system
 
-#### 3. Analytics
+#### 4. Analytics & Monitoring
 - Track user behavior
 - Monitor feature usage
 - A/B testing
+- Error tracking (Sentry)
+- Performance monitoring
 
 ---
 
 ## Key Technical Patterns
 
-### User-Specific Storage Pattern
+### Database-First Card Storage
 ```typescript
-// Storage key format
-const getUserStorageKey = (userId: string | null) => {
-  return userId ? `credit-optimizer-${userId}` : 'credit-optimizer-guest';
-};
+// Add card: Database-first to get proper UUID
+addCard: async (card) => {
+  const { data, error } = await supabase
+    .from('credit_cards')
+    .insert({
+      user_id: currentUserId,
+      nickname: card.nickname,
+      credit_limit: card.creditLimit,
+      // ... other fields
+    })
+    .select()
+    .single();
 
-// Switch user context
-setUserId(userId) // Clears cards, loads user's data from localStorage
+  // Then add to local state with database UUID
+  set((state) => ({ cards: [...state.cards, newCard] }));
+}
+
+// Update card: Optimistic update + database sync
+updateCard: async (id, updatedCard) => {
+  // Update UI immediately
+  set((state) => ({
+    cards: state.cards.map((card) =>
+      card.id === id ? { ...card, ...updatedCard } : card
+    ),
+  }));
+
+  // Sync to database
+  await supabase
+    .from('credit_cards')
+    .update(dbUpdate)
+    .eq('id', id)
+    .eq('user_id', currentUserId);
+}
 ```
 
-### Authentication Flow
+### Authentication Flow (Supabase)
 ```typescript
 // On login/signup
-const user = createMockUser(email);
-set({ user, isAuthenticated: true });
-useCalculatorStore.getState().setUserId(user.id); // Load user cards
+const { data, error } = await supabase.auth.signInWithPassword({
+  email,
+  password,
+});
+
+// Fetch user preferences from database
+const { data: userData } = await supabase
+  .from('users')
+  .select('*')
+  .eq('id', data.user.id)
+  .single();
+
+// Update calculator store with user ID
+useCalculatorStore.getState().setUserId(user.id);
 
 // On logout
+await supabase.auth.signOut();
 set({ user: null, isAuthenticated: false });
-useCalculatorStore.getState().setUserId(null); // Clear cards, switch to guest
+useCalculatorStore.getState().setUserId(null);
+```
+
+### Session Persistence
+```typescript
+// Check for existing session on app mount
+useEffect(() => {
+  checkSession();
+}, [checkSession]);
+
+// Restore user from session
+const { data: { session } } = await supabase.auth.getSession();
+if (session?.user) {
+  // Load user data and update state
+}
+```
+
+### localStorage Migration Pattern
+```typescript
+// One-time migration on first login
+if (!dbCards || dbCards.length === 0) {
+  const localCards = loadFromLocalStorage(userId);
+
+  if (localCards.length > 0) {
+    // Migrate to database
+    for (const card of localCards) {
+      await supabase.from('credit_cards').insert({...});
+    }
+
+    // Clear localStorage after migration
+    localStorage.removeItem(key);
+  }
+}
 ```
 
 ### Priority Scoring Algorithm
@@ -460,29 +567,93 @@ if (near 10% threshold) bonus += 15
 
 ---
 
-## Known Issues
+## Known Issues & Status
 
-### 1. Cards Reset on Code Updates
-**Symptom:** User adds cards, code updates (hot reload), cards disappear
-**Root Cause:** localStorage can be cleared during Next.js development mode rebuilds
-**Solution:** Connect Supabase database for persistent storage
-**Status:** CRITICAL - this is the main blocker
+### ✅ RESOLVED: Cards Reset on Code Updates
+**Previous Symptom:** User adds cards, code updates (hot reload), cards disappear
+**Previous Root Cause:** localStorage cleared during Next.js development mode rebuilds
+**✅ FIXED:** Now using Supabase database - cards persist permanently across devices
 
-### 2. Email Reminders Don't Send
+### ✅ RESOLVED: Mock Authentication
+**Previous Symptom:** Any email/password combination works
+**Previous Root Cause:** Using mock auth for development
+**✅ FIXED:** Real Supabase authentication - users must sign up with valid credentials
+
+### ⚠️ REMAINING: Email Reminders Don't Send
 **Symptom:** User sets reminders, no emails arrive
-**Root Cause:** Resend API not configured, database not storing reminders
-**Solution:** Set up Resend account and connect database
-**Status:** Medium priority - feature exists but non-functional
+**Root Cause:** Resend API not configured (database IS connected now)
+**Solution:** Set up Resend account and add API key
+**Status:** High priority - UI complete, just needs Resend integration
 
-### 3. Mock Authentication
-**Symptom:** Any email/password combination works
-**Root Cause:** Using mock auth for development
-**Solution:** Connect Supabase Auth
-**Status:** Works for demo, needs real auth for production
+### ⚠️ REMAINING: Email Confirmation Disabled
+**Symptom:** Users not required to verify email addresses
+**Root Cause:** Disabled for development testing
+**Solution:** Re-enable in Supabase Authentication settings before production
+**Status:** Low risk for development, must fix before production launch
 
 ---
 
-## Recent Changes (Latest Session)
+## Recent Changes (Database Migration Session - 2025-12-26)
+
+### 🚀 MAJOR: Supabase Integration Complete
+
+1. **Real Authentication Implemented:**
+   - Replaced mock authentication with Supabase Auth
+   - Users must create real accounts (email + password)
+   - Session persistence working (7-day default)
+   - Session restoration on page reload
+   - User IDs now stable Supabase UUIDs (not random client-side IDs)
+
+2. **Database Storage Migration:**
+   - Migrated from localStorage to Supabase `credit_cards` table
+   - All card operations (add/update/remove/clear) now use database
+   - Removed zustand persist middleware (no longer needed)
+   - Automatic one-time migration from localStorage to database
+   - Cross-device sync enabled
+
+3. **Security Features Added:**
+   - Rate limiting: 20 requests/minute global, 3 requests/minute for sensitive actions
+   - Security headers: XSS protection, clickjacking prevention, CSP
+   - Environment variables properly configured and git-ignored
+   - Row Level Security (RLS) policies enforced
+   - API security helper functions created
+
+4. **Database Schema Deployed:**
+   - `credit_cards` table with proper UUIDs
+   - `users` table with preferences
+   - `payment_reminders` table (ready for email feature)
+   - `reminder_preferences` table
+   - `calculation_history` table for analytics
+   - Database trigger for auto-creating user records
+
+5. **Bug Fixes:**
+   - Fixed "invalid UUID syntax" error (let Supabase auto-generate UUIDs)
+   - Fixed race condition in setUserId (was clearing cards before loading)
+   - Fixed email confirmation blocking signup (disabled for development)
+   - Fixed database trigger duplicate error (added ON CONFLICT handling)
+
+### 📝 Configuration Files Created:
+- `src/middleware.ts` - Rate limiting and security headers
+- `src/lib/api-security.ts` - Security helper functions
+- `SECURITY.md` - Security documentation
+- `CHANGES_MADE.md` - Migration documentation
+- `test-signup.js` - Authentication testing script
+- `debug-localstorage.html` - localStorage debugging tool
+- `.env.local` - Environment variables (configured with real Supabase keys)
+
+### 🔧 Code Refactoring:
+- `src/store/calculator-store.ts` - Complete rewrite for database integration
+  - All methods now async
+  - Database-first approach for card creation
+  - Optimistic updates for better UX
+  - Automatic localStorage migration
+- `src/store/auth-store.ts` - Updated for real Supabase auth
+  - Removed mock user creation
+  - Added session checking
+  - Integrated with user preferences table
+- `src/components/AuthSync.tsx` - Enhanced with session restoration
+
+### Previous Session Changes:
 
 1. **User-Specific Storage Implemented:**
    - Each user has separate localStorage key based on user ID
@@ -519,28 +690,49 @@ if (near 10% threshold) bonus += 15
 
 ## Next Steps for New Developer
 
-### Immediate Priority (Required for Production):
-1. **Set Up Supabase:**
-   - Create account at supabase.com (free)
-   - Create new project
-   - Copy Project URL and anon key
-   - Add to `.env.local`
-   - Run SQL migration from `src/lib/supabase.ts`
-   - Update `calculator-store.ts` to use database
-   - Update `auth-store.ts` to use Supabase Auth
+### ✅ COMPLETED: Supabase Integration
+- ✅ Supabase account created and configured
+- ✅ Database migrations run successfully
+- ✅ Real authentication working
+- ✅ Card storage migrated to database
+- ✅ Security features implemented
 
-### Medium Priority (Optional but Valuable):
-2. **Set Up Email Reminders:**
-   - Sign up for Resend (free tier)
-   - Add API key to `.env.local`
-   - Uncomment database code in `src/app/api/reminders/route.ts`
-   - Set up Vercel cron job
+### 🎯 IMMEDIATE PRIORITY:
 
-### Polish (Nice to Have):
-3. **Minor Improvements:**
+1. **Email Reminders Implementation:**
+   - Sign up for Resend (free tier: 100 emails/day)
+   - Add `RESEND_API_KEY` to `.env.local`
+   - Update `src/app/api/reminders/route.ts` to use Resend
+   - Set up Vercel cron job for scheduled reminders
+   - Create email templates
+
+2. **Production Security Hardening:**
+   - Re-enable email confirmation in Supabase (Authentication → Providers → Email)
+   - Add password reset functionality
+   - Test all security features
+   - Set up monitoring/alerting
+
+### 🔧 OPTIONAL IMPROVEMENTS:
+
+3. **User Experience:**
    - Add email change functionality in settings
-   - Add analytics tracking
-   - Improve blog features
+   - Implement account deletion feature
+   - Add password strength indicator
+   - Improve error messages
+
+4. **Analytics & Monitoring:**
+   - Add analytics tracking (Vercel Analytics or Google Analytics)
+   - Monitor feature usage
+   - Set up error tracking (Sentry)
+   - Performance monitoring
+
+5. **Blog Features:**
+   - Add search functionality
+   - Tag pages
+   - Author pages
+   - Related posts
+   - RSS feed
+   - Comments system
 
 ---
 
@@ -630,21 +822,30 @@ PROJECT_SUMMARY.md                 # This file
 **What This Project Is:**
 A Next.js web app that helps users improve credit scores by optimizing credit card payment timing. Users add their cards, get personalized payment plans, and can test different scenarios.
 
-**Current State:**
-- Fully functional with user authentication and user-specific localStorage
-- All core features implemented (calculator, dashboard, scenarios, calendar)
-- Ready for database integration but not connected yet
-
-**Critical Issue:**
-Cards reset on code updates because they're in localStorage only (not database). This is the main blocker for production use.
+**Current State (Updated 2025-12-26):**
+- ✅ Fully functional with REAL Supabase authentication
+- ✅ Database integration COMPLETE - cards stored in Supabase
+- ✅ Cross-device sync working
+- ✅ Security features implemented (rate limiting, RLS, headers)
+- ✅ All core features implemented (calculator, dashboard, scenarios, calendar)
+- ⚠️ Email reminders not yet functional (needs Resend API key)
 
 **What Needs to Be Done:**
-1. Connect Supabase database (schema ready, just needs credentials)
-2. Optional: Set up email reminders (Resend API)
+1. Set up email reminders (Resend API)
+2. Re-enable email confirmation before production
 3. Optional: Polish and improvements
 
 **Key Context:**
-- User data currently in localStorage with user-specific keys (`credit-optimizer-{userId}`)
-- Mock authentication (any email/password works)
-- All database code written but commented out
-- Backward compatible design - adding database won't break existing features
+- User data stored in Supabase `credit_cards` table (NOT localStorage)
+- Real Supabase authentication (email/password required)
+- Session persistence working (7-day default)
+- Row Level Security enforced
+- Rate limiting: 20 req/min global, 3 req/min sensitive actions
+- Email confirmation currently DISABLED for development testing
+
+**Recent Major Changes:**
+- Migrated from mock auth to real Supabase Auth
+- Migrated from localStorage to Supabase database
+- Added comprehensive security features
+- Implemented automatic localStorage→database migration
+- Fixed UUID generation and race conditions

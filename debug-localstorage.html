@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug LocalStorage - Credit Optimizer</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #252526;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #4ec9b0;
+            margin-top: 0;
+        }
+        pre {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        .key {
+            color: #9cdcfe;
+        }
+        .value {
+            color: #ce9178;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 LocalStorage Debug Tool</h1>
+
+    <div class="section">
+        <h2>All Credit Optimizer Keys</h2>
+        <div id="keys-output"></div>
+    </div>
+
+    <div class="section">
+        <h2>Storage Contents</h2>
+        <div id="storage-output"></div>
+    </div>
+
+    <div class="section">
+        <h2>Actions</h2>
+        <button onclick="refreshData()">🔄 Refresh</button>
+        <button onclick="clearAll()">🗑️ Clear All Credit Optimizer Data</button>
+    </div>
+
+    <script>
+        function refreshData() {
+            // Find all credit-optimizer keys
+            const keys = Object.keys(localStorage).filter(k => k.includes('credit-optimizer'));
+
+            const keysOutput = document.getElementById('keys-output');
+            const storageOutput = document.getElementById('storage-output');
+
+            if (keys.length === 0) {
+                keysOutput.innerHTML = '<p style="color: #f48771;">❌ No credit-optimizer keys found in localStorage</p>';
+                storageOutput.innerHTML = '';
+                return;
+            }
+
+            // Display keys
+            keysOutput.innerHTML = `
+                <p>Found <strong>${keys.length}</strong> key(s):</p>
+                <pre>${keys.map(k => `• ${k}`).join('\n')}</pre>
+            `;
+
+            // Display contents
+            let html = '';
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                let parsed;
+                let formattedValue;
+
+                try {
+                    parsed = JSON.parse(value);
+                    formattedValue = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    formattedValue = value;
+                }
+
+                html += `
+                    <div style="margin: 15px 0; padding: 10px; background: #1e1e1e; border-radius: 3px;">
+                        <div style="color: #4ec9b0; font-weight: bold; margin-bottom: 5px;">
+                            ${key}
+                        </div>
+                        <pre>${formattedValue}</pre>
+                        ${parsed?.state?.cards ? `<p style="color: #4ec9b0;">📊 Cards stored: ${parsed.state.cards.length}</p>` : ''}
+                    </div>
+                `;
+            });
+
+            storageOutput.innerHTML = html;
+        }
+
+        function clearAll() {
+            if (!confirm('Are you sure you want to clear all Credit Optimizer data from localStorage?')) {
+                return;
+            }
+
+            const keys = Object.keys(localStorage).filter(k => k.includes('credit-optimizer'));
+            keys.forEach(key => localStorage.removeItem(key));
+
+            alert(`Cleared ${keys.length} key(s)`);
+            refreshData();
+        }
+
+        // Initial load
+        refreshData();
+
+        // Auto-refresh every 2 seconds
+        setInterval(refreshData, 2000);
+    </script>
+</body>
+</html>

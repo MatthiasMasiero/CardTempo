@@ -9,8 +9,13 @@ import { useCalculatorStore } from '@/store/calculator-store';
  * This ensures that when a user logs in/out, their cards are properly loaded/cleared
  */
 export function AuthSync() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, checkSession } = useAuthStore();
   const { setUserId } = useCalculatorStore();
+
+  useEffect(() => {
+    // Check for existing Supabase session on mount
+    checkSession();
+  }, [checkSession]);
 
   useEffect(() => {
     // Sync user ID to calculator store on mount and when user changes

@@ -131,11 +131,6 @@ export default function SignupPage() {
                 </p>
               </form>
 
-              <div className="mt-6 pt-6 border-t">
-                <p className="text-xs text-center text-muted-foreground mb-4">
-                  Demo Mode: Use any email and password to create an account
-                </p>
-              </div>
             </CardContent>
           </Card>
 

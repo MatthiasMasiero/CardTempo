@@ -305,8 +305,11 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <ScrollReveal delay={0}>
               <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
-                  <AnimatedCounter end={15} />-<AnimatedCounter end={50} />
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-2 flex items-center justify-center gap-1">
+                  <span>+</span>
+                  <AnimatedCounter end={15} />
+                  <span>-</span>
+                  <AnimatedCounter end={50} />
                 </div>
                 <p className="text-muted-foreground">Point Score Increase</p>
               </div>
@@ -317,16 +320,16 @@ export default function LandingPage() {
                   <AnimatedCounter end={30} />
                   <span className="text-2xl">%</span>
                 </div>
-                <p className="text-muted-foreground">Of Score is Utilization</p>
+                <p className="text-muted-foreground">Of your credit score is utilization</p>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
               <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
+                <div className="text-4xl md:text-5xl font-bold text-primary mb-2 flex items-center justify-center">
                   <AnimatedCounter end={30} />
-                  <span className="text-2xl">d</span>
+                  <span className="text-2xl"> days</span>
                 </div>
-                <p className="text-muted-foreground">To See Results</p>
+                <p className="text-muted-foreground">Or less to see results</p>
               </div>
             </ScrollReveal>
           </div>

@@ -1,44 +1,96 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-// Simple in-memory rate limiter (for production, use Redis or Upstash)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 // Rate limit configuration
-// For a credit optimizer app, users typically:
-// - Load dashboard (2-3 requests)
-// - Add/edit cards (1-2 requests each)
-// - Run calculations (1 request)
-// - View results (2-3 requests)
-// Normal usage: ~10-15 requests per minute
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 20; // 20 requests per minute per IP (plenty for normal usage)
+const RATE_LIMIT_WINDOW = 60; // 1 minute in seconds
+const RATE_LIMIT_MAX_REQUESTS = 20; // 20 requests per minute per IP
 
-// Clean up old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of rateLimitMap.entries()) {
-    if (now > value.resetTime) {
-      rateLimitMap.delete(key);
+// Initialize Upstash Redis rate limiter (production) or in-memory fallback (development)
+let ratelimiter: Ratelimit | null = null;
+
+// Try to initialize Upstash Redis if credentials are available
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  try {
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+
+    ratelimiter = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(RATE_LIMIT_MAX_REQUESTS, `${RATE_LIMIT_WINDOW} s`),
+      analytics: true,
+      prefix: 'ratelimit',
+    });
+  } catch (error) {
+    console.error('Failed to initialize Upstash rate limiter:', error);
+  }
+}
+
+// Fallback in-memory rate limiter for development (NOT for production serverless!)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+// Clean up old entries every 5 minutes (only used if Redis not available)
+if (!ratelimiter) {
+  console.warn('⚠️  Using in-memory rate limiting - NOT suitable for production!');
+  console.warn('⚠️  Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for production.');
+
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of rateLimitMap.entries()) {
+      if (now > value.resetTime) {
+        rateLimitMap.delete(key);
+      }
+    }
+  }, 5 * 60 * 1000);
+}
+
+async function rateLimitCheck(ip: string): Promise<{
+  success: boolean;
+  limit: number;
+  remaining: number;
+  reset: number;
+}> {
+  // Use Upstash Redis if available (production)
+  if (ratelimiter) {
+    try {
+      const { success, limit, remaining, reset } = await ratelimiter.limit(ip);
+      return {
+        success,
+        limit,
+        remaining,
+        reset: reset * 1000, // Convert to milliseconds
+      };
+    } catch (error) {
+      console.error('Rate limit error:', error);
+      // Fail open - allow request if rate limiter fails
+      return {
+        success: true,
+        limit: RATE_LIMIT_MAX_REQUESTS,
+        remaining: RATE_LIMIT_MAX_REQUESTS,
+        reset: Date.now() + RATE_LIMIT_WINDOW * 1000,
+      };
     }
   }
-}, 5 * 60 * 1000);
 
-function rateLimit(ip: string): { success: boolean; limit: number; remaining: number; reset: number } {
+  // Fallback to in-memory rate limiting (development only)
   const now = Date.now();
   const record = rateLimitMap.get(ip);
 
   if (!record || now > record.resetTime) {
     // New window
+    const resetTime = now + RATE_LIMIT_WINDOW * 1000;
     rateLimitMap.set(ip, {
       count: 1,
-      resetTime: now + RATE_LIMIT_WINDOW,
+      resetTime,
     });
     return {
       success: true,
       limit: RATE_LIMIT_MAX_REQUESTS,
       remaining: RATE_LIMIT_MAX_REQUESTS - 1,
-      reset: now + RATE_LIMIT_WINDOW,
+      reset: resetTime,
     };
   }
 
@@ -62,13 +114,13 @@ function rateLimit(ip: string): { success: boolean; limit: number; remaining: nu
   };
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Get client IP address
   const ip = request.ip ?? request.headers.get('x-forwarded-for') ?? 'unknown';
 
   // Apply rate limiting to API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    const rateLimitResult = rateLimit(ip);
+    const rateLimitResult = await rateLimitCheck(ip);
 
     // Add rate limit headers to all API responses
     const headers = new Headers();

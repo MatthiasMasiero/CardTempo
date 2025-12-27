@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { subDays, format } from 'date-fns';
 
+interface ReminderData {
+  cardName: string;
+  paymentDate: string;
+  paymentDateFormatted: string;
+  reminderDate: string;
+  reminderDateFormatted: string;
+  amount: number;
+  purpose: string;
+  description: string;
+  email: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -23,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Process each card plan and create reminder schedule
     const scheduledDates: string[] = [];
-    const reminders: any[] = [];
+    const reminders: ReminderData[] = [];
 
     for (const plan of cardPlans) {
       if (!plan.payments || plan.payments.length === 0) continue;

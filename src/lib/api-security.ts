@@ -90,7 +90,7 @@ export function errorResponse(message: string, status: number = 400) {
 /**
  * Create success response with proper headers
  */
-export function successResponse(data: any, status: number = 200) {
+export function successResponse<T = unknown>(data: T, status: number = 200) {
   return NextResponse.json(data, {
     status,
     headers: {
@@ -103,7 +103,7 @@ export function successResponse(data: any, status: number = 200) {
  * Validate required fields in request body
  */
 export function validateRequiredFields(
-  body: any,
+  body: Record<string, unknown>,
   requiredFields: string[]
 ): { valid: boolean; missing?: string[] } {
   const missing = requiredFields.filter(field => {

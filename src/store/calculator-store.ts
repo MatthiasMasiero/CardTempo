@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { CreditCard, OptimizationResult } from '@/types';
-import { calculateOptimization, generateId } from '@/lib/calculator';
+import { calculateOptimization } from '@/lib/calculator';
 import { supabase } from '@/lib/supabase';
 
 interface CalculatorState {
@@ -90,7 +90,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
     // Save to database
     try {
-      const dbUpdate: any = {};
+      const dbUpdate: Record<string, unknown> = {};
       if (updatedCard.nickname !== undefined) dbUpdate.nickname = updatedCard.nickname;
       if (updatedCard.creditLimit !== undefined) dbUpdate.credit_limit = updatedCard.creditLimit;
       if (updatedCard.currentBalance !== undefined) dbUpdate.current_balance = updatedCard.currentBalance;

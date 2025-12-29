@@ -78,8 +78,7 @@ export function calculateBaseline(cards: CreditCard[]): ScenarioResult {
 export function calculatePaymentAdjustment(
   cards: CreditCard[],
   cardId: string,
-  newPaymentAmount: number,
-  _paymentDate: Date
+  newPaymentAmount: number
 ): ScenarioResult {
   const baseline = calculateBaseline(cards);
   const updatedCards = cards.map(card => {

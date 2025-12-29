@@ -36,7 +36,7 @@ type ScenarioType =
   | null;
 
 export default function ScenariosPage() {
-  const { cards, result } = useCalculatorStore();
+  const { cards } = useCalculatorStore();
   const [activeScenario, setActiveScenario] = useState<ScenarioType>(null);
   const [baselineScenario, setBaselineScenario] = useState<ScenarioResult | null>(null);
   const [currentScenario, setCurrentScenario] = useState<ScenarioResult | null>(null);

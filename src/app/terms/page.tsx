@@ -39,8 +39,8 @@ export default function TermsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  By accessing or using Credit Optimizer ("the Service"), you agree to be bound by these
-                  Terms of Service ("Terms"). If you do not agree to these Terms, please do not use the
+                  By accessing or using Credit Optimizer (&quot;the Service&quot;), you agree to be bound by these
+                  Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, please do not use the
                   Service. We reserve the right to modify these Terms at any time, and your continued use
                   of the Service constitutes acceptance of any changes.
                 </p>
@@ -173,7 +173,7 @@ export default function TermsPage() {
                 </div>
                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2">
                   <li>
-                    The Service is provided "AS IS" and "AS AVAILABLE" without any warranties of any kind
+                    The Service is provided &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; without any warranties of any kind
                   </li>
                   <li>
                     We do not guarantee that the Service will be uninterrupted, secure, or error-free
@@ -269,8 +269,8 @@ export default function TermsPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   We reserve the right to modify these Terms at any time. We will notify users of any
-                  material changes by posting the updated Terms on this page and updating the "Last
-                  updated" date. Your continued use of the Service after changes are posted constitutes
+                  material changes by posting the updated Terms on this page and updating the &quot;Last
+                  updated&quot; date. Your continued use of the Service after changes are posted constitutes
                   your acceptance of the modified Terms.
                 </p>
               </CardContent>

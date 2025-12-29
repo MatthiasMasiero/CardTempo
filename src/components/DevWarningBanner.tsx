@@ -6,10 +6,23 @@ import { AlertTriangle, X, Key, Database, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function DevWarningBanner() {
+  // Hooks must be called unconditionally at the top
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
+    // Early return for E2E tests
+    if (typeof window !== 'undefined') {
+      const userAgent = window.navigator.userAgent;
+      if (
+        userAgent.includes('Playwright') ||
+        userAgent.includes('HeadlessChrome') ||
+        userAgent.includes('compatible; Playwright')
+      ) {
+        return;
+      }
+    }
+
     // Check if running in development
     const isDev = process.env.NODE_ENV === 'development';
 
@@ -32,9 +45,10 @@ export function DevWarningBanner() {
     localStorage.setItem('dev-warning-dismissed', 'true');
   };
 
-  const handleClearDismissal = () => {
-    localStorage.removeItem('dev-warning-dismissed');
-  };
+  // Early return for test environment
+  if (process.env.NODE_ENV === 'test') {
+    return null;
+  }
 
   if (!isVisible || isDismissed) {
     return null;

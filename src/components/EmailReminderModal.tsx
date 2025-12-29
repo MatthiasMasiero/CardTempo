@@ -139,7 +139,7 @@ export function EmailReminderModal({
             <div className="text-center">
               <h3 className="font-semibold text-lg mb-2">Reminders Set!</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                We'll email you at <strong>{email}</strong>
+                We&apos;ll email you at <strong>{email}</strong>
               </p>
               {scheduledDates.length > 0 && (
                 <div className="bg-slate-50 rounded-lg p-4 text-left">

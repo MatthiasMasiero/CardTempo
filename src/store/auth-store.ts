@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // Fetch user preferences from database
-          const { data: userData, error: userError } = await supabase
+          const { data: userData } = await supabase
             .from('users')
             .select('*')
             .eq('id', data.user.id)

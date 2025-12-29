@@ -5,7 +5,7 @@
 **Credit Optimizer** is a web application that helps users improve their credit scores by 15-50 points through optimized credit card payment timing. The core insight is that credit bureaus see your balance on the **statement date** (not the due date), so paying most of your balance 2-3 days before the statement date results in lower reported utilization and better credit scores.
 
 **Tech Stack:**
-- Next.js 14 (App Router)
+- Next.js 14 (App Router) with Image Optimization
 - React + TypeScript
 - Tailwind CSS + shadcn/ui components
 - Zustand (state management)
@@ -14,6 +14,12 @@
 - Resend (email service - ready but not configured)
 
 **Project Location:** `/Users/matthiasmasiero/Desktop/Code/credit-optimizer`
+
+**Latest Updates (2025-12-28):**
+- ✅ Card image integration complete (15 premium card images)
+- ✅ Database schema updated with image_url column
+- ✅ Image display across all views (search, dashboard, results)
+- ✅ Next.js Image component with performance optimizations
 
 ---
 
@@ -261,11 +267,11 @@ interface OptimizationResult {
 
 ---
 
-## Database Schema (Defined but Not Connected)
+## Database Schema (CONNECTED - Supabase)
 
 **File:** `src/lib/supabase.ts`
 
-**Tables Defined:**
+**Tables Active:**
 
 ### `users` table:
 ```sql
@@ -291,6 +297,7 @@ statement_date INTEGER NOT NULL CHECK (statement_date BETWEEN 1 AND 31)
 due_date INTEGER NOT NULL CHECK (due_date BETWEEN 1 AND 31)
 apr DECIMAL(5,2)
 minimum_payment DECIMAL(10,2)
+image_url TEXT DEFAULT '/cards/default-card.svg'  -- ✅ ADDED 2025-12-28
 created_at TIMESTAMPTZ DEFAULT NOW()
 updated_at TIMESTAMPTZ DEFAULT NOW()
 ```
@@ -593,9 +600,72 @@ if (near 10% threshold) bonus += 15
 
 ---
 
-## Recent Changes (Database Migration Session - 2025-12-26)
+## Recent Changes
 
-### 🚀 MAJOR: Supabase Integration Complete
+### 🎨 LATEST: Card Image Integration (2025-12-28)
+
+**Card Brand Images Implemented:**
+- Added 15 premium credit card images to `public/cards/`
+- Cards included: Chase (4), Amex (5), Capital One (4), Discover (2)
+- Images sourced: Sapphire Preferred/Reserve, Platinum, Gold, Venture X, etc.
+
+**Database Changes:**
+- Added `image_url` column to `credit_cards` table
+- Migration: `supabase/migrations/20251227_add_card_image_url.sql`
+- Default fallback: `/cards/default-card.svg`
+- Column indexed and commented for documentation
+
+**Component Updates:**
+1. ✅ **CardDisplay.tsx** - Shows card images in dashboard
+   - Next.js Image component with `sizes="64px"` optimization
+   - Graceful fallback to icon on image load error
+   - Error state tracking with useState
+
+2. ✅ **CardAutocomplete.tsx** - Shows images in search/selection
+   - Preview images in dropdown results (`sizes="56px"`)
+   - Selected card preview shows image (`sizes="64px"`)
+   - Fallback icon handling
+
+3. ✅ **PaymentTimeline.tsx** - Shows images in payment results
+   - Card images in optimized payment plan
+   - Consistent styling with other components
+   - Performance optimized with Next.js Image
+
+4. ✅ **CreditCardForm.tsx** - Autocomplete integration
+   - Auto-fills card name and imageUrl on selection
+   - Passes imageUrl through form submission
+
+**Data Flow:**
+```
+Search → Select (autocomplete) → Form (imageUrl in formData)
+→ Calculator page (passes to addCard) → Database (saves image_url)
+→ Load (reads image_url) → Display (renders with Image component)
+```
+
+**Bug Fixes:**
+- Fixed calculator page not passing imageUrl to addCard (line 41)
+- Added imageUrl support to database insert operations
+- Added imageUrl support to database update operations
+- Added imageUrl loading from database in setUserId
+
+**File Changes:**
+- `src/app/calculator/page.tsx` - Added imageUrl to card object creation
+- `src/store/calculator-store.ts` - Added image_url to all database operations
+- `src/components/CardDisplay.tsx` - Added Image component with sizes prop
+- `src/components/CardAutocomplete.tsx` - Added sizes prop to prevent warnings
+- `src/components/PaymentTimeline.tsx` - Added card image display
+- `src/data/credit-cards.json` - Updated all 15 cards with image URLs
+- `public/cards/` - Added 15 card image files (PNG format)
+
+**Performance Optimizations:**
+- Next.js Image component with explicit `sizes` attribute
+- Prevents "missing sizes prop" warnings
+- Optimizes image loading and bandwidth
+- Lazy loading enabled by default
+
+---
+
+### 🚀 MAJOR: Supabase Integration Complete (2025-12-26)
 
 1. **Real Authentication Implemented:**
    - Replaced mock authentication with Supabase Auth
@@ -822,28 +892,42 @@ PROJECT_SUMMARY.md                 # This file
 **What This Project Is:**
 A Next.js web app that helps users improve credit scores by optimizing credit card payment timing. Users add their cards, get personalized payment plans, and can test different scenarios.
 
-**Current State (Updated 2025-12-26):**
+**Current State (Updated 2025-12-28):**
 - ✅ Fully functional with REAL Supabase authentication
-- ✅ Database integration COMPLETE - cards stored in Supabase
+- ✅ Database integration COMPLETE - cards stored in Supabase with images
+- ✅ Card brand images integrated (15 premium cards)
 - ✅ Cross-device sync working
 - ✅ Security features implemented (rate limiting, RLS, headers)
 - ✅ All core features implemented (calculator, dashboard, scenarios, calendar)
+- ✅ Next.js Image optimization with performance best practices
 - ⚠️ Email reminders not yet functional (needs Resend API key)
 
 **What Needs to Be Done:**
-1. Set up email reminders (Resend API)
-2. Re-enable email confirmation before production
-3. Optional: Polish and improvements
+1. Add more card images (35 remaining cards from checklist)
+2. Set up email reminders (Resend API)
+3. Re-enable email confirmation before production
+4. Optional: Polish and improvements
 
 **Key Context:**
-- User data stored in Supabase `credit_cards` table (NOT localStorage)
+- User data stored in Supabase `credit_cards` table with `image_url` column
 - Real Supabase authentication (email/password required)
 - Session persistence working (7-day default)
 - Row Level Security enforced
 - Rate limiting: 20 req/min global, 3 req/min sensitive actions
 - Email confirmation currently DISABLED for development testing
+- Card images stored in `public/cards/` and served via Next.js Image component
+- Optimistic updates: UI updates immediately, syncs to database in background
 
-**Recent Major Changes:**
+**Recent Major Changes (2025-12-28):**
+- Added card image support across entire application
+- Database migration: added `image_url` column to credit_cards table
+- Updated CardDisplay, CardAutocomplete, PaymentTimeline with images
+- Fixed calculator page bug (wasn't passing imageUrl)
+- Added 15 premium card images (Chase, Amex, Capital One, Discover)
+- Performance optimizations with Next.js Image `sizes` prop
+- Updated credit-cards.json with actual image URLs
+
+**Previous Changes (2025-12-26):**
 - Migrated from mock auth to real Supabase Auth
 - Migrated from localStorage to Supabase database
 - Added comprehensive security features

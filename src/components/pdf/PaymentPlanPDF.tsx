@@ -5,7 +5,6 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from '@react-pdf/renderer';
 import { OptimizationResult } from '@/types';
 import { format } from 'date-fns';
@@ -369,7 +368,7 @@ export const PaymentPlanPDF: React.FC<PaymentPlanPDFProps> = ({ result, generate
           </View>
           <View style={styles.tipItem}>
             <Text style={styles.tipBullet}>•</Text>
-            <Text>Schedule payments in advance through your bank's website</Text>
+            <Text>Schedule payments in advance through your bank&apos;s website</Text>
           </View>
           <View style={styles.tipItem}>
             <Text style={styles.tipBullet}>•</Text>

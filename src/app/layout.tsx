@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { DevWarningBanner } from "@/components/DevWarningBanner";
 import { AuthSync } from "@/components/AuthSync";
 
 const geistSans = localFont({
@@ -32,7 +31,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
       >
         <AuthSync />
-        <DevWarningBanner />
         {children}
       </body>
     </html>

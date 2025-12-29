@@ -527,7 +527,7 @@ export default function PriorityRankingPage() {
                         <>
                           <h3 className="font-semibold mb-3 text-amber-700 flex items-center gap-2">
                             <X className="h-4 w-4" />
-                            What You're Missing
+                            What You&apos;re Missing
                           </h3>
                           <ul className="space-y-2 text-sm">
                             {cards.length - currentAllocation.expectedImpact.cardsOptimal > 0 && (

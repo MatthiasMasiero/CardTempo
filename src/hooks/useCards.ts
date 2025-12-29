@@ -117,7 +117,7 @@ export function useSaveCard() {
             .from('credit_cards')
             .insert(dbCard);
         }
-      } catch (err) {
+      } catch {
         // Database save failed, but localStorage succeeded
         console.log('Database save failed, using localStorage only');
       }

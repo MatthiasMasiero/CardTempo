@@ -1,0 +1,352 @@
+[
+  {
+    "id": "chase-sapphire-preferred",
+    "name": "Chase Sapphire Preferred®",
+    "issuer": "Chase",
+    "imageUrl": "/cards/chase-sapphire-preferred.png",
+    "category": "travel"
+  },
+  {
+    "id": "chase-sapphire-reserve",
+    "name": "Chase Sapphire Reserve®",
+    "issuer": "Chase",
+    "imageUrl": "/cards/chase-sapphire-reserve.png",
+    "category": "travel"
+  },
+  {
+    "id": "chase-freedom-unlimited",
+    "name": "Chase Freedom Unlimited®",
+    "issuer": "Chase",
+    "imageUrl": "/cards/chase-freedom-unlimited.png",
+    "category": "cashback"
+  },
+  {
+    "id": "chase-freedom-flex",
+    "name": "Chase Freedom Flex℠",
+    "issuer": "Chase",
+    "imageUrl": "/cards/chase-freedom-flex.png",
+    "category": "cashback"
+  },
+  {
+    "id": "amex-platinum",
+    "name": "The Platinum Card® from American Express",
+    "issuer": "American Express",
+    "imageUrl": "/cards/amex-platinum.png",
+    "category": "travel"
+  },
+  {
+    "id": "amex-gold",
+    "name": "American Express® Gold Card",
+    "issuer": "American Express",
+    "imageUrl": "/cards/amex-gold.png",
+    "category": "rewards"
+  },
+  {
+    "id": "amex-blue-cash-preferred",
+    "name": "Blue Cash Preferred® Card from American Express",
+    "issuer": "American Express",
+    "imageUrl": "/cards/amex-blue-cash-preferred.png",
+    "category": "cashback"
+  },
+  {
+    "id": "amex-blue-cash-everyday",
+    "name": "Blue Cash Everyday® Card from American Express",
+    "issuer": "American Express",
+    "imageUrl": "/cards/amex-blue-cash-everyday.png",
+    "category": "cashback"
+  },
+  {
+    "id": "amex-green",
+    "name": "American Express® Green Card",
+    "issuer": "American Express",
+    "imageUrl": "/cards/amex-green.png",
+    "category": "travel"
+  },
+  {
+    "id": "capital-one-venture",
+    "name": "Capital One Venture Rewards Credit Card",
+    "issuer": "Capital One",
+    "imageUrl": "/cards/capital-one-venture.png",
+    "category": "travel"
+  },
+  {
+    "id": "capital-one-venture-x",
+    "name": "Capital One Venture X Rewards Credit Card",
+    "issuer": "Capital One",
+    "imageUrl": "/cards/capital-one-venture-x.png",
+    "category": "travel"
+  },
+  {
+    "id": "capital-one-savor",
+    "name": "Capital One Savor Cash Rewards Credit Card",
+    "issuer": "Capital One",
+    "imageUrl": "/cards/capital-one-savor.png",
+    "category": "cashback"
+  },
+  {
+    "id": "capital-one-quicksilver",
+    "name": "Capital One Quicksilver Cash Rewards Credit Card",
+    "issuer": "Capital One",
+    "imageUrl": "/cards/capital-one-quicksilver.png",
+    "category": "cashback"
+  },
+  {
+    "id": "discover-it-cash-back",
+    "name": "Discover it® Cash Back",
+    "issuer": "Discover",
+    "imageUrl": "/cards/discover-it-cash-back.png",
+    "category": "cashback"
+  },
+  {
+    "id": "discover-it-miles",
+    "name": "Discover it® Miles",
+    "issuer": "Discover",
+    "imageUrl": "/cards/discover-it-miles.png",
+    "category": "travel"
+  },
+  {
+    "id": "citi-double-cash",
+    "name": "Citi® Double Cash Card",
+    "issuer": "Citi",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "citi-custom-cash",
+    "name": "Citi Custom Cash℠ Card",
+    "issuer": "Citi",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "citi-premier",
+    "name": "Citi Premier® Card",
+    "issuer": "Citi",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "travel"
+  },
+  {
+    "id": "wells-fargo-active-cash",
+    "name": "Wells Fargo Active Cash® Card",
+    "issuer": "Wells Fargo",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "wells-fargo-autograph",
+    "name": "Wells Fargo Autograph℠ Card",
+    "issuer": "Wells Fargo",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "travel"
+  },
+  {
+    "id": "bank-of-america-travel-rewards",
+    "name": "Bank of America® Travel Rewards Credit Card",
+    "issuer": "Bank of America",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "travel"
+  },
+  {
+    "id": "bank-of-america-unlimited-cash",
+    "name": "Bank of America® Unlimited Cash Rewards Credit Card",
+    "issuer": "Bank of America",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "bank-of-america-customized-cash",
+    "name": "Bank of America® Customized Cash Rewards Credit Card",
+    "issuer": "Bank of America",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "us-bank-altitude-go",
+    "name": "U.S. Bank Altitude® Go Visa Signature® Card",
+    "issuer": "U.S. Bank",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "rewards"
+  },
+  {
+    "id": "us-bank-altitude-reserve",
+    "name": "U.S. Bank Altitude® Reserve Visa Infinite® Card",
+    "issuer": "U.S. Bank",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "travel"
+  },
+  {
+    "id": "barclays-arrival-plus",
+    "name": "Barclaycard Arrival® Plus World Elite Mastercard®",
+    "issuer": "Barclays",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "travel"
+  },
+  {
+    "id": "apple-card",
+    "name": "Apple Card",
+    "issuer": "Goldman Sachs",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "amazon-prime-rewards",
+    "name": "Amazon Prime Rewards Visa Signature Card",
+    "issuer": "Chase",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "costco-anywhere",
+    "name": "Costco Anywhere Visa® Card by Citi",
+    "issuer": "Citi",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "target-redcard",
+    "name": "Target RedCard™",
+    "issuer": "TD Bank",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "store"
+  },
+  {
+    "id": "chase-ink-business-preferred",
+    "name": "Ink Business Preferred® Credit Card",
+    "issuer": "Chase",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "business"
+  },
+  {
+    "id": "chase-ink-business-unlimited",
+    "name": "Ink Business Unlimited® Credit Card",
+    "issuer": "Chase",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "business"
+  },
+  {
+    "id": "amex-business-platinum",
+    "name": "The Business Platinum Card® from American Express",
+    "issuer": "American Express",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "business"
+  },
+  {
+    "id": "amex-business-gold",
+    "name": "American Express® Business Gold Card",
+    "issuer": "American Express",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "business"
+  },
+  {
+    "id": "capital-one-spark-cash",
+    "name": "Capital One Spark Cash for Business",
+    "issuer": "Capital One",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "business"
+  },
+  {
+    "id": "marriott-bonvoy-boundless",
+    "name": "Marriott Bonvoy Boundless™ Credit Card",
+    "issuer": "Chase",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "hotel"
+  },
+  {
+    "id": "hilton-honors-american-express",
+    "name": "Hilton Honors American Express Card",
+    "issuer": "American Express",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "hotel"
+  },
+  {
+    "id": "ihg-rewards-premier",
+    "name": "IHG® Rewards Premier Credit Card",
+    "issuer": "Chase",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "hotel"
+  },
+  {
+    "id": "united-explorer",
+    "name": "United℠ Explorer Card",
+    "issuer": "Chase",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "airline"
+  },
+  {
+    "id": "southwest-rapid-rewards-priority",
+    "name": "Southwest Rapid Rewards® Priority Credit Card",
+    "issuer": "Chase",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "airline"
+  },
+  {
+    "id": "delta-skymiles-gold",
+    "name": "Delta SkyMiles® Gold American Express Card",
+    "issuer": "American Express",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "airline"
+  },
+  {
+    "id": "american-airlines-aviator-red",
+    "name": "AAdvantage® Aviator® Red World Elite Mastercard®",
+    "issuer": "Barclays",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "airline"
+  },
+  {
+    "id": "penfed-power-cash",
+    "name": "PenFed Power Cash Rewards Visa Signature® Card",
+    "issuer": "PenFed",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "navy-federal-more-rewards",
+    "name": "Navy Federal Credit Union® More Rewards American Express® Card",
+    "issuer": "Navy Federal",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "rewards"
+  },
+  {
+    "id": "synchrony-amazon-store",
+    "name": "Amazon Store Card",
+    "issuer": "Synchrony",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "store"
+  },
+  {
+    "id": "bilt-mastercard",
+    "name": "Bilt Mastercard®",
+    "issuer": "Wells Fargo",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "rewards"
+  },
+  {
+    "id": "sofi-credit-card",
+    "name": "SoFi Credit Card",
+    "issuer": "SoFi",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "paypal-cashback",
+    "name": "PayPal Cashback Mastercard®",
+    "issuer": "Synchrony",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "venmo-credit-card",
+    "name": "Venmo Credit Card",
+    "issuer": "Synchrony",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "cashback"
+  },
+  {
+    "id": "citi-aadvantage-platinum",
+    "name": "Citi® / AAdvantage® Platinum Select® World Elite Mastercard®",
+    "issuer": "Citi",
+    "imageUrl": "/cards/default-card.svg",
+    "category": "airline"
+  }
+]

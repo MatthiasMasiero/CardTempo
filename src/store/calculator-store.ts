@@ -50,6 +50,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
           statement_date: card.statementDate,
           due_date: card.dueDate,
           apr: card.apr,
+          image_url: card.imageUrl || '/cards/default-card.svg',
         })
         .select()
         .single();
@@ -68,6 +69,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
         statementDate: data.statement_date,
         dueDate: data.due_date,
         apr: data.apr ? Number(data.apr) : undefined,
+        imageUrl: data.image_url || '/cards/default-card.svg',
       };
 
       set((state) => ({ cards: [...state.cards, newCard] }));
@@ -97,6 +99,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
       if (updatedCard.statementDate !== undefined) dbUpdate.statement_date = updatedCard.statementDate;
       if (updatedCard.dueDate !== undefined) dbUpdate.due_date = updatedCard.dueDate;
       if (updatedCard.apr !== undefined) dbUpdate.apr = updatedCard.apr;
+      if (updatedCard.imageUrl !== undefined) dbUpdate.image_url = updatedCard.imageUrl;
 
       const { error } = await supabase
         .from('credit_cards')
@@ -230,6 +233,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
                 statement_date: card.statementDate,
                 due_date: card.dueDate,
                 apr: card.apr,
+                image_url: card.imageUrl || '/cards/default-card.svg',
               });
             }
 
@@ -255,6 +259,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
             statementDate: dbCard.statement_date,
             dueDate: dbCard.due_date,
             apr: dbCard.apr ? Number(dbCard.apr) : undefined,
+            imageUrl: dbCard.image_url || '/cards/default-card.svg',
           }));
 
           console.log(`[SetUserId] Loaded ${cards.length} cards from database`);

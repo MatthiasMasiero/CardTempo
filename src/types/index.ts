@@ -7,6 +7,7 @@ export interface CreditCard {
   statementDate: number; // Day of month (1-31)
   dueDate: number; // Day of month (1-31)
   apr?: number;
+  imageUrl?: string; // URL to card image (or default if not selected)
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -81,4 +82,5 @@ export interface CreditCardFormData {
   statementDate: string;
   dueDate: string;
   apr?: string;
+  imageUrl?: string;
 }

@@ -323,16 +323,16 @@ created_at TIMESTAMPTZ DEFAULT NOW()
 **File:** `.env.local` (✅ CONFIGURED)
 
 ```bash
-# Supabase (for database + authentication) - CONNECTED
-NEXT_PUBLIC_SUPABASE_URL=https://***REMOVED***.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(200+ char JWT token)
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(200+ char JWT token)
+# Supabase (for database + authentication)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 
-# Cron job security
-CRON_SECRET=fbcac281da31afaf61ed8d8f44492cf0d4a1d906450947b86434364a35221c4c
+# Cron job security (generate with: openssl rand -hex 32)
+CRON_SECRET=your_random_64_character_hex_string_here
 
-# Resend (for email reminders - NOT YET CONFIGURED)
-RESEND_API_KEY=your_resend_api_key
+# Resend (for email reminders)
+RESEND_API_KEY=re_your_resend_api_key_here
 ```
 
 **Important Notes:**

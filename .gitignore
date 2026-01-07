@@ -31,6 +31,9 @@ yarn-error.log*
 
 # local env files
 .env*.local
+
+# deployment notes (contains sensitive info)
+DEPLOYMENT_CHECKLIST.md
 .env
 .env.local
 .env.development.local

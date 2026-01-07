@@ -333,11 +333,11 @@ export default function DashboardPage() {
                       {upcomingPayments.map((payment, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-4 border rounded-lg"
+                          className="flex items-center gap-4 p-4 border rounded-lg"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
                             <div
-                              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                                 payment.purpose === 'optimization'
                                   ? 'bg-blue-100 text-blue-600'
                                   : 'bg-green-100 text-green-600'
@@ -349,8 +349,8 @@ export default function DashboardPage() {
                                 <CreditCardIcon className="h-5 w-5" />
                               )}
                             </div>
-                            <div>
-                              <p className="font-medium">{payment.cardName}</p>
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{payment.cardName}</p>
                               <p className="text-sm text-muted-foreground">
                                 {payment.purpose === 'optimization'
                                   ? 'Optimization Payment'
@@ -358,9 +358,9 @@ export default function DashboardPage() {
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold">{formatCurrency(payment.amount)}</p>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <div className="text-right shrink-0 w-[140px] ml-auto mr-64">
+                            <p className="font-semibold tabular-nums">{formatCurrency(payment.amount)}</p>
+                            <div className="flex items-center justify-end gap-1 text-sm text-muted-foreground">
                               <Clock className="h-3 w-3" />
                               {payment.daysUntil === 0
                                 ? 'Today'
@@ -371,6 +371,7 @@ export default function DashboardPage() {
                           </div>
                           <Badge
                             variant={payment.daysUntil <= 2 ? 'destructive' : 'secondary'}
+                            className="shrink-0"
                           >
                             {format(payment.date, 'MMM d')}
                           </Badge>

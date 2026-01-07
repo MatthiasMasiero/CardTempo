@@ -1,3 +1,4 @@
+import React, { ReactElement } from 'react';
 import { NextRequest, NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { PaymentPlanPDF } from '@/components/pdf/PaymentPlanPDF';
@@ -17,14 +18,14 @@ export async function POST(request: NextRequest) {
 
     // Generate PDF
     const pdfBuffer = await renderToBuffer(
-      PaymentPlanPDF({
+      React.createElement(PaymentPlanPDF, {
         result,
         generatedDate: new Date(),
-      })
+      }) as ReactElement
     );
 
     // Return PDF as downloadable file
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

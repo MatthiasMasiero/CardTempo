@@ -43,7 +43,7 @@ export function CalendarView({ cards }: CalendarViewProps) {
       events.push({
         date: dueDate,
         cardName: card.nickname,
-        amount: card.minimumPayment || card.currentBalance * 0.02,
+        amount: card.currentBalance * 0.02, // Typical minimum payment is 2%
         type: 'due',
       });
 

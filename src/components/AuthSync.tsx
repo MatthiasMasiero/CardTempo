@@ -10,7 +10,7 @@ import { useCalculatorStore } from '@/store/calculator-store';
  */
 export function AuthSync() {
   const { user, isAuthenticated, checkSession } = useAuthStore();
-  const { setUserId } = useCalculatorStore();
+  const { setUserId, loadGuestCards } = useCalculatorStore();
 
   useEffect(() => {
     // Check for existing Supabase session on mount
@@ -20,11 +20,12 @@ export function AuthSync() {
   useEffect(() => {
     // Sync user ID to calculator store on mount and when user changes
     if (isAuthenticated && user) {
-      setUserId(user.id);
+      setUserId(user.id); // Triggers migration if guest cards exist
     } else {
       setUserId(null);
+      loadGuestCards(); // Load guest cards from localStorage
     }
-  }, [user, isAuthenticated, setUserId]);
+  }, [user, isAuthenticated, setUserId, loadGuestCards]);
 
   return null; // This component doesn't render anything
 }

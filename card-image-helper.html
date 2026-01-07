@@ -269,7 +269,7 @@
         <div class="stat-label">Completed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number" id="remainingCount">50</div>
+        <div class="stat-number" id="remainingCount">45</div>
         <div class="stat-label">Remaining</div>
       </div>
       <div class="stat-card">
@@ -291,7 +291,7 @@
     </div>
 
     <div class="filters">
-      <button class="filter-btn active" data-filter="all">All (50)</button>
+      <button class="filter-btn active" data-filter="all">All (45)</button>
       <button class="filter-btn" data-filter="travel">Travel</button>
       <button class="filter-btn" data-filter="cashback">Cash Back</button>
       <button class="filter-btn" data-filter="business">Business</button>
@@ -306,22 +306,75 @@
 
   <script>
     const cards = [
+      // Chase Cards
       { id: 'chase-sapphire-preferred', name: 'Chase Sapphire Preferred®', issuer: 'Chase', category: 'travel', url: 'https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred' },
       { id: 'chase-sapphire-reserve', name: 'Chase Sapphire Reserve®', issuer: 'Chase', category: 'travel', url: 'https://creditcards.chase.com/rewards-credit-cards/sapphire/reserve' },
       { id: 'chase-freedom-unlimited', name: 'Chase Freedom Unlimited®', issuer: 'Chase', category: 'cashback', url: 'https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited' },
       { id: 'chase-freedom-flex', name: 'Chase Freedom Flex℠', issuer: 'Chase', category: 'cashback', url: 'https://creditcards.chase.com/cash-back-credit-cards/freedom/flex' },
-      { id: 'amex-platinum', name: 'The Platinum Card® from American Express', issuer: 'American Express', category: 'travel', url: 'https://www.americanexpress.com/us/credit-cards/card/platinum/' },
+      { id: 'amazon-prime-rewards', name: 'Amazon Prime Rewards Visa', issuer: 'Chase', category: 'cashback', url: 'https://www.chase.com/personal/credit-cards/amazon' },
+      { id: 'chase-ink-business-preferred', name: 'Ink Business Preferred®', issuer: 'Chase', category: 'business', url: 'https://creditcards.chase.com/business-credit-cards/ink/business-preferred' },
+      { id: 'chase-ink-business-unlimited', name: 'Ink Business Unlimited®', issuer: 'Chase', category: 'business', url: 'https://creditcards.chase.com/business-credit-cards/ink/business-unlimited' },
+      { id: 'marriott-bonvoy-boundless', name: 'Marriott Bonvoy Boundless™', issuer: 'Chase', category: 'hotel', url: 'https://creditcards.chase.com/marriott/cardmember' },
+      { id: 'ihg-rewards-premier', name: 'IHG® Rewards Premier', issuer: 'Chase', category: 'hotel', url: 'https://creditcards.chase.com/ihg-credit-card' },
+      { id: 'united-explorer', name: 'United℠ Explorer Card', issuer: 'Chase', category: 'airline', url: 'https://www.theexplorercard.com/' },
+      { id: 'southwest-rapid-rewards-priority', name: 'Southwest Rapid Rewards® Priority', issuer: 'Chase', category: 'airline', url: 'https://www.southwest.com/rapid-rewards-credit-card/' },
+
+      // American Express Cards
+      { id: 'amex-platinum', name: 'The Platinum Card®', issuer: 'American Express', category: 'travel', url: 'https://www.americanexpress.com/us/credit-cards/card/platinum/' },
       { id: 'amex-gold', name: 'American Express® Gold Card', issuer: 'American Express', category: 'rewards', url: 'https://www.americanexpress.com/us/credit-cards/card/gold-card/' },
       { id: 'amex-blue-cash-preferred', name: 'Blue Cash Preferred®', issuer: 'American Express', category: 'cashback', url: 'https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/' },
       { id: 'amex-blue-cash-everyday', name: 'Blue Cash Everyday®', issuer: 'American Express', category: 'cashback', url: 'https://www.americanexpress.com/us/credit-cards/card/blue-cash-everyday/' },
       { id: 'amex-green', name: 'American Express® Green Card', issuer: 'American Express', category: 'travel', url: 'https://www.americanexpress.com/us/credit-cards/card/green/' },
+      { id: 'amex-business-platinum', name: 'The Business Platinum Card®', issuer: 'American Express', category: 'business', url: 'https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-platinum-credit-card/' },
+      { id: 'amex-business-gold', name: 'American Express® Business Gold Card', issuer: 'American Express', category: 'business', url: 'https://www.americanexpress.com/us/credit-cards/business/business-credit-cards/american-express-business-gold-card/' },
+      { id: 'hilton-honors-american-express', name: 'Hilton Honors American Express Card', issuer: 'American Express', category: 'hotel', url: 'https://www.americanexpress.com/us/credit-cards/card/hilton-honors/' },
+      { id: 'delta-skymiles-gold', name: 'Delta SkyMiles® Gold', issuer: 'American Express', category: 'airline', url: 'https://www.americanexpress.com/us/credit-cards/card/delta-skymiles-gold/' },
+
+      // Capital One Cards
       { id: 'capital-one-venture', name: 'Capital One Venture', issuer: 'Capital One', category: 'travel', url: 'https://www.capitalone.com/credit-cards/venture/' },
       { id: 'capital-one-venture-x', name: 'Capital One Venture X', issuer: 'Capital One', category: 'travel', url: 'https://www.capitalone.com/credit-cards/venture-x/' },
       { id: 'capital-one-savor', name: 'Capital One Savor', issuer: 'Capital One', category: 'cashback', url: 'https://www.capitalone.com/credit-cards/savor/' },
       { id: 'capital-one-quicksilver', name: 'Capital One Quicksilver', issuer: 'Capital One', category: 'cashback', url: 'https://www.capitalone.com/credit-cards/quicksilver/' },
+      { id: 'capital-one-spark-cash', name: 'Capital One Spark Cash', issuer: 'Capital One', category: 'business', url: 'https://www.capitalone.com/small-business/credit-cards/spark-cash/' },
+
+      // Discover Cards
       { id: 'discover-it-cash-back', name: 'Discover it® Cash Back', issuer: 'Discover', category: 'cashback', url: 'https://www.discover.com/credit-cards/cash-back/it-card.html' },
       { id: 'discover-it-miles', name: 'Discover it® Miles', issuer: 'Discover', category: 'travel', url: 'https://www.discover.com/credit-cards/travel/' },
-      // Add more cards here from the JSON...
+
+      // Citi Cards
+      { id: 'citi-double-cash', name: 'Citi® Double Cash Card', issuer: 'Citi', category: 'cashback', url: 'https://www.citi.com/credit-cards/citi-double-cash-credit-card' },
+      { id: 'citi-custom-cash', name: 'Citi Custom Cash℠ Card', issuer: 'Citi', category: 'cashback', url: 'https://www.citi.com/credit-cards/citi-custom-cash-credit-card' },
+      { id: 'citi-premier', name: 'Citi Premier® Card', issuer: 'Citi', category: 'travel', url: 'https://www.citi.com/credit-cards/citi-premier-credit-card' },
+      { id: 'costco-anywhere', name: 'Costco Anywhere Visa®', issuer: 'Citi', category: 'cashback', url: 'https://www.citi.com/credit-cards/citi-costco-anywhere-visa-credit-card' },
+      { id: 'citi-aadvantage-platinum', name: 'Citi® / AAdvantage® Platinum Select®', issuer: 'Citi', category: 'airline', url: 'https://www.citi.com/credit-cards/citi-aadvantage-platinum-select-credit-card' },
+
+      // Wells Fargo Cards
+      { id: 'wells-fargo-active-cash', name: 'Wells Fargo Active Cash®', issuer: 'Wells Fargo', category: 'cashback', url: 'https://creditcards.wellsfargo.com/active-cash-credit-card/' },
+      { id: 'wells-fargo-autograph', name: 'Wells Fargo Autograph℠', issuer: 'Wells Fargo', category: 'travel', url: 'https://creditcards.wellsfargo.com/autograph-visa-credit-card/' },
+      { id: 'bilt-mastercard', name: 'Bilt Mastercard®', issuer: 'Wells Fargo', category: 'rewards', url: 'https://www.biltrewards.com/' },
+
+      // Bank of America Cards
+      { id: 'bank-of-america-travel-rewards', name: 'Bank of America® Travel Rewards', issuer: 'Bank of America', category: 'travel', url: 'https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/' },
+      { id: 'bank-of-america-unlimited-cash', name: 'Bank of America® Unlimited Cash', issuer: 'Bank of America', category: 'cashback', url: 'https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/' },
+      { id: 'bank-of-america-customized-cash', name: 'Bank of America® Customized Cash', issuer: 'Bank of America', category: 'cashback', url: 'https://www.bankofamerica.com/credit-cards/products/customized-cash-rewards-credit-card/' },
+
+      // U.S. Bank Cards
+      { id: 'us-bank-altitude-go', name: 'U.S. Bank Altitude® Go', issuer: 'U.S. Bank', category: 'rewards', url: 'https://www.usbank.com/credit-cards/altitude-go-visa-signature-credit-card.html' },
+      { id: 'us-bank-altitude-reserve', name: 'U.S. Bank Altitude® Reserve', issuer: 'U.S. Bank', category: 'travel', url: 'https://www.usbank.com/credit-cards/altitude-reserve-visa-infinite-credit-card.html' },
+
+      // Barclays Cards
+      { id: 'barclays-arrival-plus', name: 'Barclaycard Arrival® Plus', issuer: 'Barclays', category: 'travel', url: 'https://www.barclaycardus.com/apply/Landing.action?campaignId=2264&cellNumber=11' },
+      { id: 'american-airlines-aviator-red', name: 'AAdvantage® Aviator® Red', issuer: 'Barclays', category: 'airline', url: 'https://www.barclaycardus.com/apply/Landing.action?campaignId=2258' },
+
+      // Other Cards
+      { id: 'apple-card', name: 'Apple Card', issuer: 'Goldman Sachs', category: 'cashback', url: 'https://www.apple.com/apple-card/' },
+      { id: 'target-redcard', name: 'Target RedCard™', issuer: 'TD Bank', category: 'store', url: 'https://www.target.com/redcard' },
+      { id: 'penfed-power-cash', name: 'PenFed Power Cash Rewards', issuer: 'PenFed', category: 'cashback', url: 'https://www.penfed.org/credit-cards/power-cash-rewards-visa-signature-card' },
+      { id: 'navy-federal-more-rewards', name: 'Navy Federal More Rewards', issuer: 'Navy Federal', category: 'rewards', url: 'https://www.navyfederal.org/loans-cards/credit-cards/more-rewards.html' },
+      { id: 'synchrony-amazon-store', name: 'Amazon Store Card', issuer: 'Synchrony', category: 'store', url: 'https://www.amazon.com/credit' },
+      { id: 'sofi-credit-card', name: 'SoFi Credit Card', issuer: 'SoFi', category: 'cashback', url: 'https://www.sofi.com/credit-card/' },
+      { id: 'paypal-cashback', name: 'PayPal Cashback Mastercard®', issuer: 'Synchrony', category: 'cashback', url: 'https://www.paypal.com/us/digital-wallet/ways-to-pay/credit-card' },
+      { id: 'venmo-credit-card', name: 'Venmo Credit Card', issuer: 'Synchrony', category: 'cashback', url: 'https://venmo.com/credit-card/' }
     ];
 
     let completedCards = JSON.parse(localStorage.getItem('completedCards') || '[]');

@@ -89,7 +89,7 @@ export default function LandingPage() {
     offset: ["start start", "end start"]
   });
 
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
 
   const scrollToSection = (id: string) => {
@@ -110,7 +110,7 @@ export default function LandingPage() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
-        className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm"
+        className="border-b border-white/20 dark:border-white/10 bg-gradient-to-r from-blue-50/60 via-indigo-50/60 to-purple-50/60 dark:from-slate-900/60 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-2xl sticky top-0 z-50 shadow-[0_8px_32px_rgba(99,102,241,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
       >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <button
@@ -129,29 +129,24 @@ export default function LandingPage() {
               Credit Optimizer
             </span>
           </button>
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-8">
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
+              className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary transition-all relative group"
             >
               How It Works
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all group-hover:w-full" />
             </button>
             <button
               onClick={() => scrollToSection('faq')}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
+              className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary transition-all relative group"
             >
               FAQ
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all group-hover:w-full" />
             </button>
-            <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group">
+            <Link href="/blog" className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary transition-all relative group">
               Blog
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
-            </Link>
-            <Link href="/calculator">
-              <Button variant="outline" size="sm" className="hover:scale-105 transition-transform">
-                Calculator
-              </Button>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all group-hover:w-full" />
             </Link>
             {isAuthenticated ? (
               <Popover>
@@ -189,7 +184,9 @@ export default function LandingPage() {
               </Popover>
             ) : (
               <Link href="/login">
-                <Button size="sm" className="hover:scale-105 transition-transform">Sign In</Button>
+                <Button size="sm" className="bg-gradient-to-r from-primary via-blue-600 to-blue-700 hover:from-blue-600 hover:via-primary hover:to-purple-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                  Sign In
+                </Button>
               </Link>
             )}
           </nav>
@@ -197,48 +194,98 @@ export default function LandingPage() {
       </motion.header>
 
       {/* Hero Section with Parallax */}
-      <section ref={heroRef} className="relative py-20 md:py-32 overflow-hidden">
+      <section ref={heroRef} className="relative pt-12 md:pt-20 pb-24 md:pb-40 overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950">
           <motion.div
             style={{ y }}
             className="absolute inset-0"
           >
-            <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-200/20 rounded-full blur-3xl" />
+            <div className="absolute top-20 left-10 w-96 h-96 bg-blue-400/40 dark:bg-blue-500/30 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-purple-400/40 dark:bg-purple-500/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-indigo-300/30 dark:bg-indigo-500/20 rounded-full blur-3xl" />
           </motion.div>
         </div>
 
+        {/* Mid-ground Decorative Shapes */}
+        <motion.div
+          className="absolute top-1/4 right-1/4 w-32 h-32 border-4 border-blue-300/20 dark:border-blue-400/20 rounded-2xl"
+          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '60%']) }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 left-1/4 w-24 h-24 border-4 border-purple-300/20 dark:border-purple-400/20 rounded-full"
+          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '40%']) }}
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 3, repeat: Infinity }}
+        />
+
         {/* Floating Elements */}
         <motion.div
-          className="absolute top-32 left-10 text-primary/10"
+          className="absolute top-32 left-10 text-primary/20 hover:text-primary/40 transition-colors cursor-pointer group"
           animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
           transition={{ duration: 5, repeat: Infinity }}
+          whileHover={{ scale: 1.2, rotate: 15 }}
+          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '50%']) }}
         >
-          <CreditCard className="h-16 w-16" />
+          <CreditCard className="h-20 w-20 group-hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all" />
         </motion.div>
         <motion.div
-          className="absolute bottom-32 right-20 text-primary/10"
+          className="absolute bottom-32 right-20 text-primary/20 hover:text-primary/40 transition-colors cursor-pointer group"
           animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
           transition={{ duration: 4, repeat: Infinity }}
+          whileHover={{ scale: 1.2, rotate: -15 }}
+          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '30%']) }}
         >
-          <TrendingUp className="h-20 w-20" />
+          <TrendingUp className="h-24 w-24 group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all" />
         </motion.div>
+
+        {/* Additional Floating Icons */}
+        <motion.div
+          className="absolute top-1/2 right-10 text-emerald-500/15 dark:text-emerald-400/20"
+          animate={{ y: [0, -15, 0], rotate: [0, -8, 0] }}
+          transition={{ duration: 6, repeat: Infinity }}
+          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '45%']) }}
+        >
+          <CheckCircle2 className="h-16 w-16" />
+        </motion.div>
+
+        {/* Floating Particles */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-primary/20 dark:bg-primary/30 rounded-full"
+            style={{
+              left: `${15 + i * 12}%`,
+              top: `${20 + (i % 3) * 25}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 3 + i * 0.5,
+              repeat: Infinity,
+              delay: i * 0.3,
+            }}
+          />
+        ))}
 
         <motion.div
           style={{ opacity }}
           className="container mx-auto px-4 relative z-10"
         >
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="backdrop-blur-2xl bg-white/30 dark:bg-slate-900/30 rounded-3xl p-12 md:p-16 border border-white/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-                <Zap className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Boost Your Score by 15-50 Points</span>
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full backdrop-blur-xl bg-white/20 dark:bg-white/10 border border-white/30 shadow-2xl mb-8 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(59,130,246,0.3)] transition-all duration-300 cursor-default group">
+                <Zap className="h-5 w-5 text-primary group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-sm font-bold text-primary">Boost Your Score by 15-50 Points</span>
               </div>
             </motion.div>
 
@@ -246,11 +293,16 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6"
+              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-tight mb-8 group cursor-default"
+              whileHover={{ scale: 1.01 }}
             >
-              Optimize Your Credit Card Payments to{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-600 to-purple-600 animate-gradient">
-                Boost Your Score
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-primary to-blue-600 dark:from-white dark:via-blue-400 dark:to-purple-400">
+                Optimize Your Credit Card Payments to{' '}
+              </span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-600 to-purple-600">
+                <span className="inline animate-gradient bg-[length:200%_auto]">
+                  Boost Your Score
+                </span>
               </span>
             </motion.h1>
 
@@ -258,9 +310,9 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed"
+              className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed font-medium"
             >
-              Most people pay on the due date, but banks report balances on the <strong>statement date</strong>.
+              Most people pay on the due date, but banks report balances on the <strong className="text-slate-900 dark:text-white">statement date</strong>.
               Learn the optimal time to pay and potentially improve your score within 30 days.
             </motion.p>
 
@@ -268,19 +320,19 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex flex-col gap-4 items-center"
+              className="flex flex-col gap-6 items-center"
             >
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Link href="/calculator">
-                  <Button size="lg" className="w-full sm:w-auto gap-2 text-base px-8 py-6 hover:scale-105 transition-transform shadow-lg hover:shadow-xl">
+                  <Button size="lg" className="w-full sm:w-auto gap-3 text-lg font-bold px-10 py-7 hover:scale-110 transition-all duration-300 shadow-2xl hover:shadow-[0_20px_60px_rgba(59,130,246,0.4)] bg-gradient-to-r from-primary via-blue-600 to-blue-700 hover:from-blue-600 hover:via-primary hover:to-purple-600 group">
                     Calculate My Optimal Strategy
-                    <ArrowRight className="h-5 w-5" />
+                    <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto text-base px-8 py-6 hover:scale-105 transition-transform"
+                  className="w-full sm:w-auto text-lg font-semibold px-10 py-7 hover:scale-110 transition-all duration-300 backdrop-blur-xl bg-white/30 dark:bg-white/10 border-2 border-white/50 hover:bg-white/50 dark:hover:bg-white/20 shadow-xl hover:shadow-2xl"
                   onClick={() => scrollToSection('how-it-works')}
                 >
                   Learn How It Works
@@ -288,13 +340,14 @@ export default function LandingPage() {
               </div>
               {isAuthenticated && (
                 <Link href="/dashboard">
-                  <Button size="lg" variant="default" className="w-full sm:w-auto gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                    <LayoutDashboard className="h-5 w-5" />
+                  <Button size="lg" variant="default" className="w-full sm:w-auto gap-3 text-lg font-bold px-10 py-7 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-2xl hover:shadow-[0_20px_60px_rgba(16,185,129,0.4)] hover:scale-110 transition-all duration-300 group">
+                    <LayoutDashboard className="h-6 w-6 group-hover:rotate-12 transition-transform" />
                     Return to Dashboard
                   </Button>
                 </Link>
               )}
             </motion.div>
+            </div>
           </div>
         </motion.div>
       </section>

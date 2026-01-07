@@ -3,11 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 import { sendPaymentReminder } from '@/lib/email/resend';
 import { format } from 'date-fns';
 
-// Initialize Supabase client with service role key
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Helper to get Supabase client (created at runtime, not build time)
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Supabase environment variables not configured');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 // This endpoint should be called by Vercel Cron
 // Configure in vercel.json:
@@ -28,6 +34,9 @@ export async function GET(request: NextRequest) {
 
     const today = format(new Date(), 'yyyy-MM-dd');
     console.log(`[Cron] Checking for reminders on ${today}`);
+
+    // Get Supabase client
+    const supabase = getSupabaseClient();
 
     // Fetch all reminders due today that haven't been sent
     const { data: reminders, error } = await supabase

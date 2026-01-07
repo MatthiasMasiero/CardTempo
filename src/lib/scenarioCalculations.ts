@@ -339,8 +339,8 @@ export function calculateNewCard(
     nickname: 'New Card',
     creditLimit: newCardLimit,
     currentBalance: startingBalance,
-    statementDate: new Date().toISOString(),
-    dueDate: addDays(new Date(), 25).toISOString(),
+    statementDate: 15, // Placeholder: users should be able to customize this
+    dueDate: 10, // Placeholder: users should be able to customize this
   };
 
   const updatedCards = [...existingCards, newCard];

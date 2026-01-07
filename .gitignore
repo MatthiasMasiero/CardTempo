@@ -55,3 +55,28 @@ next-env.d.ts
 CLAUDE.local.md
 .claude/*.local.json
 .claude/.chat_history/
+
+# Temporary documentation and checklists
+BUILD_ERRORS_EXPLAINED.md
+CARD_IMAGES_CHECKLIST.md
+CHANGES_MADE.md
+Claude-test.md
+E2E_FIX_SUMMARY.md
+TESTING_SUMMARY.md
+TOP_10_CARDS_QUICK_GUIDE.md
+*_SUMMARY.md
+*_CHECKLIST.md
+*_EXPLAINED.md
+
+# Screenshots and temporary images in root
+Screenshot*.png
+Screenshot*.jpg
+screenshot*.png
+screenshot*.jpg
+*.screenshot.png
+
+# Temporary/scratch files
+scratch.md
+notes.md
+TODO.local.md
+NOTES.md

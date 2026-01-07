@@ -114,7 +114,7 @@ export function generateICSFile(
       };
     });
 
-  return createEvents(icsEvents);
+  return createEvents(icsEvents) as { error: Error | undefined; value: string | undefined };
 }
 
 /**

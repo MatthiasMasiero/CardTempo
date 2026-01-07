@@ -2,6 +2,12 @@ import { create } from 'zustand';
 import { CreditCard, OptimizationResult } from '@/types';
 import { calculateOptimization } from '@/lib/calculator';
 import { supabase } from '@/lib/supabase';
+import {
+  loadGuestCards as loadGuestCardsFromStorage,
+  saveGuestCards,
+  addGuestCard as addGuestCardToStorage,
+  clearGuestCards as clearGuestCardsFromStorage
+} from '@/lib/guestStorage';
 
 interface CalculatorState {
   cards: CreditCard[];
@@ -18,6 +24,7 @@ interface CalculatorState {
   calculateResults: () => void;
   clearResults: () => void;
   setUserId: (userId: string | null) => Promise<void>;
+  loadGuestCards: () => void;
 }
 
 // Helper to get user-specific storage key
@@ -33,11 +40,17 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
   addCard: async (card) => {
     const { currentUserId } = get();
+
+    // GUEST MODE BRANCH
     if (!currentUserId) {
-      console.error('[AddCard] No user logged in');
+      console.log('[AddCard] Guest mode - saving to localStorage');
+      const newCard = addGuestCardToStorage(card); // Generates UUID
+      set((state) => ({ cards: [...state.cards, newCard] }));
+      saveGuestCards(get().cards);
       return;
     }
 
+    // AUTHENTICATED MODE
     // Save to database first to get the UUID
     try {
       const { data, error } = await supabase
@@ -81,15 +94,22 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
   updateCard: async (id, updatedCard) => {
     const { currentUserId } = get();
-    if (!currentUserId) return;
 
-    // Optimistic update
+    // Optimistic update (works for both modes)
     set((state) => ({
       cards: state.cards.map((card) =>
         card.id === id ? { ...card, ...updatedCard } : card
       ),
     }));
 
+    // GUEST MODE BRANCH
+    if (!currentUserId) {
+      console.log('[UpdateCard] Guest mode - saving to localStorage');
+      saveGuestCards(get().cards);
+      return;
+    }
+
+    // AUTHENTICATED MODE
     // Save to database
     try {
       const dbUpdate: Record<string, unknown> = {};
@@ -119,13 +139,20 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
   removeCard: async (id) => {
     const { currentUserId } = get();
-    if (!currentUserId) return;
 
-    // Optimistic update
+    // Optimistic update (works for both modes)
     set((state) => ({
       cards: state.cards.filter((card) => card.id !== id),
     }));
 
+    // GUEST MODE BRANCH
+    if (!currentUserId) {
+      console.log('[RemoveCard] Guest mode - saving to localStorage');
+      saveGuestCards(get().cards);
+      return;
+    }
+
+    // AUTHENTICATED MODE
     // Delete from database
     try {
       const { error } = await supabase
@@ -146,10 +173,18 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
   clearCards: async () => {
     const { currentUserId } = get();
-    if (!currentUserId) return;
 
+    // Clear state (works for both modes)
     set({ cards: [], result: null });
 
+    // GUEST MODE BRANCH
+    if (!currentUserId) {
+      console.log('[ClearCards] Guest mode - clearing localStorage');
+      clearGuestCardsFromStorage();
+      return;
+    }
+
+    // AUTHENTICATED MODE
     // Delete all cards from database
     try {
       const { error } = await supabase
@@ -185,6 +220,19 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
     set({ result: null });
   },
 
+  loadGuestCards: () => {
+    const { currentUserId } = get();
+
+    // Only load guest cards if not authenticated
+    if (currentUserId === null) {
+      console.log('[LoadGuestCards] Loading guest cards from localStorage');
+      const guestCards = loadGuestCardsFromStorage();
+      set({ cards: guestCards, result: null });
+    } else {
+      console.log('[LoadGuestCards] User authenticated, skipping guest load');
+    }
+  },
+
   setUserId: async (userId) => {
     const currentUserId = get().currentUserId;
 
@@ -217,7 +265,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
         // Check if database is empty - if so, migrate from localStorage
         if (!dbCards || dbCards.length === 0) {
           console.log('[SetUserId] No cards in database, checking localStorage for migration');
-          const localCards = loadFromLocalStorage(userId);
+          const localCards = loadFromLocalStorage(null); // Load from guest storage key
 
           if (localCards.length > 0) {
             console.log(`[SetUserId] Migrating ${localCards.length} cards from localStorage to database`);
@@ -242,7 +290,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
             // Clear localStorage after successful migration
             if (typeof window !== 'undefined') {
-              const key = getUserStorageKey(userId);
+              const key = getUserStorageKey(null); // Clear guest storage key
               localStorage.removeItem(key);
               console.log('[SetUserId] Migration complete, localStorage cleared');
             }

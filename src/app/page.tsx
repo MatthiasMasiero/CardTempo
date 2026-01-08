@@ -285,7 +285,7 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full backdrop-blur-xl bg-white/20 dark:bg-white/10 border border-white/30 shadow-2xl mb-8 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(59,130,246,0.3)] transition-all duration-300 cursor-default group">
                 <Zap className="h-5 w-5 text-primary group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-sm font-bold text-primary">Boost Your Score by 15-50 Points</span>
+                <span className="text-sm font-bold text-primary">Boost Your Score by 10-100+ Points</span>
               </div>
             </motion.div>
 
@@ -360,9 +360,10 @@ export default function LandingPage() {
               <div className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-primary mb-2 flex items-center justify-center gap-1">
                   <span>+</span>
-                  <AnimatedCounter end={15} />
+                  <AnimatedCounter end={10} />
                   <span>-</span>
-                  <AnimatedCounter end={50} />
+                  <AnimatedCounter end={100} />
+                  <span className="text-3xl">+</span>
                 </div>
                 <p className="text-muted-foreground">Point Score Increase</p>
               </div>

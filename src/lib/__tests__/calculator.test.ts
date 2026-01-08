@@ -222,12 +222,13 @@ describe('Calculator - Multiple Cards Optimization', () => {
 describe('Calculator - Score Impact Calculation', () => {
   describe('calculateScoreImpact', () => {
     test('should calculate positive impact for utilization decrease', () => {
-      const impact = calculateScoreImpact(40); // 40% improvement
+      const impact = calculateScoreImpact(40, 60); // 40% drop from 60% utilization
 
       expect(impact.min).toBeGreaterThan(0);
       expect(impact.max).toBeGreaterThan(impact.min);
-      expect(impact.min).toBeGreaterThanOrEqual(70);
-      expect(impact.max).toBeLessThanOrEqual(100);
+      // More conservative estimates now (40% drop from 60% = ~44-72 points)
+      expect(impact.min).toBeGreaterThanOrEqual(40);
+      expect(impact.max).toBeLessThanOrEqual(80);
     });
 
     test('should calculate larger impact for larger improvements', () => {
@@ -254,10 +255,10 @@ describe('Calculator - Score Impact Calculation', () => {
     });
 
     test('should have tiered impact ranges', () => {
-      const small = calculateScoreImpact(5); // 5% improvement
-      const medium = calculateScoreImpact(15); // 15% improvement
-      const large = calculateScoreImpact(25); // 25% improvement
-      const huge = calculateScoreImpact(45); // 45% improvement
+      const small = calculateScoreImpact(5, 50); // 5% improvement from 50%
+      const medium = calculateScoreImpact(15, 50); // 15% improvement from 50%
+      const large = calculateScoreImpact(25, 50); // 25% improvement from 50%
+      const huge = calculateScoreImpact(45, 80); // 45% improvement from 80%
 
       // Each tier should have higher impact
       expect(small.min).toBeLessThan(medium.min);
@@ -265,11 +266,21 @@ describe('Calculator - Score Impact Calculation', () => {
       expect(large.min).toBeLessThan(huge.min);
     });
 
-    test('should cap extreme improvements appropriately', () => {
-      const extreme = calculateScoreImpact(80); // 80% improvement
+    test('should give bigger gains for higher starting utilization', () => {
+      const lowStart = calculateScoreImpact(30, 35); // 30% drop from 35% (medium)
+      const highStart = calculateScoreImpact(30, 80); // 30% drop from 80% (high)
 
-      // Should have high impact but reasonable
-      expect(extreme.min).toBeGreaterThan(100);
+      // Same improvement, but high start should have bigger gains
+      expect(highStart.min).toBeGreaterThan(lowStart.min);
+      expect(highStart.max).toBeGreaterThan(lowStart.max);
+    });
+
+    test('should cap extreme improvements appropriately', () => {
+      const extreme = calculateScoreImpact(80, 90); // 80% improvement from 90%
+
+      // Should have high impact but capped at 150
+      expect(extreme.min).toBeGreaterThan(80);
+      expect(extreme.max).toBeLessThanOrEqual(150);
       expect(extreme.max).toBeGreaterThan(extreme.min);
     });
   });

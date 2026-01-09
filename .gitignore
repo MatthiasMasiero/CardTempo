@@ -58,7 +58,6 @@ next-env.d.ts
 CLAUDE.local.md
 .claude/*.local.json
 .claude/.chat_history/
-.claude/
 
 # Temporary documentation and checklists
 BUILD_ERRORS_EXPLAINED.md
@@ -84,3 +83,7 @@ scratch.md
 notes.md
 TODO.local.md
 NOTES.md
+
+# Others
+DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_SECURITY.md

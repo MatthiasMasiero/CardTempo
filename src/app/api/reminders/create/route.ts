@@ -15,7 +15,7 @@ const ReminderRequestSchema = z.object({
           date: z.string(), // ISO date string from frontend
           amount: z.number().positive('Amount must be positive').max(999999, 'Amount too large'),
           purpose: z.enum(['optimization', 'balance'], {
-            errorMap: () => ({ message: 'Invalid payment purpose' }),
+            message: 'Invalid payment purpose',
           }),
           description: z.string().max(500, 'Description too long'),
         })
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Invalid request data',
-          details: validationResult.error.errors.map(e => ({
+          details: validationResult.error.issues.map(e => ({
             field: e.path.join('.'),
             message: e.message,
           })),

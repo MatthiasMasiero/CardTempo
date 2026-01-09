@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { CreditCard as CreditCardIcon, Trash2, Edit2 } from 'lucide-react';
 import { CreditCard } from '@/types';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
+import Image from 'next/image';
 
 interface CardDisplayProps {
   card: CreditCard;
@@ -15,6 +17,7 @@ interface CardDisplayProps {
 }
 
 export function CardDisplay({ card, onRemove, onEdit }: CardDisplayProps) {
+  const [imageError, setImageError] = useState(false);
   const utilization = (card.currentBalance / card.creditLimit) * 100;
 
   const getUtilizationColor = (util: number) => {
@@ -48,8 +51,19 @@ export function CardDisplay({ card, onRemove, onEdit }: CardDisplayProps) {
       <CardContent className="pt-4">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <CreditCardIcon className="h-5 w-5 text-primary" />
+            <div className="relative w-16 h-10 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+              {card.imageUrl && !imageError ? (
+                <Image
+                  src={card.imageUrl}
+                  alt={card.nickname}
+                  fill
+                  sizes="64px"
+                  className="object-contain p-1"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <CreditCardIcon className="h-6 w-6 text-gray-400" />
+              )}
             </div>
             <div>
               <h3 className="font-semibold">{card.nickname}</h3>

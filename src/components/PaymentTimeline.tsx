@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import Image from 'next/image';
 import {
   CreditCard as CreditCardIcon,
   Calendar,
@@ -22,6 +24,7 @@ interface PaymentTimelineProps {
 
 export function PaymentTimeline({ plan }: PaymentTimelineProps) {
   const { card, payments, currentUtilization, newUtilization, utilizationStatus } = plan;
+  const [imageError, setImageError] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -59,8 +62,21 @@ export function PaymentTimeline({ plan }: PaymentTimelineProps) {
     <Card className={`border-2 ${getStatusColor(utilizationStatus)}`}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CreditCardIcon className="h-5 w-5" />
+          <CardTitle className="text-lg flex items-center gap-3">
+            <div className="relative w-16 h-10 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+              {card.imageUrl && !imageError ? (
+                <Image
+                  src={card.imageUrl}
+                  alt={card.nickname}
+                  fill
+                  sizes="64px"
+                  className="object-contain p-1"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <CreditCardIcon className="h-6 w-6 text-gray-400" />
+              )}
+            </div>
             {card.nickname}
           </CardTitle>
           <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>

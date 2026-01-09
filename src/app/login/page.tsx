@@ -115,11 +115,6 @@ export default function LoginPage() {
               </p>
             </form>
 
-            <div className="mt-6 pt-6 border-t">
-              <p className="text-xs text-center text-muted-foreground">
-                Demo Mode: Enter any email and password to sign in
-              </p>
-            </div>
           </CardContent>
         </Card>
       </main>

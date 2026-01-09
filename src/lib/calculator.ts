@@ -204,11 +204,18 @@ export function calculateCardPaymentPlan(
  * Improving utilization can have significant impact on score
  *
  * Estimates are conservative and based on:
- * - Industry research on credit scoring models
+ * - Industry research on credit scoring models (2026)
  * - Utilization is 30% of FICO score
  * - Assumes good payment history (otherwise impact is lower)
+ * - Research anchor: 60% → 20% drop = 50+ points
+ *
+ * @param utilizationImprovement - Percentage point drop in utilization (e.g., 33.5 for 38.5% → 5%)
+ * @param currentUtilization - Starting utilization percentage (e.g., 38.5)
  */
-export function calculateScoreImpact(utilizationImprovement: number): { min: number; max: number } {
+export function calculateScoreImpact(
+  utilizationImprovement: number,
+  currentUtilization: number = 50 // Default assumes medium starting utilization
+): { min: number; max: number } {
   // Handle negative impact (utilization increased)
   if (utilizationImprovement < 0) {
     const utilizationIncrease = Math.abs(utilizationImprovement);
@@ -247,43 +254,80 @@ export function calculateScoreImpact(utilizationImprovement: number): { min: num
     return { min: 0, max: 0 };
   }
 
+  // Determine severity multiplier based on starting utilization
+  // Higher starting utilization = bigger score impact potential
+  let severityMultiplier = 1.0;
+
+  if (currentUtilization >= 70) {
+    // Very high utilization (likely poor credit 500-600)
+    severityMultiplier = 1.3; // Biggest gains
+  } else if (currentUtilization >= 50) {
+    // High utilization (likely fair credit 600-670)
+    severityMultiplier = 1.1; // Above average gains
+  } else if (currentUtilization >= 30) {
+    // Medium utilization (likely good credit 670-740)
+    severityMultiplier = 0.85; // Moderate gains
+  } else {
+    // Low utilization (likely very good/excellent credit 740+)
+    severityMultiplier = 0.6; // Smallest gains (already optimized)
+  }
+
+  // Base estimates (adjusted by research: 60%→20% = 50+ points)
+  let min: number;
+  let max: number;
+
   // Very small improvement (0-5% utilization drop)
   if (utilizationImprovement <= 5) {
-    return { min: 5, max: 15 };
+    min = 5;
+    max = 12;
   }
-
   // Small improvement (5-10% utilization drop)
   // Example: 40% → 35% utilization
-  if (utilizationImprovement <= 10) {
-    return { min: 10, max: 25 };
+  else if (utilizationImprovement <= 10) {
+    min = 8;
+    max = 18;
   }
-
   // Moderate improvement (10-20% utilization drop)
   // Example: 45% → 30% or 35% → 20%
-  if (utilizationImprovement <= 20) {
-    return { min: 25, max: 45 };
+  else if (utilizationImprovement <= 20) {
+    min = 15;
+    max = 30;
   }
-
   // Good improvement (20-30% utilization drop)
   // Example: 50% → 25% or 40% → 15%
-  if (utilizationImprovement <= 30) {
-    return { min: 45, max: 70 };
+  else if (utilizationImprovement <= 30) {
+    min = 25;
+    max = 45;
   }
-
   // Excellent improvement (30-40% utilization drop)
   // Example: 60% → 25% or 50% → 15%
-  if (utilizationImprovement <= 40) {
-    return { min: 70, max: 100 };
+  // Research: 60%→20% = 50+ points (40pt drop)
+  else if (utilizationImprovement <= 40) {
+    min = 40;
+    max = 65;
   }
-
   // Outstanding improvement (40-50% utilization drop)
-  if (utilizationImprovement <= 50) {
-    return { min: 100, max: 130 };
+  // Example: 70% → 25% or 80% → 30%
+  else if (utilizationImprovement <= 50) {
+    min = 60;
+    max = 90;
+  }
+  // Extreme improvement (50%+ utilization drop)
+  // Example: 90% → 10% or 100% → 5%
+  else {
+    min = 85;
+    max = 120;
   }
 
-  // Extreme improvement (50%+ utilization drop)
-  // Example: 80% → 10% or 90% → 5%
-  return { min: 130, max: 160 };
+  // Apply severity multiplier based on starting utilization
+  min = Math.round(min * severityMultiplier);
+  max = Math.round(max * severityMultiplier);
+
+  // Cap at reasonable maximum (utilization is only 30% of score)
+  // Theoretical max: 30% of 850 = 255 points, but realistically much lower
+  max = Math.min(max, 150);
+
+  return { min, max };
 }
 
 /**
@@ -319,7 +363,7 @@ export function calculateOptimization(
   const optimizedOverallUtilization = calculateUtilization(totalTargetBalance, totalCreditLimit);
 
   const utilizationImprovement = currentOverallUtilization - optimizedOverallUtilization;
-  const estimatedScoreImpact = calculateScoreImpact(utilizationImprovement);
+  const estimatedScoreImpact = calculateScoreImpact(utilizationImprovement, currentOverallUtilization);
 
   return {
     cards: cardPlans,

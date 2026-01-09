@@ -38,6 +38,7 @@ export default function CalculatorPage() {
       statementDate: parseInt(formData.statementDate),
       dueDate: parseInt(formData.dueDate),
       apr: formData.apr ? parseFloat(formData.apr) : undefined,
+      imageUrl: formData.imageUrl || '/cards/default-card.svg',
     };
     addCard(card);
     setShowForm(false);

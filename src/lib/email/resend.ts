@@ -1,7 +1,16 @@
 import { Resend } from 'resend';
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-initialize Resend client (only when API key is available)
+let resend: Resend | null = null;
+function getResendClient() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  if (!resend) {
+    throw new Error('RESEND_API_KEY is not configured. Email functionality is disabled.');
+  }
+  return resend;
+}
 
 // Default sender email - Update this to your verified domain
 const FROM_EMAIL = 'Credit Optimizer <onboarding@resend.dev>'; // Change to your domain
@@ -37,7 +46,8 @@ export async function sendPaymentReminder({
       description,
     });
 
-    const { data, error } = await resend.emails.send({
+    const client = getResendClient();
+    const { data, error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
       subject,
@@ -65,7 +75,8 @@ export async function sendWelcomeEmail({ to, reminderCount }: SendWelcomeEmailPa
   try {
     const html = generateWelcomeEmailHTML({ reminderCount });
 
-    const { data, error } = await resend.emails.send({
+    const client = getResendClient();
+    const { data, error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
       subject: '✅ Your Payment Reminders Are Set!',
@@ -93,7 +104,8 @@ export async function sendMonthlyTips({ to, tips }: SendMonthlyTipsParams) {
   try {
     const html = generateMonthlyTipsHTML({ tips });
 
-    const { data, error } = await resend.emails.send({
+    const client = getResendClient();
+    const { data, error } = await client.emails.send({
       from: FROM_EMAIL,
       to,
       subject: '💡 Monthly Credit Optimization Tips',

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScenarioResult, compareScenarios } from '@/lib/scenarioCalculations';
-import { TrendingUp, TrendingDown, Minus, CheckCircle, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface ScenarioComparisonProps {
   baseline: ScenarioResult;
@@ -24,7 +24,7 @@ export function ScenarioComparison({
   const isDifferent =
     JSON.stringify(baseline.cards) !== JSON.stringify(scenario.cards);
 
-  const formatChange = (value: number, isPositive: boolean = true) => {
+  const formatChange = (value: number) => {
     if (value === 0) return '0';
     const sign = value > 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}`;

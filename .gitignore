@@ -8,6 +8,10 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
+*.trace.zip
 
 # next.js
 /.next/
@@ -28,9 +32,58 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# deployment notes (contains sensitive info)
+DEPLOYMENT_CHECKLIST.md
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Sensitive files
+*.pem
+*.key
+*.cert
+secrets/
+.secrets
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code local files
+CLAUDE.local.md
+.claude/*.local.json
+.claude/.chat_history/
+
+# Temporary documentation and checklists
+BUILD_ERRORS_EXPLAINED.md
+CARD_IMAGES_CHECKLIST.md
+CHANGES_MADE.md
+Claude-test.md
+E2E_FIX_SUMMARY.md
+TESTING_SUMMARY.md
+TOP_10_CARDS_QUICK_GUIDE.md
+*_SUMMARY.md
+*_CHECKLIST.md
+*_EXPLAINED.md
+
+# Screenshots and temporary images in root
+Screenshot*.png
+Screenshot*.jpg
+screenshot*.png
+screenshot*.jpg
+*.screenshot.png
+
+# Temporary/scratch files
+scratch.md
+notes.md
+TODO.local.md
+NOTES.md
+
+# Others
+DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_SECURITY.md

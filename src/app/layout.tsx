@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { DevWarningBanner } from "@/components/DevWarningBanner";
 import { AuthSync } from "@/components/AuthSync";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -32,8 +32,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
       >
         <AuthSync />
-        <DevWarningBanner />
         {children}
+        <Analytics />
       </body>
     </html>
   );

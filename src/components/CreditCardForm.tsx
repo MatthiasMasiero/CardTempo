@@ -16,6 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard as CreditCardIcon, Trash2, AlertTriangle } from 'lucide-react';
 import { CreditCardFormData } from '@/types';
+import CardAutocomplete from './CardAutocomplete';
 
 interface CreditCardFormProps {
   index: number;
@@ -40,15 +41,45 @@ export function CreditCardForm({
       statementDate: '',
       dueDate: '',
       apr: '',
+      imageUrl: '',
     }
   );
 
   const [errors, setErrors] = useState<Partial<Record<keyof CreditCardFormData, string>>>({});
+  const [selectedCard, setSelectedCard] = useState<{
+    id: string;
+    name: string;
+    issuer: string;
+    imageUrl: string;
+    category: string;
+  } | null>(null);
 
   const handleChange = (field: keyof CreditCardFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleCardSelect = (card: { id: string; name: string; issuer: string; imageUrl: string; category: string } | null) => {
+    setSelectedCard(card);
+    if (card) {
+      // Auto-fill the nickname and imageUrl when a card is selected
+      setFormData((prev) => ({
+        ...prev,
+        nickname: card.name,
+        imageUrl: card.imageUrl,
+      }));
+      // Clear nickname error if it was set
+      if (errors.nickname) {
+        setErrors((prev) => ({ ...prev, nickname: undefined }));
+      }
+    } else {
+      // Clear the imageUrl when card is deselected
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: '',
+      }));
     }
   };
 
@@ -137,6 +168,18 @@ export function CreditCardForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Card Autocomplete */}
+        <div className="space-y-2">
+          <Label>Find Your Card (Optional)</Label>
+          <CardAutocomplete
+            onSelect={handleCardSelect}
+            selectedCard={selectedCard}
+          />
+          <p className="text-xs text-muted-foreground">
+            Search for your card to auto-fill the name and add a card image
+          </p>
+        </div>
+
         {/* Card Nickname */}
         <div className="space-y-2">
           <Label htmlFor={`nickname-${index}`}>Card Name</Label>

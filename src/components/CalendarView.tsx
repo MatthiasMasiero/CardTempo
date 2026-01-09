@@ -20,18 +20,17 @@ interface CalendarViewProps {
 export function CalendarView({ cards }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Generate payment events from cards
+  // Generate payment events from cards for the currently viewed month
   const generateEvents = (): PaymentEvent[] => {
     const events: PaymentEvent[] = [];
-    const today = new Date();
+
+    // Generate events for the currently viewed month
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
     cards.forEach((card) => {
-      // Statement date event
-      const statementDate = new Date(today);
-      statementDate.setDate(card.statementDate);
-      if (statementDate < today) {
-        statementDate.setMonth(statementDate.getMonth() + 1);
-      }
+      // Statement date event - always on the specified day of the viewed month
+      const statementDate = new Date(year, month, card.statementDate);
       events.push({
         date: statementDate,
         cardName: card.nickname,
@@ -39,16 +38,12 @@ export function CalendarView({ cards }: CalendarViewProps) {
         type: 'statement',
       });
 
-      // Due date event
-      const dueDate = new Date(today);
-      dueDate.setDate(card.dueDate);
-      if (dueDate < today) {
-        dueDate.setMonth(dueDate.getMonth() + 1);
-      }
+      // Due date event - always on the specified day of the viewed month
+      const dueDate = new Date(year, month, card.dueDate);
       events.push({
         date: dueDate,
         cardName: card.nickname,
-        amount: card.minimumPayment || card.currentBalance * 0.02,
+        amount: card.currentBalance * 0.02, // Typical minimum payment is 2%
         type: 'due',
       });
 
@@ -66,6 +61,7 @@ export function CalendarView({ cards }: CalendarViewProps) {
     return events;
   };
 
+  // Regenerate events whenever the currentDate changes
   const events = generateEvents();
 
   // Calendar helper functions
@@ -90,6 +86,7 @@ export function CalendarView({ cards }: CalendarViewProps) {
   };
 
   const getEventsForDay = (day: number) => {
+    // Filter events for the specific day, month, and year
     return events.filter((event) => {
       return (
         event.date.getMonth() === currentDate.getMonth() &&

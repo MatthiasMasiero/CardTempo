@@ -1,0 +1,41 @@
+<svg width="400" height="250" viewBox="0 0 400 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card Background -->
+  <rect width="400" height="250" rx="20" fill="url(#gradient)"/>
+
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="400" y2="250" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="100%" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Chip -->
+  <rect x="30" y="80" width="60" height="45" rx="8" fill="#FFD700" opacity="0.8"/>
+  <rect x="35" y="85" width="50" height="35" rx="5" fill="#FFF" opacity="0.2"/>
+
+  <!-- Card Brand Circle -->
+  <circle cx="350" cy="40" r="25" fill="white" opacity="0.3"/>
+  <circle cx="335" cy="40" r="25" fill="white" opacity="0.3"/>
+
+  <!-- Decorative Lines -->
+  <line x1="30" y1="160" x2="370" y2="160" stroke="white" stroke-width="2" opacity="0.3"/>
+
+  <!-- Card Number Placeholder -->
+  <text x="30" y="190" font-family="monospace" font-size="24" fill="white" opacity="0.6">
+    •••• •••• •••• ••••
+  </text>
+
+  <!-- Name Placeholder -->
+  <text x="30" y="225" font-family="Arial" font-size="16" fill="white" opacity="0.6">
+    CARD HOLDER NAME
+  </text>
+
+  <!-- Valid Thru -->
+  <text x="280" y="210" font-family="Arial" font-size="12" fill="white" opacity="0.5">
+    VALID THRU
+  </text>
+  <text x="280" y="230" font-family="monospace" font-size="16" fill="white" opacity="0.6">
+    ••/••
+  </text>
+</svg>

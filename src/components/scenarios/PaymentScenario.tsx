@@ -44,8 +44,7 @@ export function PaymentScenario({ cards, onUpdate }: PaymentScenarioProps) {
       const result = calculatePaymentAdjustment(
         cards,
         selectedCardId,
-        paymentAmount,
-        new Date()
+        paymentAmount
       );
       onUpdate(result);
     }

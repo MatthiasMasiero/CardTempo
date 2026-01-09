@@ -363,7 +363,6 @@ export default function LandingPage() {
                   <AnimatedCounter end={10} />
                   <span>-</span>
                   <AnimatedCounter end={100} />
-                  <span className="text-3xl">+</span>
                 </div>
                 <p className="text-muted-foreground">Point Score Increase</p>
               </div>

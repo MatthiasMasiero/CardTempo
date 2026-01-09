@@ -22,15 +22,18 @@ interface BalanceTransferScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function BalanceTransferScenario({ cards, onUpdate }: BalanceTransferScenarioProps) {
-  const [fromCardId, setFromCardId] = useState<string>(cards[0]?.id || '');
-  const [toCardId, setToCardId] = useState<string>(cards[1]?.id || cards[0]?.id || '');
+export function BalanceTransferScenario({ cards, onUpdate, baseline }: BalanceTransferScenarioProps) {
+  // Use baseline cards if available (after applying a scenario), otherwise use original cards
+  const workingCards = baseline ? baseline.cards : cards;
+
+  const [fromCardId, setFromCardId] = useState<string>(workingCards[0]?.id || '');
+  const [toCardId, setToCardId] = useState<string>(workingCards[1]?.id || workingCards[0]?.id || '');
   const [transferAmount, setTransferAmount] = useState<number>(0);
   const [transferFee, setTransferFee] = useState<number>(3);
   const [sliderValue, setSliderValue] = useState<number>(0);
 
-  const fromCard = cards.find((c) => c.id === fromCardId);
-  const toCard = cards.find((c) => c.id === toCardId);
+  const fromCard = workingCards.find((c) => c.id === fromCardId);
+  const toCard = workingCards.find((c) => c.id === toCardId);
 
   useEffect(() => {
     if (fromCard) {
@@ -45,7 +48,7 @@ export function BalanceTransferScenario({ cards, onUpdate }: BalanceTransferScen
   useEffect(() => {
     if (fromCard && toCard) {
       const result = calculateBalanceTransfer(
-        cards,
+        workingCards,
         fromCardId,
         toCardId,
         transferAmount,
@@ -122,7 +125,7 @@ export function BalanceTransferScenario({ cards, onUpdate }: BalanceTransferScen
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {cards.map((card) => {
+                {workingCards.map((card) => {
                   const util = (card.currentBalance / card.creditLimit) * 100;
                   return (
                     <SelectItem key={card.id} value={card.id}>
@@ -142,7 +145,7 @@ export function BalanceTransferScenario({ cards, onUpdate }: BalanceTransferScen
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {cards.map((card) => {
+                {workingCards.map((card) => {
                   const available = card.creditLimit - card.currentBalance;
                   return (
                     <SelectItem key={card.id} value={card.id}>

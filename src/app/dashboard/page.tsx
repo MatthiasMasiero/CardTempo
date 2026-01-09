@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CardDisplay } from '@/components/CardDisplay';
 import { CalendarView } from '@/components/CalendarView';
+import { HighUtilizationBanner } from '@/components/HighUtilizationBanner';
 import { useAuthStore } from '@/store/auth-store';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
@@ -124,6 +125,9 @@ export default function DashboardPage() {
               {user?.email} | Manage your credit cards and optimize your payments
             </p>
           </div>
+
+          {/* High Utilization Banner */}
+          <HighUtilizationBanner overallUtilization={overallUtilization} />
 
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

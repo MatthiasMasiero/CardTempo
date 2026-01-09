@@ -22,17 +22,20 @@ interface PurchaseScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function PurchaseScenario({ cards, onUpdate }: PurchaseScenarioProps) {
-  const [selectedCardId, setSelectedCardId] = useState<string>(cards[0]?.id || '');
+export function PurchaseScenario({ cards, onUpdate, baseline }: PurchaseScenarioProps) {
+  // Use baseline cards if available (after applying a scenario), otherwise use original cards
+  const workingCards = baseline ? baseline.cards : cards;
+
+  const [selectedCardId, setSelectedCardId] = useState<string>(workingCards[0]?.id || '');
   const [purchaseAmount, setPurchaseAmount] = useState<number>(500);
   const [sliderValue, setSliderValue] = useState<number>(500);
 
-  const selectedCard = cards.find((c) => c.id === selectedCardId);
+  const selectedCard = workingCards.find((c) => c.id === selectedCardId);
 
   useEffect(() => {
     if (selectedCard) {
       const result = calculatePurchaseImpact(
-        cards,
+        workingCards,
         selectedCardId,
         purchaseAmount,
         new Date()
@@ -87,7 +90,7 @@ export function PurchaseScenario({ cards, onUpdate }: PurchaseScenarioProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {cards.map((card) => {
+                {workingCards.map((card) => {
                   const available = card.creditLimit - card.currentBalance;
                   return (
                     <SelectItem key={card.id} value={card.id}>

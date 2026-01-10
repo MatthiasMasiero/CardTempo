@@ -8,12 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CardDisplay } from '@/components/CardDisplay';
+import { CreditCardForm } from '@/components/CreditCardForm';
 import { CalendarView } from '@/components/CalendarView';
 import { HighUtilizationBanner } from '@/components/HighUtilizationBanner';
 import { useAuthStore } from '@/store/auth-store';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
 import { format, differenceInDays } from 'date-fns';
+import { CreditCard, CreditCardFormData } from '@/types';
 import {
   CreditCard as CreditCardIcon,
   Plus,
@@ -32,8 +34,9 @@ import {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { cards, result, calculateResults, removeCard } = useCalculatorStore();
+  const { cards, result, calculateResults, updateCard, removeCard } = useCalculatorStore();
   const [mounted, setMounted] = useState(false);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -54,6 +57,42 @@ export default function DashboardPage() {
   const handleLogout = () => {
     logout();
     router.push('/');
+  };
+
+  // Helper to convert CreditCard to CreditCardFormData
+  const cardToFormData = (card: CreditCard): CreditCardFormData => ({
+    nickname: card.nickname,
+    creditLimit: card.creditLimit.toString(),
+    currentBalance: card.currentBalance.toString(),
+    statementDate: card.statementDate.toString(),
+    dueDate: card.dueDate.toString(),
+    apr: card.apr?.toString() || '',
+    imageUrl: card.imageUrl || '',
+  });
+
+  const handleEditCard = (id: string) => {
+    setEditingCardId(id);
+  };
+
+  const handleUpdateCard = (formData: CreditCardFormData) => {
+    if (editingCardId) {
+      updateCard(editingCardId, {
+        nickname: formData.nickname,
+        creditLimit: parseFloat(formData.creditLimit),
+        currentBalance: parseFloat(formData.currentBalance),
+        statementDate: parseInt(formData.statementDate),
+        dueDate: parseInt(formData.dueDate),
+        apr: formData.apr ? parseFloat(formData.apr) : undefined,
+        imageUrl: formData.imageUrl || '/cards/default-card.svg',
+      });
+      setEditingCardId(null);
+      // Recalculate results after edit
+      calculateResults();
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCardId(null);
   };
 
   // Hydration fix
@@ -233,14 +272,35 @@ export default function DashboardPage() {
                 </Card>
               ) : (
                 <>
+                  {/* Edit Card Form */}
+                  {editingCardId && (() => {
+                    const editingCard = cards.find((c) => c.id === editingCardId);
+                    if (!editingCard) return null;
+                    return (
+                      <div className="mb-6">
+                        <CreditCardForm
+                          index={cards.findIndex((c) => c.id === editingCardId)}
+                          onSubmit={handleUpdateCard}
+                          onRemove={handleCancelEdit}
+                          initialData={cardToFormData(editingCard)}
+                          showRemove={true}
+                          isEditing={true}
+                        />
+                      </div>
+                    );
+                  })()}
+
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {cards.map((card) => (
-                      <CardDisplay
-                        key={card.id}
-                        card={card}
-                        onRemove={() => removeCard(card.id)}
-                      />
-                    ))}
+                    {cards
+                      .filter((card) => card.id !== editingCardId)
+                      .map((card) => (
+                        <CardDisplay
+                          key={card.id}
+                          card={card}
+                          onRemove={() => removeCard(card.id)}
+                          onEdit={() => handleEditCard(card.id)}
+                        />
+                      ))}
                   </div>
 
                   {/* View Results CTA */}

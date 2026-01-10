@@ -24,6 +24,7 @@ interface CreditCardFormProps {
   onRemove?: () => void;
   initialData?: CreditCardFormData;
   showRemove?: boolean;
+  isEditing?: boolean;
 }
 
 export function CreditCardForm({
@@ -32,6 +33,7 @@ export function CreditCardForm({
   onRemove,
   initialData,
   showRemove = false,
+  isEditing = false,
 }: CreditCardFormProps) {
   const [formData, setFormData] = useState<CreditCardFormData>(
     initialData || {
@@ -318,7 +320,7 @@ export function CreditCardForm({
         </div>
 
         <Button onClick={handleSubmit} className="w-full">
-          Add Card
+          {isEditing ? 'Update Card' : 'Add Card'}
         </Button>
       </CardContent>
     </Card>

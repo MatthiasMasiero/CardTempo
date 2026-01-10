@@ -19,28 +19,55 @@ import {
 } from 'lucide-react';
 
 export default function CalculatorPage() {
-  const { cards, addCard, removeCard, calculateResults, result, clearResults } =
+  const { cards, addCard, updateCard, removeCard, calculateResults, result, clearResults } =
     useCalculatorStore();
   const { isAuthenticated } = useAuthStore();
 
   const [showForm, setShowForm] = useState(cards.length === 0);
   const [mounted, setMounted] = useState(false);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Helper to convert CreditCard to CreditCardFormData
+  const cardToFormData = (card: CreditCard): CreditCardFormData => ({
+    nickname: card.nickname,
+    creditLimit: card.creditLimit.toString(),
+    currentBalance: card.currentBalance.toString(),
+    statementDate: card.statementDate.toString(),
+    dueDate: card.dueDate.toString(),
+    apr: card.apr?.toString() || '',
+    imageUrl: card.imageUrl || '',
+  });
+
   const handleAddCard = (formData: CreditCardFormData) => {
-    const card: Omit<CreditCard, 'id'> = {
-      nickname: formData.nickname,
-      creditLimit: parseFloat(formData.creditLimit),
-      currentBalance: parseFloat(formData.currentBalance),
-      statementDate: parseInt(formData.statementDate),
-      dueDate: parseInt(formData.dueDate),
-      apr: formData.apr ? parseFloat(formData.apr) : undefined,
-      imageUrl: formData.imageUrl || '/cards/default-card.svg',
-    };
-    addCard(card);
+    if (editingCardId) {
+      // UPDATE MODE
+      updateCard(editingCardId, {
+        nickname: formData.nickname,
+        creditLimit: parseFloat(formData.creditLimit),
+        currentBalance: parseFloat(formData.currentBalance),
+        statementDate: parseInt(formData.statementDate),
+        dueDate: parseInt(formData.dueDate),
+        apr: formData.apr ? parseFloat(formData.apr) : undefined,
+        imageUrl: formData.imageUrl || '/cards/default-card.svg',
+      });
+      setEditingCardId(null);
+    } else {
+      // CREATE MODE
+      const card: Omit<CreditCard, 'id'> = {
+        nickname: formData.nickname,
+        creditLimit: parseFloat(formData.creditLimit),
+        currentBalance: parseFloat(formData.currentBalance),
+        statementDate: parseInt(formData.statementDate),
+        dueDate: parseInt(formData.dueDate),
+        apr: formData.apr ? parseFloat(formData.apr) : undefined,
+        imageUrl: formData.imageUrl || '/cards/default-card.svg',
+      };
+      addCard(card);
+    }
     setShowForm(false);
     clearResults();
   };
@@ -51,6 +78,16 @@ export default function CalculatorPage() {
     if (cards.length === 1) {
       setShowForm(true);
     }
+  };
+
+  const handleEditCard = (id: string) => {
+    setEditingCardId(id);
+    setShowForm(false);
+    clearResults();
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCardId(null);
   };
 
   const handleCalculate = () => {
@@ -134,25 +171,29 @@ export default function CalculatorPage() {
                   size="sm"
                   onClick={() => setShowForm(true)}
                   className="gap-2"
+                  disabled={!!editingCardId}
                 >
                   <Plus className="h-4 w-4" />
                   Add Card
                 </Button>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
-                {cards.map((card) => (
-                  <CardDisplay
-                    key={card.id}
-                    card={card}
-                    onRemove={() => handleRemoveCard(card.id)}
-                  />
-                ))}
+                {cards
+                  .filter((card) => card.id !== editingCardId)
+                  .map((card) => (
+                    <CardDisplay
+                      key={card.id}
+                      card={card}
+                      onRemove={() => handleRemoveCard(card.id)}
+                      onEdit={() => handleEditCard(card.id)}
+                    />
+                  ))}
               </div>
             </div>
           )}
 
           {/* Add Card Form */}
-          {showForm && (
+          {showForm && !editingCardId && (
             <div className="mb-6">
               <CreditCardForm
                 index={cards.length}
@@ -162,6 +203,24 @@ export default function CalculatorPage() {
               />
             </div>
           )}
+
+          {/* Edit Card Form */}
+          {editingCardId && (() => {
+            const editingCard = cards.find((c) => c.id === editingCardId);
+            if (!editingCard) return null;
+            return (
+              <div className="mb-6">
+                <CreditCardForm
+                  index={cards.findIndex((c) => c.id === editingCardId)}
+                  onSubmit={handleAddCard}
+                  onRemove={handleCancelEdit}
+                  initialData={cardToFormData(editingCard)}
+                  showRemove={true}
+                  isEditing={true}
+                />
+              </div>
+            );
+          })()}
 
           {/* Empty State */}
           {cards.length === 0 && !showForm && (

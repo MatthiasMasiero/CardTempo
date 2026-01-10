@@ -185,7 +185,7 @@
     "id": "apple-card",
     "name": "Apple Card",
     "issuer": "Goldman Sachs",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/apple-card.png",
     "category": "cashback"
   },
   {

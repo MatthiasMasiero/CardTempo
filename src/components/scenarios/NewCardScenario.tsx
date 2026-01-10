@@ -15,7 +15,10 @@ interface NewCardScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function NewCardScenario({ cards, onUpdate }: NewCardScenarioProps) {
+export function NewCardScenario({ cards, onUpdate, baseline }: NewCardScenarioProps) {
+  // Use baseline cards if available (after applying a scenario), otherwise use original cards
+  const workingCards = baseline ? baseline.cards : cards;
+
   const [newCardLimit, setNewCardLimit] = useState<number>(5000);
   const [startingBalance, setStartingBalance] = useState<number>(0);
   const [sliderValue, setSliderValue] = useState<number>(5000);
@@ -23,7 +26,7 @@ export function NewCardScenario({ cards, onUpdate }: NewCardScenarioProps) {
 
   useEffect(() => {
     const result = calculateNewCard(
-      cards,
+      workingCards,
       newCardLimit,
       startingBalance,
       true // Include hard inquiry
@@ -32,8 +35,8 @@ export function NewCardScenario({ cards, onUpdate }: NewCardScenarioProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newCardLimit, startingBalance]);
 
-  const currentTotalLimit = cards.reduce((sum, card) => sum + card.creditLimit, 0);
-  const currentTotalBalance = cards.reduce((sum, card) => sum + card.currentBalance, 0);
+  const currentTotalLimit = workingCards.reduce((sum, card) => sum + card.creditLimit, 0);
+  const currentTotalBalance = workingCards.reduce((sum, card) => sum + card.currentBalance, 0);
   const currentUtilization = currentTotalLimit > 0 ? (currentTotalBalance / currentTotalLimit) * 100 : 0;
 
   const newTotalLimit = currentTotalLimit + newCardLimit;

@@ -84,3 +84,100 @@ export interface CreditCardFormData {
   apr?: string;
   imageUrl?: string;
 }
+
+// ========== RECOMMENDATION TYPES ==========
+
+// Spending categories for card recommendations
+export type SpendingCategory = 'dining' | 'groceries' | 'gas' | 'travel' | 'online-shopping';
+
+// Reward tier (simplified classification)
+export type RewardTier = 'basic' | 'moderate' | 'aggressive';
+
+// Credit score range for eligibility
+export type CreditScoreRange = 'excellent' | 'good' | 'fair' | 'building';
+
+// User's reward type preference
+export type RewardPreference = 'cashback' | 'points' | 'either';
+
+// User questionnaire input
+export interface RecommendationPreferences {
+  simplicityPreference: 'fewer-cards' | 'more-rewards';
+  topCategories: SpendingCategory[];
+  rewardPreference: RewardPreference;
+  creditScoreRange: CreditScoreRange;
+  monthlySpending?: {
+    [key in SpendingCategory]?: number;
+  };
+}
+
+// Reward rate structure for a card
+export interface CategoryReward {
+  category: SpendingCategory | 'all' | 'rotating';
+  rewardRate: number;
+  rewardType: 'cashback' | 'points';
+  pointValue?: number;
+  cap?: number;
+  isRotating?: boolean;
+}
+
+// Extended card data for recommendations
+export interface RecommendableCard {
+  id: string;
+  name: string;
+  issuer: string;
+  imageUrl: string;
+  tier: RewardTier;
+  annualFee: number;
+  rewards: CategoryReward[];
+  minCreditScore: CreditScoreRange;
+  foreignTransactionFee: boolean;
+  pros: string[];
+  cons: string[];
+  signupBonus?: {
+    amount: number;
+    spendRequirement: number;
+    timeframeDays: number;
+  };
+  isSelectableCategories?: boolean; // User must manually choose categories (e.g., U.S. Bank Cash+)
+}
+
+// Single card recommendation
+export interface CardRecommendation {
+  card: RecommendableCard;
+  matchScore: number;
+  primaryUse: SpendingCategory | 'all';
+  reasoning: string[];
+  estimatedAnnualReward: number;
+  applicationOrder: number;
+  waitDays: number;
+}
+
+// Spending strategy (which card to use for what)
+export interface SpendingStrategy {
+  category: SpendingCategory;
+  recommendedCard: string;
+  rewardRate: number;
+  reasoning: string;
+}
+
+// Full recommendation result
+export interface RecommendationResult {
+  recommendations: CardRecommendation[];
+  spendingStrategy: SpendingStrategy[];
+  projectedScoreImpact: {
+    shortTerm: number;
+    longTerm: number;
+  };
+  totalEstimatedAnnualReward: number;
+  totalAnnualFees: number;
+  netAnnualBenefit: number;
+}
+
+// Timeline event for visualization
+export interface RecommendationTimelineEvent {
+  date: Date;
+  type: 'application' | 'bonus-deadline' | 'score-recovery' | 'strategy-start';
+  cardName?: string;
+  description: string;
+  icon: 'card' | 'calendar' | 'trending-up' | 'wallet';
+}

@@ -268,10 +268,10 @@ export function ScenarioComparison({
             <Button
               className="w-full"
               onClick={onApply}
-              disabled={comparison.netChange === 'negative'}
+              variant={comparison.netChange === 'negative' ? 'outline' : 'default'}
             >
               {comparison.netChange === 'negative'
-                ? 'Not Recommended'
+                ? 'Apply Scenario (Not Recommended)'
                 : 'Apply This Scenario'}
             </Button>
             <Button variant="outline" className="w-full" onClick={onReset}>

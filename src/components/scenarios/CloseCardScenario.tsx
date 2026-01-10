@@ -20,14 +20,17 @@ interface CloseCardScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function CloseCardScenario({ cards, onUpdate }: CloseCardScenarioProps) {
-  const [selectedCardId, setSelectedCardId] = useState<string>(cards[0]?.id || '');
+export function CloseCardScenario({ cards, onUpdate, baseline }: CloseCardScenarioProps) {
+  // Use baseline cards if available (after applying a scenario), otherwise use original cards
+  const workingCards = baseline ? baseline.cards : cards;
 
-  const selectedCard = cards.find((c) => c.id === selectedCardId);
+  const [selectedCardId, setSelectedCardId] = useState<string>(workingCards[0]?.id || '');
+
+  const selectedCard = workingCards.find((c) => c.id === selectedCardId);
 
   useEffect(() => {
     if (selectedCard) {
-      const result = calculateCardClosure(cards, selectedCardId);
+      const result = calculateCardClosure(workingCards, selectedCardId);
       onUpdate(result);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,8 +42,8 @@ export function CloseCardScenario({ cards, onUpdate }: CloseCardScenarioProps) {
 
   const hasBalance = selectedCard.currentBalance > 0;
 
-  const currentTotalLimit = cards.reduce((sum, card) => sum + card.creditLimit, 0);
-  const currentTotalBalance = cards.reduce((sum, card) => sum + card.currentBalance, 0);
+  const currentTotalLimit = workingCards.reduce((sum, card) => sum + card.creditLimit, 0);
+  const currentTotalBalance = workingCards.reduce((sum, card) => sum + card.currentBalance, 0);
   const currentUtilization = currentTotalLimit > 0 ? (currentTotalBalance / currentTotalLimit) * 100 : 0;
 
   const newTotalLimit = currentTotalLimit - selectedCard.creditLimit;
@@ -75,7 +78,7 @@ export function CloseCardScenario({ cards, onUpdate }: CloseCardScenarioProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {cards.map((card) => {
+                {workingCards.map((card) => {
                   const balance = card.currentBalance;
                   return (
                     <SelectItem key={card.id} value={card.id}>

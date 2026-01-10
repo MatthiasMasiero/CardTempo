@@ -22,12 +22,15 @@ interface LimitIncreaseScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function LimitIncreaseScenario({ cards, onUpdate }: LimitIncreaseScenarioProps) {
-  const [selectedCardId, setSelectedCardId] = useState<string>(cards[0]?.id || '');
+export function LimitIncreaseScenario({ cards, onUpdate, baseline }: LimitIncreaseScenarioProps) {
+  // Use baseline cards if available (after applying a scenario), otherwise use original cards
+  const workingCards = baseline ? baseline.cards : cards;
+
+  const [selectedCardId, setSelectedCardId] = useState<string>(workingCards[0]?.id || '');
   const [newLimit, setNewLimit] = useState<number>(0);
   const [sliderValue, setSliderValue] = useState<number>(0);
 
-  const selectedCard = cards.find((c) => c.id === selectedCardId);
+  const selectedCard = workingCards.find((c) => c.id === selectedCardId);
 
   useEffect(() => {
     if (selectedCard) {
@@ -42,7 +45,7 @@ export function LimitIncreaseScenario({ cards, onUpdate }: LimitIncreaseScenario
   useEffect(() => {
     if (selectedCard) {
       const result = calculateLimitIncrease(
-        cards,
+        workingCards,
         selectedCardId,
         newLimit
       );

@@ -22,12 +22,15 @@ interface PaymentScenarioProps {
   baseline: ScenarioResult | null;
 }
 
-export function PaymentScenario({ cards, onUpdate }: PaymentScenarioProps) {
-  const [selectedCardId, setSelectedCardId] = useState<string>(cards[0]?.id || '');
+export function PaymentScenario({ cards, onUpdate, baseline }: PaymentScenarioProps) {
+  // Use baseline cards if available (after applying a scenario), otherwise use original cards
+  const workingCards = baseline ? baseline.cards : cards;
+
+  const [selectedCardId, setSelectedCardId] = useState<string>(workingCards[0]?.id || '');
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [sliderValue, setSliderValue] = useState<number>(0);
 
-  const selectedCard = cards.find((c) => c.id === selectedCardId);
+  const selectedCard = workingCards.find((c) => c.id === selectedCardId);
 
   useEffect(() => {
     if (selectedCard) {
@@ -42,7 +45,7 @@ export function PaymentScenario({ cards, onUpdate }: PaymentScenarioProps) {
   useEffect(() => {
     if (selectedCard) {
       const result = calculatePaymentAdjustment(
-        cards,
+        workingCards,
         selectedCardId,
         paymentAmount
       );
@@ -98,7 +101,7 @@ export function PaymentScenario({ cards, onUpdate }: PaymentScenarioProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {cards.map((card) => (
+                {workingCards.map((card) => (
                   <SelectItem key={card.id} value={card.id}>
                     {card.nickname} - ${card.currentBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} balance
                   </SelectItem>

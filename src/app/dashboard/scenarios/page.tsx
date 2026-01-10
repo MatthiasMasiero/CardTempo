@@ -264,9 +264,10 @@ export default function ScenariosPage() {
                   </div>
                 </div>
 
-                {/* Render Active Scenario */}
+                {/* Render Active Scenario - key prop forces reset when switching tabs or applying */}
                 {activeScenario === 'payment' && baselineScenario && (
                   <PaymentScenario
+                    key={`payment-${activeScenario}-${JSON.stringify(baselineScenario.cards.map(c => c.currentBalance))}`}
                     cards={cards}
                     onUpdate={handleScenarioUpdate}
                     baseline={baselineScenario}
@@ -274,6 +275,7 @@ export default function ScenariosPage() {
                 )}
                 {activeScenario === 'purchase' && baselineScenario && (
                   <PurchaseScenario
+                    key={`purchase-${activeScenario}-${JSON.stringify(baselineScenario.cards.map(c => c.currentBalance))}`}
                     cards={cards}
                     onUpdate={handleScenarioUpdate}
                     baseline={baselineScenario}
@@ -281,6 +283,7 @@ export default function ScenariosPage() {
                 )}
                 {activeScenario === 'limit' && baselineScenario && (
                   <LimitIncreaseScenario
+                    key={`limit-${activeScenario}-${JSON.stringify(baselineScenario.cards.map(c => c.creditLimit))}`}
                     cards={cards}
                     onUpdate={handleScenarioUpdate}
                     baseline={baselineScenario}
@@ -288,6 +291,7 @@ export default function ScenariosPage() {
                 )}
                 {activeScenario === 'newcard' && baselineScenario && (
                   <NewCardScenario
+                    key={`newcard-${activeScenario}-${baselineScenario.metrics.totalCreditLimit}`}
                     cards={cards}
                     onUpdate={handleScenarioUpdate}
                     baseline={baselineScenario}
@@ -295,6 +299,7 @@ export default function ScenariosPage() {
                 )}
                 {activeScenario === 'close' && baselineScenario && (
                   <CloseCardScenario
+                    key={`close-${activeScenario}-${baselineScenario.cards.length}`}
                     cards={cards}
                     onUpdate={handleScenarioUpdate}
                     baseline={baselineScenario}
@@ -302,6 +307,7 @@ export default function ScenariosPage() {
                 )}
                 {activeScenario === 'transfer' && baselineScenario && (
                   <BalanceTransferScenario
+                    key={`transfer-${activeScenario}-${JSON.stringify(baselineScenario.cards.map(c => c.currentBalance))}`}
                     cards={cards}
                     onUpdate={handleScenarioUpdate}
                     baseline={baselineScenario}

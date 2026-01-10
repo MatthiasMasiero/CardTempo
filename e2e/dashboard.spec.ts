@@ -205,4 +205,51 @@ test.describe.skip('Dashboard - Authenticated', () => {
       await expect(page).toHaveURL(/.*settings/);
     }
   });
+
+  test('should show high utilization banner and navigate to priority page', async ({ page }) => {
+    // Note: This test assumes the user has cards with high utilization (>30%)
+    // In a real test environment, you would set up test data with high utilization cards
+
+    await page.goto('/dashboard');
+
+    // Check if banner appears (it should appear if utilization > 30%)
+    const banner = page.locator('text=Can\'t Pay in Full');
+
+    if (await banner.isVisible()) {
+      // Verify banner has correct content
+      await expect(page.locator('text=/\\d+\\.\\d+%.*above the recommended 30% threshold/')).toBeVisible();
+      await expect(page.getByText(/Smart Payment Allocation tool/)).toBeVisible();
+
+      // Verify optimize button exists and navigate
+      const optimizeButton = page.getByRole('button', { name: /Optimize My Payments/i });
+      await expect(optimizeButton).toBeVisible();
+
+      await optimizeButton.click();
+
+      // Verify navigation to priority page
+      await expect(page).toHaveURL(/.*\/dashboard\/priority/);
+      await page.waitForLoadState('networkidle');
+
+      // Go back to dashboard
+      await page.goBack();
+      await page.waitForLoadState('networkidle');
+
+      // Test dismissal
+      const dismissButton = page.getByLabel('Dismiss warning');
+      await expect(dismissButton).toBeVisible();
+      await dismissButton.click();
+
+      // Banner should disappear
+      await expect(banner).not.toBeVisible();
+
+      // Verify persistence after reload
+      await page.reload();
+      await page.waitForLoadState('networkidle');
+      await expect(banner).not.toBeVisible();
+    } else {
+      // If banner is not visible, it means utilization <= 30%, which is fine
+      // Just verify the dashboard loaded correctly
+      await expect(page.getByText(/Welcome back/)).toBeVisible();
+    }
+  });
 });

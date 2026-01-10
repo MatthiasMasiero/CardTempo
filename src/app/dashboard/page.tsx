@@ -29,6 +29,7 @@ import {
   Calculator,
   RefreshCw,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -367,6 +368,25 @@ export default function DashboardPage() {
                               </div>
                               <p className="text-blue-100">
                                 See how different decisions affect your credit score before making them
+                              </p>
+                            </div>
+                            <div className="text-4xl">→</div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/recommendations">
+                      <Card className="bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-xl transition-shadow cursor-pointer">
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Sparkles className="h-6 w-6" />
+                                <h3 className="text-xl font-bold">Get Card Recommendations</h3>
+                              </div>
+                              <p className="text-amber-100">
+                                Find the best credit cards for your spending habits and goals
                               </p>
                             </div>
                             <div className="text-4xl">→</div>

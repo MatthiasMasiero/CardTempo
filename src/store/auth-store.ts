@@ -3,6 +3,11 @@ import { persist } from 'zustand/middleware';
 import { User, UserPreferences } from '@/types';
 import { supabase } from '@/lib/supabase';
 
+export type SignupResult =
+  | { success: true; needsConfirmation: false }
+  | { success: true; needsConfirmation: true }
+  | { success: false; error: string };
+
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -10,7 +15,7 @@ interface AuthState {
 
   // Actions
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string) => Promise<SignupResult>;
   logout: () => void;
   updatePreferences: (preferences: Partial<UserPreferences>) => void;
   checkSession: () => Promise<void>;
@@ -85,7 +90,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signup: async (email: string, password: string) => {
+      signup: async (email: string, password: string): Promise<SignupResult> => {
         set({ isLoading: true });
 
         try {
@@ -98,16 +103,26 @@ export const useAuthStore = create<AuthState>()(
           if (error) {
             console.error('Signup error:', error.message);
             set({ isLoading: false });
-            return false;
+            return { success: false, error: error.message };
           }
 
           if (!data.user) {
             set({ isLoading: false });
-            return false;
+            return { success: false, error: 'Failed to create account' };
           }
 
-          // The trigger will automatically create the user in public.users
-          // Wait a moment for the trigger to complete
+          // Check if email confirmation is required
+          // If email_confirmed_at is null, user needs to confirm their email
+          const needsConfirmation = !data.user.email_confirmed_at;
+
+          if (needsConfirmation) {
+            // Don't authenticate yet - user must confirm email first
+            set({ isLoading: false });
+            return { success: true, needsConfirmation: true };
+          }
+
+          // Email is already confirmed (happens if confirmation is disabled in Supabase)
+          // Wait for trigger to create user in public.users
           await new Promise((resolve) => setTimeout(resolve, 500));
 
           const user: User = {
@@ -130,11 +145,11 @@ export const useAuthStore = create<AuthState>()(
             useCalculatorStore.getState().setUserId(user.id);
           }
 
-          return true;
+          return { success: true, needsConfirmation: false };
         } catch (error) {
           console.error('Signup error:', error);
           set({ isLoading: false });
-          return false;
+          return { success: false, error: 'An unexpected error occurred' };
         }
       },
 

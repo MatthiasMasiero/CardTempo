@@ -13,7 +13,7 @@ function getResendClient() {
 }
 
 // Default sender email - Update this to your verified domain
-const FROM_EMAIL = 'Credit Optimizer <onboarding@resend.dev>'; // Change to your domain
+const FROM_EMAIL = 'CardTempo <onboarding@resend.dev>'; // Change to your domain
 
 interface SendPaymentReminderParams {
   to: string;
@@ -209,7 +209,7 @@ function generatePaymentReminderHTML({
           <!-- Footer -->
           <div style="text-align: center; padding: 30px 20px; color: #94a3b8; font-size: 12px;">
             <p style="margin: 0 0 8px;">
-              You're receiving this because you set up payment reminders at Credit Optimizer
+              You're receiving this because you set up payment reminders at CardTempo
             </p>
             <p style="margin: 0;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings" style="color: #667eea; text-decoration: none;">Manage Reminders</a> •

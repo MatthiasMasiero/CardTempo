@@ -2,7 +2,7 @@
 title: "Credit Card Statement Date vs Due Date: The Difference That Can Cost You 100 Points"
 excerpt: "Confusing your statement date with your due date could be costing you 40-100 credit score points. Learn the difference and when to actually pay your bill for maximum score optimization."
 date: "2025-01-15"
-author: "Credit Optimizer Team"
+author: "CardTempo Team"
 tags: ["credit card basics", "payment timing", "credit utilization", "credit card tips"]
 ---
 
@@ -356,7 +356,7 @@ If your statement date is before payday, you may need to shift your payment cycl
 
 ## Tools to Help
 
-**Free Credit Optimizer Calculator:**
+**Free CardTempo Calculator:**
 - Input all your cards (limits, balances, statement dates, due dates)
 - Get exact payment amounts and timing
 - Download personalized PDF payment plan

@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <CreditCard className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">Credit Optimizer</span>
+            <span className="font-semibold text-lg">CardTempo</span>
           </Link>
           <Link href="/">
             <Button variant="ghost" size="sm" className="gap-2">
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
                 <div>
                   <h3 className="font-semibold mb-2">Information You Provide</h3>
                   <p className="text-sm text-muted-foreground">
-                    When you use Credit Optimizer, you may provide us with:
+                    When you use CardTempo, you may provide us with:
                   </p>
                   <ul className="list-disc list-inside text-sm text-muted-foreground mt-2 space-y-1">
                     <li>Email address (for account creation and notifications)</li>
@@ -179,7 +179,7 @@ export default function PrivacyPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Credit Optimizer is not intended for use by individuals under 18 years of age. We do
+                  CardTempo is not intended for use by individuals under 18 years of age. We do
                   not knowingly collect personal information from children. If you believe we have
                   collected information from a child, please contact us immediately.
                 </p>

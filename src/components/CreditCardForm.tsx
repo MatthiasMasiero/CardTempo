@@ -16,6 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard as CreditCardIcon, Trash2, AlertTriangle } from 'lucide-react';
 import { CreditCardFormData } from '@/types';
+import { getUtilizationColor, getUtilizationBadge } from '@/lib/utilization';
 import CardAutocomplete from './CardAutocomplete';
 
 interface CreditCardFormProps {
@@ -124,21 +125,6 @@ export function CreditCardForm({
   const creditLimit = parseFloat(formData.creditLimit) || 0;
   const currentBalance = parseFloat(formData.currentBalance) || 0;
   const utilization = creditLimit > 0 ? (currentBalance / creditLimit) * 100 : 0;
-
-  const getUtilizationColor = (util: number) => {
-    if (util > 100) return 'bg-red-500';
-    if (util > 30) return 'bg-red-500';
-    if (util > 10) return 'bg-yellow-500';
-    return 'bg-green-500';
-  };
-
-  const getUtilizationBadge = (util: number) => {
-    if (util > 100) return { label: 'Over Limit', variant: 'destructive' as const };
-    if (util > 30) return { label: 'High', variant: 'destructive' as const };
-    if (util > 10) return { label: 'Medium', variant: 'secondary' as const };
-    return { label: 'Good', variant: 'default' as const };
-  };
-
   const badge = getUtilizationBadge(utilization);
 
   // Generate day options

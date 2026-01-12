@@ -7,21 +7,21 @@ export interface CardForRanking {
   creditLimit: number;
   apr: number;
   minimumPayment: number;
-  statementDate: number; // Day of month
+  statementDate: number;
   dueDate: number;
 }
 
 export interface PriorityScore {
   cardId: string;
-  totalScore: number; // 0-100
+  totalScore: number;
   breakdown: {
-    utilizationImpact: number; // 0-40 points
-    aprWeight: number; // 0-25 points
-    timeUrgency: number; // 0-20 points
-    creditLimitWeight: number; // 0-15 points
+    utilizationImpact: number;
+    aprWeight: number;
+    timeUrgency: number;
+    creditLimitWeight: number;
   };
-  reasoning: string[]; // Human-readable reasons
-  rank: number; // 1, 2, 3, etc.
+  reasoning: string[];
+  rank: number;
 }
 
 export interface AllocationStrategy {
@@ -49,81 +49,91 @@ export interface ImpactSummary {
   estimatedScoreImpact: number;
   interestSaved: number;
   cardsUnder30Percent: number;
-  cardsOptimal: number; // Under 10%
+  cardsOptimal: number;
   percentOfOptimalAchieved: number;
+}
+
+/**
+ * Calculate card utilization percentage.
+ */
+function cardUtilization(card: CardForRanking): number {
+  return (card.currentBalance / card.creditLimit) * 100;
+}
+
+/**
+ * Create initial allocations with minimum payments for all cards.
+ */
+function createInitialAllocations(cards: CardForRanking[]): CardAllocation[] {
+  return cards.map(card => ({
+    cardId: card.id,
+    cardName: card.name,
+    amount: card.minimumPayment,
+    newBalance: card.currentBalance - card.minimumPayment,
+    newUtilization: ((card.currentBalance - card.minimumPayment) / card.creditLimit) * 100,
+    priorityRank: 0,
+    reasoning: 'Minimum payment',
+  }));
 }
 
 // Helper function to calculate days until a statement date
 function calculateDaysUntilDate(dayOfMonth: number): number {
   const today = new Date();
   const currentDay = today.getDate();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
+  let targetDate = new Date(today.getFullYear(), today.getMonth(), dayOfMonth);
 
-  let targetDate = new Date(currentYear, currentMonth, dayOfMonth);
-
-  // If the statement date has passed this month, use next month
   if (dayOfMonth < currentDay) {
-    targetDate = new Date(currentYear, currentMonth + 1, dayOfMonth);
+    targetDate = new Date(today.getFullYear(), today.getMonth() + 1, dayOfMonth);
   }
 
-  const diffTime = targetDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  return diffDays;
+  return Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-// Calculate priority score for a single card
+// Utilization thresholds and their scores
+const UTILIZATION_THRESHOLDS = [
+  { threshold: 90, score: 40, reason: 'Critical: Over 90% utilization' },
+  { threshold: 75, score: 35, reason: 'Very high utilization (over 75%)' },
+  { threshold: 50, score: 30, reason: 'High utilization (over 50%)' },
+  { threshold: 30, score: 20, reason: 'Above optimal threshold (30%)' },
+  { threshold: 10, score: 10, reason: 'In acceptable range but not optimal' },
+  { threshold: 0, score: 5, reason: 'Already in optimal range' },
+];
+
+// Time urgency thresholds
+const TIME_URGENCY_THRESHOLDS = [
+  { days: 3, score: 20, urgent: true },
+  { days: 7, score: 15, urgent: false },
+  { days: 14, score: 10, urgent: false },
+  { days: Infinity, score: 5, urgent: false },
+];
+
+/**
+ * Calculate priority score for a single card.
+ */
 export function calculatePriorityScore(
   card: CardForRanking,
   allCards: CardForRanking[]
 ): PriorityScore {
-  const score = {
-    utilizationImpact: 0, // Max 40 points
-    aprWeight: 0, // Max 25 points
-    timeUrgency: 0, // Max 20 points
-    creditLimitWeight: 0, // Max 15 points
-  };
-
   const reasoning: string[] = [];
+  const utilization = cardUtilization(card);
 
   // 1. Utilization Impact (40 points max)
-  const utilization = (card.currentBalance / card.creditLimit) * 100;
+  const utilizationEntry = UTILIZATION_THRESHOLDS.find(t => utilization > t.threshold) || UTILIZATION_THRESHOLDS[UTILIZATION_THRESHOLDS.length - 1];
+  let utilizationImpact = utilizationEntry.score;
+  reasoning.push(utilizationEntry.reason);
 
-  if (utilization > 90) {
-    score.utilizationImpact = 40;
-    reasoning.push('Critical: Over 90% utilization');
-  } else if (utilization > 75) {
-    score.utilizationImpact = 35;
-    reasoning.push('Very high utilization (over 75%)');
-  } else if (utilization > 50) {
-    score.utilizationImpact = 30;
-    reasoning.push('High utilization (over 50%)');
-  } else if (utilization > 30) {
-    score.utilizationImpact = 20;
-    reasoning.push('Above optimal threshold (30%)');
-  } else if (utilization > 10) {
-    score.utilizationImpact = 10;
-    reasoning.push('In acceptable range but not optimal');
-  } else {
-    score.utilizationImpact = 5;
-    reasoning.push('Already in optimal range');
-  }
-
-  // Bonus points for cards just above key thresholds
+  // Bonus for cards just above key thresholds
   if (utilization > 30 && utilization <= 35) {
-    score.utilizationImpact += 5;
+    utilizationImpact += 5;
     reasoning.push('Just above 30% threshold - easy win');
   }
   if (utilization > 50 && utilization <= 55) {
-    score.utilizationImpact += 3;
+    utilizationImpact += 3;
     reasoning.push('Just above 50% - high impact opportunity');
   }
 
   // 2. APR Weight (25 points max)
-  const maxAPR = Math.max(...allCards.map((c) => c.apr));
-  const aprScore = (card.apr / maxAPR) * 25;
-  score.aprWeight = Math.round(aprScore);
+  const maxAPR = Math.max(...allCards.map(c => c.apr));
+  const aprWeight = Math.round((card.apr / maxAPR) * 25);
 
   if (card.apr > 25) {
     reasoning.push(`Very high APR (${card.apr.toFixed(2)}%)`);
@@ -135,25 +145,20 @@ export function calculatePriorityScore(
 
   // 3. Time Urgency (20 points max)
   const daysToStatement = calculateDaysUntilDate(card.statementDate);
+  const urgencyEntry = TIME_URGENCY_THRESHOLDS.find(t => daysToStatement <= t.days)!;
+  const timeUrgency = urgencyEntry.score;
 
-  if (daysToStatement <= 3) {
-    score.timeUrgency = 20;
+  if (urgencyEntry.urgent) {
     reasoning.push(`Urgent: Statement closes in ${daysToStatement} days`);
-  } else if (daysToStatement <= 7) {
-    score.timeUrgency = 15;
-    reasoning.push(`Statement closes soon (${daysToStatement} days)`);
   } else if (daysToStatement <= 14) {
-    score.timeUrgency = 10;
-    reasoning.push(`Statement closes in ${daysToStatement} days`);
+    reasoning.push(`Statement closes ${daysToStatement <= 7 ? 'soon' : ''} (${daysToStatement} days)`);
   } else {
-    score.timeUrgency = 5;
     reasoning.push('Statement date not urgent');
   }
 
   // 4. Credit Limit Weight (15 points max)
-  const maxLimit = Math.max(...allCards.map((c) => c.creditLimit));
-  const limitScore = (card.creditLimit / maxLimit) * 15;
-  score.creditLimitWeight = Math.round(limitScore);
+  const maxLimit = Math.max(...allCards.map(c => c.creditLimit));
+  const creditLimitWeight = Math.round((card.creditLimit / maxLimit) * 15);
 
   if (card.creditLimit >= 10000) {
     reasoning.push(`Large credit limit ($${(card.creditLimit / 1000).toFixed(0)}k) - high score impact`);
@@ -161,61 +166,49 @@ export function calculatePriorityScore(
     reasoning.push(`Medium credit limit ($${(card.creditLimit / 1000).toFixed(0)}k)`);
   }
 
-  const totalScore =
-    score.utilizationImpact +
-    score.aprWeight +
-    score.timeUrgency +
-    score.creditLimitWeight;
+  const totalScore = utilizationImpact + aprWeight + timeUrgency + creditLimitWeight;
 
   return {
     cardId: card.id,
     totalScore: Math.round(totalScore),
-    breakdown: score,
+    breakdown: { utilizationImpact, aprWeight, timeUrgency, creditLimitWeight },
     reasoning,
-    rank: 0, // Will be set after sorting
+    rank: 0,
   };
 }
 
 // Rank all cards by priority
 export function rankCardsByPriority(cards: CardForRanking[]): PriorityScore[] {
-  // Calculate scores for all cards
-  const scores = cards.map((card) => calculatePriorityScore(card, cards));
-
-  // Sort by total score (descending)
+  const scores = cards.map(card => calculatePriorityScore(card, cards));
   scores.sort((a, b) => b.totalScore - a.totalScore);
-
-  // Assign ranks
   scores.forEach((score, index) => {
     score.rank = index + 1;
   });
-
   return scores;
 }
 
+// Score impact thresholds
+const SCORE_IMPACT_THRESHOLDS = [
+  { threshold: 90, bonus: 30 },
+  { threshold: 75, bonus: 20 },
+  { threshold: 50, bonus: 15 },
+  { threshold: 30, bonus: 25 },
+  { threshold: 10, bonus: 15 },
+];
+
 // Estimate score impact based on utilization change
 function estimateScoreImpact(utilizationBefore: number, utilizationAfter: number): number {
-  const improvement = utilizationBefore - utilizationAfter;
   let scoreChange = 0;
 
-  // Threshold bonuses
-  if (utilizationBefore > 90 && utilizationAfter <= 90) {
-    scoreChange += 30;
-  }
-  if (utilizationBefore > 75 && utilizationAfter <= 75) {
-    scoreChange += 20;
-  }
-  if (utilizationBefore > 50 && utilizationAfter <= 50) {
-    scoreChange += 15;
-  }
-  if (utilizationBefore > 30 && utilizationAfter <= 30) {
-    scoreChange += 25; // Big jump
-  }
-  if (utilizationBefore > 10 && utilizationAfter <= 10) {
-    scoreChange += 15;
+  // Add bonus for crossing key thresholds
+  for (const { threshold, bonus } of SCORE_IMPACT_THRESHOLDS) {
+    if (utilizationBefore > threshold && utilizationAfter <= threshold) {
+      scoreChange += bonus;
+    }
   }
 
-  // Linear improvement within ranges
-  scoreChange += improvement * 0.5;
+  // Linear improvement component
+  scoreChange += (utilizationBefore - utilizationAfter) * 0.5;
 
   return Math.max(scoreChange, 0);
 }
@@ -269,35 +262,53 @@ function calculateImpact(
   };
 }
 
+/**
+ * Validate budget and return remaining after minimum payments.
+ */
+function validateBudget(cards: CardForRanking[], totalBudget: number): number {
+  const minimumTotal = cards.reduce((sum, c) => sum + c.minimumPayment, 0);
+  if (totalBudget < minimumTotal) {
+    throw new Error(`Budget ($${totalBudget}) is below required minimums ($${minimumTotal})`);
+  }
+  return totalBudget - minimumTotal;
+}
+
+/**
+ * Apply additional payment to an allocation.
+ */
+function applyPayment(
+  allocation: CardAllocation,
+  additionalPayment: number,
+  card: CardForRanking,
+  reasoning: string
+): number {
+  const payment = Math.min(additionalPayment, allocation.newBalance);
+  if (payment > 0) {
+    allocation.amount += payment;
+    allocation.newBalance -= payment;
+    allocation.newUtilization = (allocation.newBalance / card.creditLimit) * 100;
+    allocation.reasoning = reasoning;
+  }
+  return payment;
+}
+
 // Strategy 1: Maximum Score Impact
 export function allocateForMaxScoreImpact(
   cards: CardForRanking[],
   totalBudget: number
 ): AllocationStrategy {
-  const minimumTotal = cards.reduce((sum, c) => sum + c.minimumPayment, 0);
-
-  if (totalBudget < minimumTotal) {
-    throw new Error(`Budget ($${totalBudget}) is below required minimums ($${minimumTotal})`);
-  }
-
-  let remainingBudget = totalBudget - minimumTotal;
-  const allocations: CardAllocation[] = [];
-
-  // Start with minimum payments
-  cards.forEach((card) => {
-    allocations.push({
-      cardId: card.id,
-      cardName: card.name,
-      amount: card.minimumPayment,
-      newBalance: card.currentBalance - card.minimumPayment,
-      newUtilization: ((card.currentBalance - card.minimumPayment) / card.creditLimit) * 100,
-      priorityRank: 0,
-      reasoning: 'Minimum payment',
-    });
-  });
-
-  // Rank cards by priority
+  let remainingBudget = validateBudget(cards, totalBudget);
+  const allocations = createInitialAllocations(cards);
   const priorities = rankCardsByPriority(cards);
+
+  // Helper to sort allocations by priority score
+  const sortByPriority = (allocs: CardAllocation[]) => {
+    return [...allocs].sort((a, b) => {
+      const scoreA = priorities.find(p => p.cardId === a.cardId)!.totalScore;
+      const scoreB = priorities.find(p => p.cardId === b.cardId)!.totalScore;
+      return scoreB - scoreA;
+    });
+  };
 
   // Allocate remaining budget using greedy algorithm
   const thresholds = [90, 75, 50, 30, 10, 0];
@@ -305,75 +316,46 @@ export function allocateForMaxScoreImpact(
   for (const threshold of thresholds) {
     if (remainingBudget <= 0) break;
 
-    // Find cards above this threshold
-    const cardsAboveThreshold = allocations.filter((alloc) => alloc.newUtilization > threshold);
+    const cardsAboveThreshold = sortByPriority(
+      allocations.filter(alloc => alloc.newUtilization > threshold)
+    );
 
-    // Sort by priority score
-    cardsAboveThreshold.sort((a, b) => {
-      const scoreA = priorities.find((p) => p.cardId === a.cardId)!.totalScore;
-      const scoreB = priorities.find((p) => p.cardId === b.cardId)!.totalScore;
-      return scoreB - scoreA;
-    });
-
-    // Pay down cards to get them under threshold
     for (const allocation of cardsAboveThreshold) {
       if (remainingBudget <= 0) break;
 
-      const card = cards.find((c) => c.id === allocation.cardId)!;
+      const card = cards.find(c => c.id === allocation.cardId)!;
       const targetBalance = card.creditLimit * (threshold / 100);
-      const additionalPayment = Math.min(
+      const payment = applyPayment(
+        allocation,
         allocation.newBalance - targetBalance,
-        remainingBudget
+        card,
+        `Get under ${threshold}% utilization`
       );
-
-      if (additionalPayment > 0) {
-        allocation.amount += additionalPayment;
-        allocation.newBalance -= additionalPayment;
-        allocation.newUtilization = (allocation.newBalance / card.creditLimit) * 100;
-        remainingBudget -= additionalPayment;
-        allocation.reasoning = `Get under ${threshold}% utilization`;
-      }
+      remainingBudget -= payment;
     }
   }
 
-  // If budget remains, distribute to highest priority cards
+  // Distribute remaining budget to highest priority cards
   if (remainingBudget > 0) {
-    const sortedByPriority = [...allocations].sort((a, b) => {
-      const scoreA = priorities.find((p) => p.cardId === a.cardId)!.totalScore;
-      const scoreB = priorities.find((p) => p.cardId === b.cardId)!.totalScore;
-      return scoreB - scoreA;
-    });
-
-    for (const allocation of sortedByPriority) {
+    for (const allocation of sortByPriority(allocations)) {
       if (remainingBudget <= 0) break;
 
-      const additionalPayment = Math.min(allocation.newBalance, remainingBudget);
-
-      if (additionalPayment > 0) {
-        allocation.amount += additionalPayment;
-        allocation.newBalance -= additionalPayment;
-        const card = cards.find((c) => c.id === allocation.cardId)!;
-        allocation.newUtilization = (allocation.newBalance / card.creditLimit) * 100;
-        remainingBudget -= additionalPayment;
-        allocation.reasoning = 'Maximize score impact';
-      }
+      const card = cards.find(c => c.id === allocation.cardId)!;
+      remainingBudget -= applyPayment(allocation, remainingBudget, card, 'Maximize score impact');
     }
   }
 
-  // Add priority ranks to allocations
-  allocations.forEach((alloc) => {
-    const priority = priorities.find((p) => p.cardId === alloc.cardId)!;
-    alloc.priorityRank = priority.rank;
+  // Add priority ranks
+  allocations.forEach(alloc => {
+    alloc.priorityRank = priorities.find(p => p.cardId === alloc.cardId)!.rank;
   });
-
-  const impact = calculateImpact(cards, allocations, totalBudget);
 
   return {
     type: 'max_score',
     name: 'Maximum Score Impact',
     description: 'Optimized to improve your credit score the most',
     allocations,
-    expectedImpact: impact,
+    expectedImpact: calculateImpact(cards, allocations, totalBudget),
   };
 }
 
@@ -382,51 +364,33 @@ export function allocateForMinInterest(
   cards: CardForRanking[],
   totalBudget: number
 ): AllocationStrategy {
-  const minimumTotal = cards.reduce((sum, c) => sum + c.minimumPayment, 0);
-  let remainingBudget = totalBudget - minimumTotal;
-
-  const allocations: CardAllocation[] = cards.map((card) => ({
-    cardId: card.id,
-    cardName: card.name,
-    amount: card.minimumPayment,
-    newBalance: card.currentBalance - card.minimumPayment,
-    newUtilization: ((card.currentBalance - card.minimumPayment) / card.creditLimit) * 100,
-    priorityRank: 0,
-    reasoning: 'Minimum payment',
-  }));
-
-  // Sort cards by APR (highest first)
+  let remainingBudget = validateBudget(cards, totalBudget);
+  const allocations = createInitialAllocations(cards);
   const cardsByAPR = [...cards].sort((a, b) => b.apr - a.apr);
 
-  // Allocate remaining budget to highest APR cards
   for (const card of cardsByAPR) {
     if (remainingBudget <= 0) break;
 
-    const allocation = allocations.find((a) => a.cardId === card.id)!;
-    const additionalPayment = Math.min(allocation.newBalance, remainingBudget);
-
-    allocation.amount += additionalPayment;
-    allocation.newBalance -= additionalPayment;
-    allocation.newUtilization = (allocation.newBalance / card.creditLimit) * 100;
-    allocation.reasoning = `Highest APR (${card.apr.toFixed(2)}%) - saves most interest`;
-    remainingBudget -= additionalPayment;
+    const allocation = allocations.find(a => a.cardId === card.id)!;
+    remainingBudget -= applyPayment(
+      allocation,
+      remainingBudget,
+      card,
+      `Highest APR (${card.apr.toFixed(2)}%) - saves most interest`
+    );
   }
 
-  // Rank by APR
-  allocations.forEach((alloc) => {
-    const card = cards.find((c) => c.id === alloc.cardId)!;
-    const rankByAPR = cardsByAPR.findIndex((c) => c.id === card.id) + 1;
-    alloc.priorityRank = rankByAPR;
+  // Assign ranks by APR
+  allocations.forEach(alloc => {
+    alloc.priorityRank = cardsByAPR.findIndex(c => c.id === alloc.cardId) + 1;
   });
-
-  const impact = calculateImpact(cards, allocations, totalBudget);
 
   return {
     type: 'min_interest',
     name: 'Minimum Interest (Avalanche)',
     description: 'Save the most money on interest charges',
     allocations,
-    expectedImpact: impact,
+    expectedImpact: calculateImpact(cards, allocations, totalBudget),
   };
 }
 
@@ -435,56 +399,33 @@ export function allocateForUtilization(
   cards: CardForRanking[],
   totalBudget: number
 ): AllocationStrategy {
-  const minimumTotal = cards.reduce((sum, c) => sum + c.minimumPayment, 0);
-  let remainingBudget = totalBudget - minimumTotal;
+  let remainingBudget = validateBudget(cards, totalBudget);
+  const allocations = createInitialAllocations(cards);
+  const cardsByUtilization = [...cards].sort((a, b) => cardUtilization(b) - cardUtilization(a));
 
-  const allocations: CardAllocation[] = cards.map((card) => ({
-    cardId: card.id,
-    cardName: card.name,
-    amount: card.minimumPayment,
-    newBalance: card.currentBalance - card.minimumPayment,
-    newUtilization: ((card.currentBalance - card.minimumPayment) / card.creditLimit) * 100,
-    priorityRank: 0,
-    reasoning: 'Minimum payment',
-  }));
-
-  // Sort by utilization (highest first)
-  const cardsByUtilization = [...cards].sort((a, b) => {
-    const utilA = a.currentBalance / a.creditLimit;
-    const utilB = b.currentBalance / b.creditLimit;
-    return utilB - utilA;
-  });
-
-  // Allocate to highest utilization cards
   for (const card of cardsByUtilization) {
     if (remainingBudget <= 0) break;
 
-    const allocation = allocations.find((a) => a.cardId === card.id)!;
-    const additionalPayment = Math.min(allocation.newBalance, remainingBudget);
-
-    allocation.amount += additionalPayment;
-    allocation.newBalance -= additionalPayment;
-    allocation.newUtilization = (allocation.newBalance / card.creditLimit) * 100;
-
-    const currentUtil = (card.currentBalance / card.creditLimit) * 100;
-    allocation.reasoning = `Highest utilization (${currentUtil.toFixed(0)}%)`;
-    remainingBudget -= additionalPayment;
+    const allocation = allocations.find(a => a.cardId === card.id)!;
+    remainingBudget -= applyPayment(
+      allocation,
+      remainingBudget,
+      card,
+      `Highest utilization (${cardUtilization(card).toFixed(0)}%)`
+    );
   }
 
-  allocations.forEach((alloc) => {
-    const card = cards.find((c) => c.id === alloc.cardId)!;
-    const rankByUtil = cardsByUtilization.findIndex((c) => c.id === card.id) + 1;
-    alloc.priorityRank = rankByUtil;
+  // Assign ranks by utilization
+  allocations.forEach(alloc => {
+    alloc.priorityRank = cardsByUtilization.findIndex(c => c.id === alloc.cardId) + 1;
   });
-
-  const impact = calculateImpact(cards, allocations, totalBudget);
 
   return {
     type: 'utilization_focus',
     name: 'Utilization Focus',
     description: 'Target highest utilization cards first',
     allocations,
-    expectedImpact: impact,
+    expectedImpact: calculateImpact(cards, allocations, totalBudget),
   };
 }
 
@@ -495,7 +436,7 @@ export function allocateEqually(
 ): AllocationStrategy {
   const perCardBudget = totalBudget / cards.length;
 
-  const allocations: CardAllocation[] = cards.map((card) => {
+  const allocations: CardAllocation[] = cards.map(card => {
     const payment = Math.min(perCardBudget, card.currentBalance);
     const newBalance = card.currentBalance - payment;
 
@@ -510,13 +451,11 @@ export function allocateEqually(
     };
   });
 
-  const impact = calculateImpact(cards, allocations, totalBudget);
-
   return {
     type: 'equal_distribution',
     name: 'Equal Distribution',
     description: 'Split budget equally across all cards',
     allocations,
-    expectedImpact: impact,
+    expectedImpact: calculateImpact(cards, allocations, totalBudget),
   };
 }

@@ -1,6 +1,6 @@
 # Credit Card Images Directory
 
-This directory contains images for credit cards displayed in the Credit Optimizer app.
+This directory contains images for credit cards displayed in the CardTempo app.
 
 ## Default Card Image
 

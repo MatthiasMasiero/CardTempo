@@ -1,4 +1,4 @@
-# Claude AI Context - Credit Optimizer Project
+# Claude AI Context - CardTempo Project
 
 > **Living Document**: This file is automatically updated as we work together. Last updated: December 29, 2025
 
@@ -6,7 +6,7 @@
 
 ## 📋 Project Overview
 
-**Credit Optimizer** is a Next.js web application that helps users improve their credit scores by 15-50 points through optimized credit card payment timing.
+**CardTempo** is a Next.js web application that helps users improve their credit scores by 15-50 points through optimized credit card payment timing.
 
 ### Core Concept
 Credit bureaus report balances on **statement dates** (not due dates). By paying most of your balance 2-3 days before the statement date, you can significantly reduce your reported credit utilization and boost your credit score.

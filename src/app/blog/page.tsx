@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Credit Score Blog - Tips & Guides | Credit Optimizer',
+  title: 'Credit Score Blog - Tips & Guides | CardTempo',
   description: 'Learn how to improve your credit score with expert tips on credit utilization, payment timing, and credit card optimization strategies.',
   keywords: ['credit score tips', 'credit utilization', 'improve credit score', 'credit card optimization', 'FICO score'],
 };

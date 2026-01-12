@@ -139,6 +139,7 @@ export interface RecommendableCard {
     timeframeDays: number;
   };
   isSelectableCategories?: boolean; // User must manually choose categories (e.g., U.S. Bank Cash+)
+  isAutoHighestCategory?: boolean; // Card automatically gives bonus on your highest spending category (e.g., Citi Custom Cash)
 }
 
 // Single card recommendation

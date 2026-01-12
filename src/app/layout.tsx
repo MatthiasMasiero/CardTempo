@@ -16,7 +16,8 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-
+// Editorial typography
+const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-display",

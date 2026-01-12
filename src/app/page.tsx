@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import Image from 'next/image';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -23,144 +23,292 @@ import {
   Calendar,
   ArrowRight,
   CheckCircle2,
-  AlertTriangle,
   Clock,
   LayoutDashboard,
   User,
   LogOut,
-  Zap,
-  Shield,
-  BarChart3,
+  Sparkles,
+  Star,
+  ArrowUpRight,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 
-// Animated Counter Component
-function AnimatedCounter({ end, duration = 2 }: { end: number; duration?: number }) {
-  const [count, setCount] = useState(0);
+// Staggered reveal animation
+function RevealOnScroll({
+  children,
+  delay = 0,
+  className = ""
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!isInView) return;
-
-    let startTime: number;
-    let animationFrame: number;
-
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / (duration * 1000), 1);
-
-      setCount(Math.floor(progress * end));
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [end, duration, isInView]);
-
-  return <span ref={ref}>{count}</span>;
-}
-
-// Scroll Animation Wrapper
-function ScrollReveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={className}
     >
       {children}
     </motion.div>
   );
 }
 
+// Animated number counter
+function Counter({ end, suffix = "" }: { end: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!isInView) return;
+    const duration = 1500;
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * end));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+  }, [end, isInView]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+// Hero section with scroll-linked rotating card
+function HeroSection({
+  isAuthenticated,
+  scrollToSection
+}: {
+  isAuthenticated: boolean;
+  scrollToSection: (id: string) => void;
+}) {
+  const sectionRef = useRef(null);
+  const { scrollY } = useScroll();
+
+  // Card rotates based on raw scroll pixels - 5px buffer before starting
+  const rotateY = useTransform(scrollY, [5, 400], [0, 25]);
+  const rotateX = useTransform(scrollY, [5, 400], [0, -10]);
+  const scale = useTransform(scrollY, [5, 300], [1, 0.9]);
+
+  return (
+    <section ref={sectionRef} className="pt-16 md:pt-24 pb-20 md:pb-32 overflow-hidden">
+      <div className="container mx-auto px-6">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left: Text Content */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 mb-8"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-sm font-medium text-emerald-700">Free tool — no signup required</span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="font-display text-5xl md:text-6xl lg:text-7xl text-stone-900 leading-[0.95] tracking-tight mb-6"
+            >
+              Your credit score
+              <br />
+              <span className="text-emerald-600">is being held back.</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-xl md:text-2xl text-stone-600 max-w-xl mb-10 leading-relaxed"
+            >
+              Banks report your balance on the <em className="text-stone-900 not-italic font-medium">statement date</em>, not when you pay.
+              Time it right, and watch your score climb.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <Link href="/calculator">
+                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 text-base px-8 h-14 rounded-xl shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all">
+                  Get Your Free Plan
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => scrollToSection('how-it-works')}
+                className="gap-2 text-base px-8 h-14 rounded-xl border-stone-300 text-stone-700 hover:bg-stone-100"
+              >
+                See How It Works
+              </Button>
+            </motion.div>
+
+            {isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-6"
+              >
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="gap-2 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Go to Dashboard
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Right: Rotating Card Stack */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="hidden lg:block mt-16"
+            style={{ perspective: 1200 }}
+          >
+            <motion.div
+              className="relative w-full aspect-[4/3]"
+              style={{
+                rotateY,
+                rotateX,
+                scale,
+                transformStyle: "preserve-3d"
+              }}
+            >
+              {/* Shadow/glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-3xl blur-3xl -z-10 translate-y-12" />
+
+              {/* Back card - Chase Sapphire */}
+              <motion.div
+                className="absolute top-24 left-4 w-[80%] aspect-[1.586/1] rounded-2xl overflow-hidden shadow-2xl"
+                style={{ transform: "translateZ(-80px) rotateY(-6deg) rotateZ(-3deg)" }}
+              >
+                <Image
+                  src="/cards/chase-sapphire-preferred.png"
+                  alt="Chase Sapphire Preferred"
+                  fill
+                  className="object-cover"
+                />
+              </motion.div>
+
+              {/* Middle card - Amex Gold */}
+              <motion.div
+                className="absolute top-12 left-16 w-[80%] aspect-[1.586/1] rounded-2xl overflow-hidden shadow-2xl"
+                style={{ transform: "translateZ(-40px) rotateY(-3deg) rotateZ(-1.5deg)" }}
+              >
+                <Image
+                  src="/cards/amex-gold.png"
+                  alt="Amex Gold"
+                  fill
+                  className="object-cover"
+                />
+              </motion.div>
+
+              {/* Front card - Amex Platinum */}
+              <motion.div
+                className="absolute top-0 left-28 w-[80%] aspect-[1.586/1] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/20"
+                style={{ transform: "translateZ(0px)" }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Image
+                  src="/cards/amex-platinum.png"
+                  alt="Amex Platinum"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   const { isAuthenticated, user, logout } = useAuthStore();
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"]
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAFAF8] font-body">
       {/* Header */}
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="border-b border-white/20 dark:border-white/10 bg-gradient-to-r from-blue-50/60 via-indigo-50/60 to-purple-50/60 dark:from-slate-900/60 dark:via-blue-950/60 dark:to-purple-950/60 backdrop-blur-2xl sticky top-0 z-50 shadow-[0_8px_32px_rgba(99,102,241,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="sticky top-0 z-50 bg-[#FAFAF8]/80 backdrop-blur-md border-b border-stone-200"
       >
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
+            className="flex items-center gap-2.5 group"
           >
-            <div className="relative">
-              <CreditCard className="h-6 w-6 text-primary transition-transform group-hover:scale-110" />
-              <motion.div
-                className="absolute inset-0 bg-primary/20 rounded-full blur-xl"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <CreditCard className="h-4 w-4 text-white" />
             </div>
-            <span className="font-semibold text-lg bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-              CardTempo
-            </span>
+            <span className="font-display text-xl text-stone-900">CardTempo</span>
           </button>
+
           <nav className="hidden md:flex items-center gap-8">
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary transition-all relative group"
+              className="text-sm text-stone-600 hover:text-stone-900 transition-colors"
             >
               How It Works
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all group-hover:w-full" />
+            </button>
+            <button
+              onClick={() => scrollToSection('card-finder')}
+              className="text-sm text-stone-600 hover:text-stone-900 transition-colors"
+            >
+              Card Finder
             </button>
             <button
               onClick={() => scrollToSection('faq')}
-              className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary transition-all relative group"
+              className="text-sm text-stone-600 hover:text-stone-900 transition-colors"
             >
               FAQ
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all group-hover:w-full" />
             </button>
-            <Link href="/blog" className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary transition-all relative group">
+            <Link href="/blog" className="text-sm text-stone-600 hover:text-stone-900 transition-colors">
               Blog
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all group-hover:w-full" />
             </Link>
+
             {isAuthenticated ? (
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button size="sm" className="gap-2 hover:scale-105 transition-transform">
+                  <Button variant="outline" size="sm" className="gap-2 border-stone-300">
                     <User className="h-4 w-4" />
                     Account
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-0" align="end">
                   <div className="flex flex-col">
-                    <div className="px-4 py-3 border-b">
-                      <p className="text-sm font-medium">Signed in as</p>
-                      <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+                    <div className="px-4 py-3 border-b border-stone-100">
+                      <p className="text-sm font-medium text-stone-900">Signed in as</p>
+                      <p className="text-sm text-stone-500 truncate">{user?.email}</p>
                     </div>
                     <div className="p-2">
                       <Link href="/dashboard" className="block">
@@ -173,7 +321,7 @@ export default function LandingPage() {
                         variant="ghost"
                         className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                         size="sm"
-                        onClick={handleLogout}
+                        onClick={() => logout()}
                       >
                         <LogOut className="h-4 w-4" />
                         Sign Out
@@ -184,7 +332,7 @@ export default function LandingPage() {
               </Popover>
             ) : (
               <Link href="/login">
-                <Button size="sm" className="bg-gradient-to-r from-primary via-blue-600 to-blue-700 hover:from-blue-600 hover:via-primary hover:to-purple-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <Button size="sm" className="bg-stone-900 hover:bg-stone-800 text-white">
                   Sign In
                 </Button>
               </Link>
@@ -193,528 +341,423 @@ export default function LandingPage() {
         </div>
       </motion.header>
 
-      {/* Hero Section with Parallax */}
-      <section ref={heroRef} className="relative pt-12 md:pt-20 pb-24 md:pb-40 overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950">
-          <motion.div
-            style={{ y }}
-            className="absolute inset-0"
-          >
-            <div className="absolute top-20 left-10 w-96 h-96 bg-blue-400/40 dark:bg-blue-500/30 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-purple-400/40 dark:bg-purple-500/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-indigo-300/30 dark:bg-indigo-500/20 rounded-full blur-3xl" />
-          </motion.div>
-        </div>
+      {/* Hero Section */}
+      <HeroSection
+        isAuthenticated={isAuthenticated}
+        scrollToSection={scrollToSection}
+      />
 
-        {/* Mid-ground Decorative Shapes */}
-        <motion.div
-          className="absolute top-1/4 right-1/4 w-32 h-32 border-4 border-blue-300/20 dark:border-blue-400/20 rounded-2xl"
-          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '60%']) }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 left-1/4 w-24 h-24 border-4 border-purple-300/20 dark:border-purple-400/20 rounded-full"
-          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '40%']) }}
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
-
-        {/* Floating Elements */}
-        <motion.div
-          className="absolute top-32 left-10 text-primary/20 hover:text-primary/40 transition-colors cursor-pointer group"
-          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 5, repeat: Infinity }}
-          whileHover={{ scale: 1.2, rotate: 15 }}
-          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '50%']) }}
-        >
-          <CreditCard className="h-20 w-20 group-hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all" />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-32 right-20 text-primary/20 hover:text-primary/40 transition-colors cursor-pointer group"
-          animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
-          transition={{ duration: 4, repeat: Infinity }}
-          whileHover={{ scale: 1.2, rotate: -15 }}
-          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '30%']) }}
-        >
-          <TrendingUp className="h-24 w-24 group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all" />
-        </motion.div>
-
-        {/* Additional Floating Icons */}
-        <motion.div
-          className="absolute top-1/2 right-10 text-emerald-500/15 dark:text-emerald-400/20"
-          animate={{ y: [0, -15, 0], rotate: [0, -8, 0] }}
-          transition={{ duration: 6, repeat: Infinity }}
-          style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '45%']) }}
-        >
-          <CheckCircle2 className="h-16 w-16" />
-        </motion.div>
-
-        {/* Floating Particles */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-primary/20 dark:bg-primary/30 rounded-full"
-            style={{
-              left: `${15 + i * 12}%`,
-              top: `${20 + (i % 3) * 25}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              opacity: [0.2, 0.5, 0.2],
-            }}
-            transition={{
-              duration: 3 + i * 0.5,
-              repeat: Infinity,
-              delay: i * 0.3,
-            }}
-          />
-        ))}
-
-        <motion.div
-          style={{ opacity }}
-          className="container mx-auto px-4 relative z-10"
-        >
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="backdrop-blur-2xl bg-white/30 dark:bg-slate-900/30 rounded-3xl p-12 md:p-16 border border-white/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full backdrop-blur-xl bg-white/20 dark:bg-white/10 border border-white/30 shadow-2xl mb-8 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(59,130,246,0.3)] transition-all duration-300 cursor-default group">
-                <Zap className="h-5 w-5 text-primary group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-sm font-bold text-primary">Boost Your Score by up to 100 Points</span>
+      {/* Stats Bar */}
+      <section className="py-8 border-y border-stone-200 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
+            <div>
+              <div className="font-display text-4xl md:text-5xl text-stone-900">
+                <Counter end={100} suffix="+" />
               </div>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-tight mb-8 group cursor-default"
-              whileHover={{ scale: 1.01 }}
-            >
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-primary to-blue-600 dark:from-white dark:via-blue-400 dark:to-purple-400">
-                Optimize Your Credit Card Payments to{' '}
-              </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-600 to-purple-600">
-                <span className="inline animate-gradient bg-[length:200%_auto]">
-                  Boost Your Score
-                </span>
-              </span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed font-medium"
-            >
-              Most people pay on the due date, but banks report balances on the <strong className="text-slate-900 dark:text-white">statement date</strong>.
-              Learn the optimal time to pay and potentially improve your score within 30 days.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex flex-col gap-6 items-center"
-            >
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Link href="/calculator">
-                  <Button size="lg" className="w-full sm:w-auto gap-3 text-lg font-bold px-10 py-7 hover:scale-110 transition-all duration-300 shadow-2xl hover:shadow-[0_20px_60px_rgba(59,130,246,0.4)] bg-gradient-to-r from-primary via-blue-600 to-blue-700 hover:from-blue-600 hover:via-primary hover:to-purple-600 group">
-                    Calculate My Optimal Strategy
-                    <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto text-lg font-semibold px-10 py-7 hover:scale-110 transition-all duration-300 backdrop-blur-xl bg-white/30 dark:bg-white/10 border-2 border-white/50 hover:bg-white/50 dark:hover:bg-white/20 shadow-xl hover:shadow-2xl"
-                  onClick={() => scrollToSection('how-it-works')}
-                >
-                  Learn How It Works
-                </Button>
+              <p className="text-sm text-stone-500 mt-1">Point increase possible</p>
+            </div>
+            <div>
+              <div className="font-display text-4xl md:text-5xl text-stone-900">
+                <Counter end={30} suffix="%" />
               </div>
-              {isAuthenticated && (
-                <Link href="/dashboard">
-                  <Button size="lg" variant="default" className="w-full sm:w-auto gap-3 text-lg font-bold px-10 py-7 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-2xl hover:shadow-[0_20px_60px_rgba(16,185,129,0.4)] hover:scale-110 transition-all duration-300 group">
-                    <LayoutDashboard className="h-6 w-6 group-hover:rotate-12 transition-transform" />
-                    Return to Dashboard
-                  </Button>
-                </Link>
-              )}
-            </motion.div>
+              <p className="text-sm text-stone-500 mt-1">Of your score is utilization</p>
+            </div>
+            <div>
+              <div className="font-display text-4xl md:text-5xl text-stone-900">
+                <Counter end={30} />
+              </div>
+              <p className="text-sm text-stone-500 mt-1">Days to see results</p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 bg-white border-y">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <ScrollReveal delay={0}>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2 flex items-center justify-center gap-1">
-                  <span>+</span>
-                  <AnimatedCounter end={10} />
-                  <span>-</span>
-                  <AnimatedCounter end={100} />
-                </div>
-                <p className="text-muted-foreground">Point Score Increase</p>
+      {/* Card Finder Premium Feature */}
+      <section id="card-finder" className="py-24 md:py-32 bg-stone-900 text-white relative overflow-hidden">
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}
+        />
+
+        <div className="container mx-auto px-6 relative">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <RevealOnScroll>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
+                <Sparkles className="h-4 w-4 text-amber-400" />
+                <span className="text-sm font-medium text-amber-400">Premium Feature</span>
               </div>
-            </ScrollReveal>
-            <ScrollReveal delay={0.1}>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
-                  <AnimatedCounter end={30} />
-                  <span className="text-2xl">%</span>
+
+              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
+                Find the perfect card for <span className="text-emerald-400">your</span> spending.
+              </h2>
+
+              <p className="text-lg text-stone-400 mb-8 leading-relaxed">
+                Our Card Finder analyzes your spending habits and recommends cards that maximize your rewards.
+                Stop leaving money on the table with the wrong cards.
+              </p>
+
+              <div className="space-y-4 mb-10">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                  </div>
+                  <p className="text-stone-300">Personalized recommendations based on your actual spending</p>
                 </div>
-                <p className="text-muted-foreground">Of your credit score is utilization</p>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={0.2}>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-primary mb-2 flex items-center justify-center">
-                  <AnimatedCounter end={30} />
-                  <span className="text-2xl"> days</span>
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                  </div>
+                  <p className="text-stone-300">See exactly how much you&apos;ll earn in rewards annually</p>
                 </div>
-                <p className="text-muted-foreground">Or less to see results</p>
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                  </div>
+                  <p className="text-stone-300">Optimal card combinations for maximum cashback</p>
+                </div>
               </div>
-            </ScrollReveal>
+
+              <Link href="/recommendations">
+                <Button size="lg" className="bg-white text-stone-900 hover:bg-stone-100 gap-2 text-base px-8 h-14 rounded-xl">
+                  Find My Cards
+                  <ArrowUpRight className="h-5 w-5" />
+                </Button>
+              </Link>
+            </RevealOnScroll>
+
+            {/* Card Preview Stack */}
+            <RevealOnScroll delay={0.2} className="relative">
+              <div className="relative h-[400px] md:h-[500px]">
+                {/* Background card */}
+                <motion.div
+                  className="absolute top-8 left-8 right-0 bottom-0 bg-stone-800 rounded-2xl border border-stone-700"
+                  initial={{ rotate: 6 }}
+                  whileHover={{ rotate: 8, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                />
+                {/* Middle card */}
+                <motion.div
+                  className="absolute top-4 left-4 right-4 bottom-4 bg-stone-800 rounded-2xl border border-stone-700"
+                  initial={{ rotate: 3 }}
+                  whileHover={{ rotate: 4, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                />
+                {/* Front card */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl border border-stone-700 p-6 md:p-8 flex flex-col"
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">Top Recommendation</span>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                      <span className="text-sm text-amber-400 font-medium">98% Match</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-16 h-10 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-white">Chase Sapphire Preferred</p>
+                      <p className="text-sm text-stone-400">Travel Rewards</p>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-4">
+                    <div className="flex justify-between items-center py-3 border-b border-stone-700">
+                      <span className="text-stone-400">Annual Rewards</span>
+                      <span className="font-medium text-emerald-400">$847</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3 border-b border-stone-700">
+                      <span className="text-stone-400">Sign-up Bonus</span>
+                      <span className="font-medium text-white">75,000 pts</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3">
+                      <span className="text-stone-400">Annual Fee</span>
+                      <span className="font-medium text-white">$95</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <p className="text-sm text-emerald-400">
+                      <span className="font-semibold">+$752 net value</span> per year based on your spending
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </RevealOnScroll>
           </div>
         </div>
       </section>
 
-      {/* Problem/Solution Visual */}
-      <section id="how-it-works" className="py-20 md:py-32 bg-gradient-to-b from-white to-slate-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <ScrollReveal>
-              <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-                The Secret Banks Don&apos;t Tell You
+      {/* How It Works */}
+      <section id="how-it-works" className="py-24 md:py-32">
+        <div className="container mx-auto px-6">
+          <RevealOnScroll>
+            <div className="text-center mb-16">
+              <h2 className="font-display text-4xl md:text-5xl text-stone-900 mb-4">
+                The timing trick banks don&apos;t tell you
               </h2>
-            </ScrollReveal>
-            <ScrollReveal delay={0.1}>
-              <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto text-lg">
-                Credit bureaus see your balance on the <strong className="text-foreground">statement date</strong>, not the due date.
-                This means timing your payments strategically can dramatically improve your reported utilization.
+              <p className="text-lg text-stone-600 max-w-2xl mx-auto">
+                Credit bureaus see your balance on the statement date. Pay strategically,
+                and they&apos;ll report a much lower utilization.
               </p>
-            </ScrollReveal>
+            </div>
+          </RevealOnScroll>
 
-            {/* Timeline Diagram */}
-            <ScrollReveal delay={0.2}>
-              <Card className="p-8 md:p-12 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 border-2 shadow-xl hover:shadow-2xl transition-shadow">
-                <CardContent className="p-0">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4">
-                    {/* Statement Date */}
-                    <motion.div
-                      className="flex-1 text-center group"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <div className="relative">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow">
-                          <Calendar className="h-10 w-10 text-yellow-600" />
-                        </div>
-                        <motion.div
-                          className="absolute inset-0 bg-yellow-400/20 rounded-full blur-xl"
-                          animate={{ scale: [1, 1.3, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        />
-                      </div>
-                      <h3 className="font-semibold text-lg mb-2">Statement Date</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Balance is reported to credit bureaus
-                      </p>
-                      <div className="mt-3 inline-flex items-center gap-1 text-yellow-600 text-xs font-medium bg-yellow-50 px-3 py-1 rounded-full">
-                        <AlertTriangle className="h-3 w-3" />
-                        Critical Date
-                      </div>
-                    </motion.div>
-
-                    <ArrowRight className="h-8 w-8 text-primary hidden md:block" />
-
-                    {/* Balance Reported */}
-                    <motion.div
-                      className="flex-1 text-center group"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <div className="relative">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow">
-                          <TrendingUp className="h-10 w-10 text-blue-600" />
-                        </div>
-                        <motion.div
-                          className="absolute inset-0 bg-blue-400/20 rounded-full blur-xl"
-                          animate={{ scale: [1, 1.3, 1] }}
-                          transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                        />
-                      </div>
-                      <h3 className="font-semibold text-lg mb-2">Bureaus Calculate Score</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Utilization affects ~30% of your score
-                      </p>
-                      <div className="mt-3 inline-flex items-center gap-1 text-blue-600 text-xs font-medium bg-blue-50 px-3 py-1 rounded-full">
-                        <Clock className="h-3 w-3" />
-                        21-25 days later
-                      </div>
-                    </motion.div>
-
-                    <ArrowRight className="h-8 w-8 text-primary hidden md:block" />
-
-                    {/* Due Date */}
-                    <motion.div
-                      className="flex-1 text-center group"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <div className="relative">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow">
-                          <CreditCard className="h-10 w-10 text-green-600" />
-                        </div>
-                        <motion.div
-                          className="absolute inset-0 bg-green-400/20 rounded-full blur-xl"
-                          animate={{ scale: [1, 1.3, 1] }}
-                          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                        />
-                      </div>
-                      <h3 className="font-semibold text-lg mb-2">Due Date</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Standard payment deadline
-                      </p>
-                      <div className="mt-3 inline-flex items-center gap-1 text-green-600 text-xs font-medium bg-green-50 px-3 py-1 rounded-full">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Avoid Interest
-                      </div>
-                    </motion.div>
+          {/* Timeline Visual */}
+          <RevealOnScroll delay={0.1}>
+            <Card className="max-w-4xl mx-auto border-stone-200 shadow-sm overflow-hidden">
+              <CardContent className="p-8 md:p-12">
+                <div className="flex flex-col md:flex-row items-stretch gap-6 md:gap-0">
+                  {/* Step 1 */}
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto md:mx-0 mb-4">
+                      <Calendar className="h-7 w-7 text-amber-600" />
+                    </div>
+                    <h3 className="font-display text-xl text-stone-900 mb-2">Statement Date</h3>
+                    <p className="text-stone-600 text-sm leading-relaxed">
+                      Your balance is reported to credit bureaus. This is the date that matters.
+                    </p>
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      Critical
+                    </div>
                   </div>
 
-                  <motion.div
-                    className="mt-12 p-6 bg-gradient-to-r from-primary/10 via-blue-500/10 to-purple-500/10 rounded-xl border-2 border-primary/30"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <p className="text-center text-base">
-                      <strong className="text-lg">The Strategy:</strong> Pay down your balance{' '}
-                      <span className="text-primary font-semibold text-lg">2-3 days before</span> the statement date
-                      so a lower balance is reported, then pay the remaining small amount by the due date.
+                  {/* Arrow */}
+                  <div className="hidden md:flex items-center justify-center px-6">
+                    <ArrowRight className="h-6 w-6 text-stone-300" />
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto md:mx-0 mb-4">
+                      <TrendingUp className="h-7 w-7 text-blue-600" />
+                    </div>
+                    <h3 className="font-display text-xl text-stone-900 mb-2">Score Calculated</h3>
+                    <p className="text-stone-600 text-sm leading-relaxed">
+                      Bureaus calculate utilization. Lower reported balance = higher score.
                     </p>
-                  </motion.div>
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
+                      <Clock className="h-3 w-3" />
+                      ~21 days later
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="hidden md:flex items-center justify-center px-6">
+                    <ArrowRight className="h-6 w-6 text-stone-300" />
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto md:mx-0 mb-4">
+                      <CreditCard className="h-7 w-7 text-emerald-600" />
+                    </div>
+                    <h3 className="font-display text-xl text-stone-900 mb-2">Due Date</h3>
+                    <p className="text-stone-600 text-sm leading-relaxed">
+                      Standard payment deadline. Pay remaining balance here to avoid interest.
+                    </p>
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
+                      <CheckCircle2 className="h-3 w-3" />
+                      No interest
+                    </div>
+                  </div>
+                </div>
+
+                {/* Strategy Box */}
+                <div className="mt-10 p-6 bg-stone-50 rounded-xl border border-stone-200">
+                  <p className="text-center text-stone-700">
+                    <span className="font-semibold text-stone-900">The strategy:</span> Pay most of your balance{' '}
+                    <span className="text-emerald-600 font-semibold">2-3 days before</span> the statement date,
+                    then pay the small remainder by the due date.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </RevealOnScroll>
+        </div>
+      </section>
+
+      {/* Benefits Grid */}
+      <section className="py-24 md:py-32 bg-white border-y border-stone-200">
+        <div className="container mx-auto px-6">
+          <RevealOnScroll>
+            <h2 className="font-display text-4xl md:text-5xl text-stone-900 text-center mb-16">
+              Why this works
+            </h2>
+          </RevealOnScroll>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <RevealOnScroll delay={0}>
+              <Card className="border-stone-200 hover:border-stone-300 hover:shadow-md transition-all h-full">
+                <CardContent className="p-8">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-6">
+                    <TrendingUp className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <h3 className="font-display text-xl text-stone-900 mb-3">Lower utilization reported</h3>
+                  <p className="text-stone-600 leading-relaxed">
+                    Bureaus see 5% utilization instead of 50%. Utilization is 30% of your FICO score.
+                  </p>
                 </CardContent>
               </Card>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
+            </RevealOnScroll>
 
-      {/* Benefits Section */}
-      <section className="py-20 md:py-32 bg-white">
-        <div className="container mx-auto px-4">
-          <ScrollReveal>
-            <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-              Why This Works
-            </h2>
-          </ScrollReveal>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <ScrollReveal delay={0}>
-              <motion.div whileHover={{ y: -10 }} transition={{ type: "spring", stiffness: 300 }}>
-                <Card className="p-8 h-full hover:shadow-xl transition-all border-2 hover:border-green-200 bg-gradient-to-br from-white to-green-50/30">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-lg">
-                    <TrendingUp className="h-8 w-8 text-green-600" />
+            <RevealOnScroll delay={0.1}>
+              <Card className="border-stone-200 hover:border-stone-300 hover:shadow-md transition-all h-full">
+                <CardContent className="p-8">
+                  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-6">
+                    <CreditCard className="h-6 w-6 text-blue-600" />
                   </div>
-                  <h3 className="font-semibold text-xl mb-3">Lower Utilization Reported</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Credit bureaus see a 5% utilization instead of 50%+, directly improving your score.
+                  <h3 className="font-display text-xl text-stone-900 mb-3">Zero extra interest</h3>
+                  <p className="text-stone-600 leading-relaxed">
+                    You still pay the full balance by the due date. Just split into two strategic payments.
                   </p>
-                </Card>
-              </motion.div>
-            </ScrollReveal>
+                </CardContent>
+              </Card>
+            </RevealOnScroll>
 
-            <ScrollReveal delay={0.1}>
-              <motion.div whileHover={{ y: -10 }} transition={{ type: "spring", stiffness: 300 }}>
-                <Card className="p-8 h-full hover:shadow-xl transition-all border-2 hover:border-blue-200 bg-gradient-to-br from-white to-blue-50/30">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-6 shadow-lg">
-                    <Shield className="h-8 w-8 text-blue-600" />
+            <RevealOnScroll delay={0.2}>
+              <Card className="border-stone-200 hover:border-stone-300 hover:shadow-md transition-all h-full">
+                <CardContent className="p-8">
+                  <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-6">
+                    <Clock className="h-6 w-6 text-purple-600" />
                   </div>
-                  <h3 className="font-semibold text-xl mb-3">No Extra Interest</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    You still pay the full balance by the due date, so you never pay any interest.
+                  <h3 className="font-display text-xl text-stone-900 mb-3">Results in 30 days</h3>
+                  <p className="text-stone-600 leading-relaxed">
+                    See score improvements within one billing cycle. No waiting months for results.
                   </p>
-                </Card>
-              </motion.div>
-            </ScrollReveal>
-
-            <ScrollReveal delay={0.2}>
-              <motion.div whileHover={{ y: -10 }} transition={{ type: "spring", stiffness: 300 }}>
-                <Card className="p-8 h-full hover:shadow-xl transition-all border-2 hover:border-purple-200 bg-gradient-to-br from-white to-purple-50/30">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center mb-6 shadow-lg">
-                    <BarChart3 className="h-8 w-8 text-purple-600" />
-                  </div>
-                  <h3 className="font-semibold text-xl mb-3">Fast Results</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    See score improvements within one billing cycle - often within 30 days.
-                  </p>
-                </Card>
-              </motion.div>
-            </ScrollReveal>
+                </CardContent>
+              </Card>
+            </RevealOnScroll>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 md:py-32 bg-gradient-to-b from-slate-50 to-white">
-        <div className="container mx-auto px-4">
+      <section id="faq" className="py-24 md:py-32">
+        <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
-            <ScrollReveal>
-              <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-                Frequently Asked Questions
+            <RevealOnScroll>
+              <h2 className="font-display text-4xl md:text-5xl text-stone-900 text-center mb-16">
+                Common questions
               </h2>
-            </ScrollReveal>
-            <ScrollReveal delay={0.1}>
-              <Accordion type="single" collapsible className="w-full space-y-4">
-                <AccordionItem value="item-1" className="border rounded-lg px-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="text-left hover:no-underline">
-                    Is this actually legitimate? Will it really help my credit score?
+            </RevealOnScroll>
+
+            <RevealOnScroll delay={0.1}>
+              <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem value="item-1" className="border border-stone-200 rounded-xl px-6 bg-white">
+                  <AccordionTrigger className="text-left hover:no-underline py-5 text-stone-900">
+                    Is this legitimate? Will it really help my score?
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    Yes! This is based on how credit scoring actually works. Credit utilization
-                    (how much of your available credit you&apos;re using) accounts for about 30% of your
-                    FICO score. By strategically timing your payments, you control what balance
-                    gets reported to the bureaus. This is completely legal and used by financial
-                    advisors everywhere.
+                  <AccordionContent className="text-stone-600 pb-5 leading-relaxed">
+                    Yes. This is based on how credit scoring actually works. Utilization accounts for about 30% of your FICO score.
+                    By timing payments strategically, you control what gets reported. This is completely legal and recommended by financial advisors.
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-2" className="border rounded-lg px-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="text-left hover:no-underline">
-                    When exactly do I need to make payments?
+                <AccordionItem value="item-2" className="border border-stone-200 rounded-xl px-6 bg-white">
+                  <AccordionTrigger className="text-left hover:no-underline py-5 text-stone-900">
+                    When exactly should I make payments?
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    Make your &ldquo;optimization payment&rdquo; 2-3 days before your statement closing date
-                    to bring your balance down to 5-9% of your limit. Then pay the remaining small
-                    balance by your due date. Our calculator will give you the exact dates and amounts
-                    for each of your cards.
+                  <AccordionContent className="text-stone-600 pb-5 leading-relaxed">
+                    Make your &quot;optimization payment&quot; 2-3 days before your statement date to bring your balance down to 5-9% of your limit.
+                    Then pay the remaining balance by your due date. Our calculator gives you exact dates and amounts.
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-3" className="border rounded-lg px-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="text-left hover:no-underline">
-                    What&apos;s the ideal credit utilization percentage?
+                <AccordionItem value="item-3" className="border border-stone-200 rounded-xl px-6 bg-white">
+                  <AccordionTrigger className="text-left hover:no-underline py-5 text-stone-900">
+                    What&apos;s the ideal utilization percentage?
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    For the best credit score impact, aim for 1-9% utilization on each card.
-                    Keeping some balance (rather than $0) shows you actively use credit responsibly.
-                    Our calculator targets 5% as the sweet spot between showing activity and keeping
-                    utilization low.
+                  <AccordionContent className="text-stone-600 pb-5 leading-relaxed">
+                    For the best score impact, aim for 1-9% utilization. Keeping some balance shows you actively use credit.
+                    Our calculator targets 5% as the optimal balance between showing activity and keeping utilization low.
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-4" className="border rounded-lg px-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="text-left hover:no-underline">
-                    How fast will I see results?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    Credit card issuers typically report to bureaus once per month, around your
-                    statement date. So you can see score changes within one billing cycle - often
-                    within 30 days of optimizing your payment timing.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-5" className="border rounded-lg px-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="text-left hover:no-underline">
+                <AccordionItem value="item-4" className="border border-stone-200 rounded-xl px-6 bg-white">
+                  <AccordionTrigger className="text-left hover:no-underline py-5 text-stone-900">
                     Will I pay any interest using this method?
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    No! You&apos;re still paying your full balance before the due date. You&apos;re just
-                    splitting it into two payments: one before the statement date (to optimize
-                    reported utilization) and one before the due date (to pay the remaining amount).
-                    You avoid all interest charges.
+                  <AccordionContent className="text-stone-600 pb-5 leading-relaxed">
+                    No. You&apos;re still paying your full balance before the due date—just splitting it into two payments.
+                    One before the statement date (to optimize reported utilization) and one before the due date (to clear the rest).
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="item-6" className="border rounded-lg px-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="text-left hover:no-underline">
+                <AccordionItem value="item-5" className="border border-stone-200 rounded-xl px-6 bg-white">
+                  <AccordionTrigger className="text-left hover:no-underline py-5 text-stone-900">
                     What if I have multiple credit cards?
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    Our calculator handles multiple cards! It will create an optimized payment plan
-                    for each card, prioritizing cards with the highest utilization. It also shows
-                    your overall utilization across all cards.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-7" className="border rounded-lg px-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="text-left hover:no-underline">
-                    How is this different from just paying on time?
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    Paying on time avoids late fees and interest, which is great! But the balance
-                    that gets reported to credit bureaus is determined by your statement date, not
-                    your due date. If you pay on the due date with a high balance on your statement
-                    date, bureaus see high utilization even though you paid in full.
+                  <AccordionContent className="text-stone-600 pb-5 leading-relaxed">
+                    Our calculator handles multiple cards. It creates an optimized payment plan for each one, prioritizing cards with the highest utilization.
+                    It also shows your overall utilization across all cards.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-            </ScrollReveal>
+            </RevealOnScroll>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 md:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-blue-600 to-purple-600">
-          <motion.div
-            className="absolute inset-0 opacity-30"
-            animate={{
-              backgroundPosition: ['0% 0%', '100% 100%'],
-            }}
-            transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse' }}
-            style={{
-              backgroundImage: 'radial-gradient(circle at 50% 50%, white 1px, transparent 1px)',
-              backgroundSize: '50px 50px',
-            }}
-          />
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <ScrollReveal>
-            <div className="max-w-3xl mx-auto text-center text-white">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Ready to Optimize Your Credit?
+      {/* Final CTA */}
+      <section className="py-24 md:py-32 bg-stone-900 text-white">
+        <div className="container mx-auto px-6">
+          <RevealOnScroll>
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl mb-6">
+                Ready to unlock your credit potential?
               </h2>
-              <p className="text-xl text-white/90 mb-10 leading-relaxed">
-                Enter your credit card details and get a personalized payment plan in seconds.
-                No sign-up required to use the calculator.
+              <p className="text-xl text-stone-400 mb-10 leading-relaxed">
+                Enter your cards and get a personalized payment plan in seconds.
+                No signup required for the free calculator.
               </p>
-              <Link href="/calculator">
-                <Button size="lg" variant="secondary" className="gap-2 text-base px-8 py-6 hover:scale-105 transition-transform shadow-xl hover:shadow-2xl">
-                  Start Optimizing Now
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/calculator">
+                  <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 text-base px-8 h-14 rounded-xl">
+                    Start Optimizing
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/recommendations">
+                  <Button size="lg" className="bg-transparent border border-stone-600 text-white hover:bg-stone-800 gap-2 text-base px-8 h-14 rounded-xl">
+                    Find My Cards
+                    <Sparkles className="h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </ScrollReveal>
+          </RevealOnScroll>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-slate-900 text-slate-400">
-        <div className="container mx-auto px-4">
+      <footer className="py-12 bg-stone-950 text-stone-400">
+        <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              <span className="font-semibold text-white">CardTempo</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-stone-800 flex items-center justify-center">
+                <CreditCard className="h-3.5 w-3.5 text-stone-400" />
+              </div>
+              <span className="font-display text-lg text-stone-300">CardTempo</span>
             </div>
             <p className="text-sm">
               For educational purposes. Not financial advice. Results may vary.
             </p>
             <div className="flex gap-6 text-sm">
-              <Link href="/privacy" className="hover:text-white transition-colors">
+              <Link href="/privacy" className="hover:text-stone-200 transition-colors">
                 Privacy
               </Link>
-              <Link href="/terms" className="hover:text-white transition-colors">
+              <Link href="/terms" className="hover:text-stone-200 transition-colors">
                 Terms
               </Link>
             </div>

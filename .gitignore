@@ -71,6 +71,7 @@ TOP_10_CARDS_QUICK_GUIDE.md
 *_CHECKLIST.md
 *_EXPLAINED.md
 public/card-image-checklist.html
+.claude/agents
 
 # Screenshots and temporary images in root
 Screenshot*.png

@@ -146,19 +146,21 @@ export default function ResultsPage() {
   // Hydration fix
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <header className="border-b bg-white sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center gap-2">
-              <CreditCardIcon className="h-6 w-6 text-primary" />
-              <span className="font-semibold text-lg">CardTempo</span>
+      <div className="min-h-screen bg-[#FAFAF8] font-body">
+        <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+                <CreditCardIcon className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-display text-xl text-stone-900">CardTempo</span>
             </div>
           </div>
         </header>
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-6 py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-slate-200 rounded w-1/3"></div>
-            <div className="h-64 bg-slate-200 rounded"></div>
+            <div className="h-8 bg-stone-200 rounded w-1/3"></div>
+            <div className="h-64 bg-stone-200 rounded"></div>
           </div>
         </main>
       </div>
@@ -167,26 +169,28 @@ export default function ResultsPage() {
 
   if (!result || cards.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <header className="border-b bg-white sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center gap-2">
-              <CreditCardIcon className="h-6 w-6 text-primary" />
-              <span className="font-semibold text-lg">CardTempo</span>
+      <div className="min-h-screen bg-[#FAFAF8] font-body">
+        <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="container mx-auto px-6 py-4">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+                <CreditCardIcon className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-display text-xl text-stone-900">CardTempo</span>
             </Link>
           </div>
         </header>
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-6 py-8">
           <div className="max-w-xl mx-auto text-center py-16">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <CreditCardIcon className="h-8 w-8 text-primary" />
+            <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <CreditCardIcon className="h-8 w-8 text-emerald-600" />
             </div>
-            <h1 className="text-2xl font-bold mb-2">No Cards to Analyze</h1>
-            <p className="text-muted-foreground mb-6">
+            <h1 className="font-display text-2xl text-stone-900 mb-2">No Cards to Analyze</h1>
+            <p className="text-stone-600 mb-6">
               Add your credit cards first to see your optimized payment plan.
             </p>
             <Link href="/calculator">
-              <Button>Go to Calculator</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700">Go to Calculator</Button>
             </Link>
           </div>
         </main>
@@ -195,31 +199,33 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#FAFAF8] font-body">
       {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <CreditCardIcon className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">CardTempo</span>
+      <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <CreditCardIcon className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-display text-xl text-stone-900">CardTempo</span>
           </Link>
           <nav className="flex items-center gap-4">
             <Link href="/calculator">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-stone-600 hover:text-stone-900">
                 <ArrowLeft className="h-4 w-4" />
                 Edit Cards
               </Button>
             </Link>
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2 border-stone-300">
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Button>
               </Link>
             ) : (
               <Link href="/login">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 bg-stone-900 hover:bg-stone-800 text-white">
                   <UserPlus className="h-4 w-4" />
                   Save Results
                 </Button>
@@ -230,12 +236,12 @@ export default function ResultsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Summary Card */}
-          <Card className="mb-8 overflow-hidden">
-            <div className="bg-gradient-to-r from-primary to-blue-600 text-white p-6">
-              <h1 className="text-2xl font-bold mb-2">Your Optimized Payment Plan</h1>
+          <Card className="mb-8 overflow-hidden border-stone-200">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-6">
+              <h1 className="font-display text-2xl mb-2">Your Optimized Payment Plan</h1>
               <p className="text-white/80">
                 Based on your {result.cards.length} credit card{result.cards.length > 1 ? 's' : ''}
               </p>
@@ -244,61 +250,61 @@ export default function ResultsPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {/* Total Credit */}
                 <div className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mx-auto mb-2">
                     <CreditCardIcon className="h-6 w-6 text-blue-600" />
                   </div>
-                  <p className="text-2xl font-bold">{formatCurrency(result.totalCreditLimit)}</p>
-                  <p className="text-xs text-muted-foreground">Total Credit Limit</p>
+                  <p className="font-display text-2xl text-stone-900">{formatCurrency(result.totalCreditLimit)}</p>
+                  <p className="text-xs text-stone-500">Total Credit Limit</p>
                 </div>
 
                 {/* Total Balance */}
                 <div className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mx-auto mb-2">
                     <DollarSign className="h-6 w-6 text-purple-600" />
                   </div>
-                  <p className="text-2xl font-bold">{formatCurrency(result.totalCurrentBalance)}</p>
-                  <p className="text-xs text-muted-foreground">Total Balance</p>
+                  <p className="font-display text-2xl text-stone-900">{formatCurrency(result.totalCurrentBalance)}</p>
+                  <p className="text-xs text-stone-500">Total Balance</p>
                 </div>
 
                 {/* Utilization Improvement */}
                 <div className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center mx-auto mb-2">
                     <Percent className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <span className="text-lg text-red-500 line-through">
                       {formatPercentage(result.currentOverallUtilization)}
                     </span>
-                    <span className="text-2xl font-bold text-green-600">
+                    <span className="font-display text-2xl text-emerald-600">
                       {formatPercentage(result.optimizedOverallUtilization)}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Utilization</p>
+                  <p className="text-xs text-stone-500">Utilization</p>
                 </div>
 
                 {/* Score Impact */}
                 <div className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-2">
-                    <TrendingUp className="h-6 w-6 text-yellow-600" />
+                  <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mx-auto mb-2">
+                    <TrendingUp className="h-6 w-6 text-amber-600" />
                   </div>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="font-display text-2xl text-emerald-600">
                     {result.estimatedScoreImpact.min === result.estimatedScoreImpact.max
                       ? `+${result.estimatedScoreImpact.min}`
                       : `+${result.estimatedScoreImpact.min} to +${result.estimatedScoreImpact.max}`}
                   </p>
-                  <p className="text-xs text-muted-foreground">Est. Score Impact</p>
+                  <p className="text-xs text-stone-500">Est. Score Impact</p>
                 </div>
               </div>
 
               {/* Impact Summary */}
-              <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5" />
                   <div>
-                    <p className="font-medium text-green-700">
+                    <p className="font-medium text-emerald-700">
                       Potential Score Improvement: +{result.estimatedScoreImpact.min} to +{result.estimatedScoreImpact.max} points
                     </p>
-                    <p className="text-sm text-green-600 mt-1">
+                    <p className="text-sm text-emerald-600 mt-1">
                       By reducing your utilization from {formatPercentage(result.currentOverallUtilization)} to{' '}
                       {formatPercentage(result.optimizedOverallUtilization)}, credit bureaus will report a much
                       healthier credit profile. Interest saved: $0 (you pay in full before due date).
@@ -312,8 +318,8 @@ export default function ResultsPage() {
           {/* Individual Card Plans */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Card-by-Card Payment Plans</h2>
-              <Button variant="outline" size="sm" onClick={handleRecalculate} className="gap-2">
+              <h2 className="font-display text-xl text-stone-900">Card-by-Card Payment Plans</h2>
+              <Button variant="outline" size="sm" onClick={handleRecalculate} className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
                 <RefreshCw className="h-4 w-4" />
                 Recalculate
               </Button>
@@ -326,14 +332,14 @@ export default function ResultsPage() {
           </div>
 
           {/* Call to Action */}
-          <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+          <Card className="bg-gradient-to-r from-emerald-50 to-emerald-100/50 border-emerald-200">
             <CardContent className="p-6">
               <div className="flex flex-col gap-6">
                 <div>
-                  <h3 className="font-bold text-lg mb-2">
+                  <h3 className="font-display text-lg text-stone-900 mb-2">
                     {isAuthenticated ? 'Manage Your Payment Plan' : 'Don\'t Lose Your Payment Plan'}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-stone-600">
                     {isAuthenticated
                       ? 'Export your plan or set up reminders to stay on track.'
                       : 'Email yourself this plan, or create an account to save your cards and get payment reminders.'}
@@ -341,8 +347,7 @@ export default function ResultsPage() {
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                   <Button
-                    variant="default"
-                    className="gap-2"
+                    className="gap-2 bg-emerald-600 hover:bg-emerald-700"
                     onClick={() => setShowCalendarModal(true)}
                   >
                     <Calendar className="h-4 w-4" />
@@ -350,7 +355,7 @@ export default function ResultsPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="gap-2"
+                    className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100"
                     onClick={handleDownloadPDF}
                     disabled={downloadingPDF}
                   >
@@ -370,7 +375,7 @@ export default function ResultsPage() {
                     cardPlans={result.cards}
                     userEmail={email}
                     trigger={
-                      <Button variant="outline" className="gap-2">
+                      <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
                         <Bell className="h-4 w-4" />
                         Set Reminders
                       </Button>
@@ -378,7 +383,7 @@ export default function ResultsPage() {
                   />
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="gap-2">
+                      <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
                         <Mail className="h-4 w-4" />
                         Email Plan
                       </Button>
@@ -418,7 +423,7 @@ export default function ResultsPage() {
                   </Dialog>
                   {!isAuthenticated && (
                     <Link href="/signup">
-                      <Button className="gap-2">
+                      <Button className="gap-2 bg-stone-900 hover:bg-stone-800 text-white">
                         <UserPlus className="h-4 w-4" />
                         Create Account
                       </Button>
@@ -430,36 +435,36 @@ export default function ResultsPage() {
           </Card>
 
           {/* Tips */}
-          <Card className="mt-8">
+          <Card className="mt-8 border-stone-200">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="h-5 w-5" />
+              <CardTitle className="font-display text-lg text-stone-900 flex items-center gap-2">
+                <Target className="h-5 w-5 text-emerald-600" />
                 Next Steps
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-50 rounded-lg">
-                  <h4 className="font-medium mb-2">Set Calendar Reminders</h4>
-                  <p className="text-sm text-muted-foreground">
+                <div className="p-4 bg-stone-50 rounded-xl">
+                  <h4 className="font-medium text-stone-900 mb-2">Set Calendar Reminders</h4>
+                  <p className="text-sm text-stone-600">
                     Add payment dates to your calendar so you don&apos;t miss the optimization window.
                   </p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-lg">
-                  <h4 className="font-medium mb-2">Schedule Payments</h4>
-                  <p className="text-sm text-muted-foreground">
+                <div className="p-4 bg-stone-50 rounded-xl">
+                  <h4 className="font-medium text-stone-900 mb-2">Schedule Payments</h4>
+                  <p className="text-sm text-stone-600">
                     Many banks allow scheduling future payments. Set them up now!
                   </p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-lg">
-                  <h4 className="font-medium mb-2">Check Your Score</h4>
-                  <p className="text-sm text-muted-foreground">
+                <div className="p-4 bg-stone-50 rounded-xl">
+                  <h4 className="font-medium text-stone-900 mb-2">Check Your Score</h4>
+                  <p className="text-sm text-stone-600">
                     Wait 1-2 weeks after statement date, then check for score improvements.
                   </p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-lg">
-                  <h4 className="font-medium mb-2">Repeat Monthly</h4>
-                  <p className="text-sm text-muted-foreground">
+                <div className="p-4 bg-stone-50 rounded-xl">
+                  <h4 className="font-medium text-stone-900 mb-2">Repeat Monthly</h4>
+                  <p className="text-sm text-stone-600">
                     Use this strategy every billing cycle to maintain optimal utilization.
                   </p>
                 </div>
@@ -470,9 +475,9 @@ export default function ResultsPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 mt-8 border-t bg-white">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-sm text-muted-foreground">
+      <footer className="py-8 mt-8 border-t border-stone-200 bg-white">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-sm text-stone-500">
             Estimated score impacts are based on general credit scoring principles and may vary.
             This is not financial advice. Consult a financial advisor for personalized guidance.
           </p>

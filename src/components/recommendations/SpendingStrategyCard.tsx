@@ -10,6 +10,12 @@ import {
   Plane,
   Globe,
   ArrowRight,
+  Tv,
+  Zap,
+  Train,
+  Smartphone,
+  Film,
+  Pill,
 } from 'lucide-react';
 import { SpendingStrategy, SpendingCategory } from '@/types';
 
@@ -30,6 +36,18 @@ export function SpendingStrategyCard({ strategies }: SpendingStrategyCardProps) 
         return <Plane className="h-4 w-4" />;
       case 'online-shopping':
         return <Globe className="h-4 w-4" />;
+      case 'streaming':
+        return <Tv className="h-4 w-4" />;
+      case 'utilities':
+        return <Zap className="h-4 w-4" />;
+      case 'transit':
+        return <Train className="h-4 w-4" />;
+      case 'phone':
+        return <Smartphone className="h-4 w-4" />;
+      case 'entertainment':
+        return <Film className="h-4 w-4" />;
+      case 'drugstores':
+        return <Pill className="h-4 w-4" />;
       default:
         return <Wallet className="h-4 w-4" />;
     }
@@ -42,6 +60,12 @@ export function SpendingStrategyCard({ strategies }: SpendingStrategyCardProps) 
       'gas': 'Gas',
       'travel': 'Travel',
       'online-shopping': 'Online Shopping',
+      'streaming': 'Streaming',
+      'utilities': 'Utilities',
+      'transit': 'Transit',
+      'phone': 'Phone',
+      'entertainment': 'Entertainment',
+      'drugstores': 'Drugstores',
     };
     return labels[category] || category;
   };

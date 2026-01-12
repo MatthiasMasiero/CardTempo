@@ -8,6 +8,7 @@ import {
   RecommendationTimelineEvent,
   CreditScoreRange,
   RewardTier,
+  CreditCard,
 } from '@/types';
 import {
   recommendableCards,
@@ -28,11 +29,91 @@ const DEFAULT_MONTHLY_SPENDING: Record<SpendingCategory, number> = {
   'groceries': 400,
   'gas': 150,
   'travel': 200,
-  'online-shopping': 250
+  'online-shopping': 250,
+  'streaming': 50,
+  'utilities': 200,
+  'transit': 100,
+  'phone': 100,
+  'entertainment': 100,
+  'drugstores': 50
 };
 
 // Days to wait between card applications (for credit score recovery)
 const APPLICATION_SPACING_DAYS = 90;
+
+// ============================================
+// CURRENT CARD MATCHING
+// ============================================
+
+/**
+ * Try to match a user's card (by nickname) to a known RecommendableCard.
+ * Uses fuzzy matching to find the best match.
+ */
+function matchUserCardToKnownCard(userCard: CreditCard): RecommendableCard | null {
+  const nickname = userCard.nickname.toLowerCase();
+
+  // Try exact match first
+  let bestMatch: RecommendableCard | null = null;
+  let bestScore = 0;
+
+  for (const knownCard of recommendableCards) {
+    const knownName = knownCard.name.toLowerCase();
+    const knownIssuer = knownCard.issuer.toLowerCase();
+
+    // Check for various match patterns
+    let score = 0;
+
+    // Exact name match
+    if (nickname === knownName) {
+      score = 100;
+    }
+    // Name contains full known name
+    else if (nickname.includes(knownName) || knownName.includes(nickname)) {
+      score = 80;
+    }
+    // Match key parts (issuer + type)
+    else {
+      // Check if issuer is in nickname
+      if (nickname.includes(knownIssuer)) {
+        score += 30;
+      }
+
+      // Check for card type keywords
+      const keywords = ['sapphire', 'freedom', 'gold', 'platinum', 'venture', 'savor',
+                       'double cash', 'active cash', 'custom cash', 'autograph', 'quicksilver'];
+      for (const keyword of keywords) {
+        if (nickname.includes(keyword) && knownName.includes(keyword)) {
+          score += 40;
+          break;
+        }
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = knownCard;
+    }
+  }
+
+  // Only return if we have a reasonable confidence match
+  return bestScore >= 50 ? bestMatch : null;
+}
+
+/**
+ * Match all user cards to known cards
+ */
+export function matchCurrentCards(userCards: CreditCard[]): Map<string, RecommendableCard> {
+  const matches = new Map<string, RecommendableCard>();
+
+  for (const userCard of userCards) {
+    const match = matchUserCardToKnownCard(userCard);
+    if (match) {
+      matches.set(userCard.id, match);
+    }
+  }
+
+  return matches;
+}
 
 // ============================================
 // ELIGIBILITY CHECKS
@@ -187,7 +268,8 @@ export function calculateAnnualReward(
     }
 
     // Calculate rewards: best category gets bonus rate, others get base rate
-    const baseRate = card.rewards.find(r => r.category === 'all')?.rewardRate || 1;
+    const baseReward = card.rewards.find(r => r.category === 'all');
+    const baseRate = baseReward?.rewardRate || 1;
 
     for (const [category, monthly] of spendingEntries) {
       let yearlySpend = monthly * 12;
@@ -203,7 +285,14 @@ export function calculateAnnualReward(
         yearlySpend = Math.min(yearlySpend, reward.cap * 12); // cap is monthly
       }
 
-      const rewardValue = yearlySpend * (rewardRate / 100);
+      let rewardValue = yearlySpend * (rewardRate / 100);
+
+      // Apply point value multiplier for points cards (~2cpp when transferred)
+      const applicableReward = (category === bestCategory && reward) ? reward : baseReward;
+      if (applicableReward?.rewardType === 'points' && applicableReward?.pointValue) {
+        rewardValue = rewardValue * applicableReward.pointValue;
+      }
+
       annualReward += rewardValue;
     }
   } else {
@@ -249,19 +338,39 @@ function generateReasoning(
 ): string[] {
   const reasons: string[] = [];
 
+  // Check if card earns transferable points (pointValue >= 2)
+  const hasTransferablePoints = card.rewards.some(r =>
+    r.rewardType === 'points' && r.pointValue && r.pointValue >= 2
+  );
+
   // Category-specific reasons
   for (const category of preferences.topCategories) {
     const reward = card.rewards.find(r => r.category === category);
     if (reward && reward.rewardRate >= 3) {
-      const typeLabel = reward.rewardType === 'points' ? 'points' : '%';
-      reasons.push(`${reward.rewardRate}${typeLabel === '%' ? '%' : 'x'} ${reward.rewardType} on ${formatCategoryName(category)}`);
+      if (reward.rewardType === 'points') {
+        // For points cards, show effective value with transfers
+        const effectiveRate = reward.pointValue ? reward.rewardRate * reward.pointValue : reward.rewardRate;
+        reasons.push(`${reward.rewardRate}x points on ${formatCategoryName(category)} (~${effectiveRate}% value with transfers)`);
+      } else {
+        reasons.push(`${reward.rewardRate}% cashback on ${formatCategoryName(category)}`);
+      }
     }
   }
 
   // Flat-rate cards
   const allReward = card.rewards.find(r => r.category === 'all');
   if (allReward && allReward.rewardRate >= 1.5 && reasons.length === 0) {
-    reasons.push(`${allReward.rewardRate}% on all purchases`);
+    if (allReward.rewardType === 'points' && allReward.pointValue && allReward.pointValue >= 2) {
+      const effectiveRate = allReward.rewardRate * allReward.pointValue;
+      reasons.push(`${allReward.rewardRate}x points on all purchases (~${effectiveRate}% value with transfers)`);
+    } else {
+      reasons.push(`${allReward.rewardRate}% on all purchases`);
+    }
+  }
+
+  // Transferable points explanation (high priority for points cards)
+  if (hasTransferablePoints && reasons.length < 3) {
+    reasons.push('Points transfer to airlines/hotels at ~2¢ each');
   }
 
   // No annual fee
@@ -269,12 +378,15 @@ function generateReasoning(
     reasons.push('No annual fee');
   }
 
-  // Signup bonus
+  // Signup bonus with value estimate
   if (card.signupBonus) {
-    const bonusText = card.rewards[0]?.rewardType === 'points'
-      ? `${card.signupBonus.amount.toLocaleString()} bonus points`
-      : `$${card.signupBonus.amount} signup bonus`;
-    reasons.push(bonusText);
+    if (card.rewards[0]?.rewardType === 'points') {
+      const pointValue = card.rewards[0]?.pointValue || 1;
+      const bonusDollarValue = Math.round(card.signupBonus.amount * pointValue / 100);
+      reasons.push(`${card.signupBonus.amount.toLocaleString()} bonus points (~$${bonusDollarValue} value)`);
+    } else {
+      reasons.push(`$${card.signupBonus.amount} signup bonus`);
+    }
   }
 
   // No foreign transaction fees
@@ -287,7 +399,7 @@ function generateReasoning(
     reasons.push('Simple flat-rate rewards');
   }
 
-  return reasons.slice(0, 4); // Max 4 reasons for display
+  return reasons.slice(0, 5); // Max 5 reasons for display
 }
 
 /**
@@ -499,9 +611,22 @@ function calculateScoreProjection(cardCount: number): { shortTerm: number; longT
 export function generateRecommendations(
   preferences: RecommendationPreferences
 ): RecommendationResult {
-  // 1. Filter eligible cards by credit score
+  // 0. Handle current cards if included
+  let matchedCurrentCards: Map<string, RecommendableCard> = new Map();
+  const currentCardIds: Set<string> = new Set();
+
+  if (preferences.includeCurrentCards && preferences.currentCards) {
+    matchedCurrentCards = matchCurrentCards(preferences.currentCards);
+    // Get the IDs of matched cards to exclude from recommendations
+    matchedCurrentCards.forEach((knownCard) => {
+      currentCardIds.add(knownCard.id);
+    });
+  }
+
+  // 1. Filter eligible cards by credit score AND exclude cards user already owns
   const eligibleCards = recommendableCards.filter(card =>
-    meetsMinCreditScore(card.minCreditScore, preferences.creditScoreRange)
+    meetsMinCreditScore(card.minCreditScore, preferences.creditScoreRange) &&
+    !currentCardIds.has(card.id)
   );
 
   // 2. Score all eligible cards
@@ -529,10 +654,30 @@ export function generateRecommendations(
     waitDays: index * APPLICATION_SPACING_DAYS
   }));
 
-  // 5. Generate spending strategy
-  const spendingStrategy = generateSpendingStrategy(recommendations, preferences.topCategories, preferences.monthlySpending);
+  // 4.5. Create CardRecommendation objects for matched current cards
+  const currentCardRecommendations: CardRecommendation[] = [];
+  if (preferences.includeCurrentCards && preferences.currentCards) {
+    for (const userCard of preferences.currentCards) {
+      const matchedCard = matchedCurrentCards.get(userCard.id);
+      if (matchedCard) {
+        currentCardRecommendations.push({
+          card: matchedCard,
+          matchScore: 100, // Current cards get full match score
+          primaryUse: determinePrimaryUse(matchedCard, preferences.topCategories),
+          reasoning: ['Card you already own', ...generateReasoning(matchedCard, preferences).slice(0, 2)],
+          estimatedAnnualReward: calculateAnnualReward(matchedCard, preferences.monthlySpending),
+          applicationOrder: 0, // 0 indicates already owned
+          waitDays: 0
+        });
+      }
+    }
+  }
 
-  // 6. Calculate totals
+  // 5. Generate spending strategy (include both current and new cards)
+  const allCardsForStrategy = [...currentCardRecommendations, ...recommendations];
+  const spendingStrategy = generateSpendingStrategy(allCardsForStrategy, preferences.topCategories, preferences.monthlySpending);
+
+  // 6. Calculate totals (only for new recommendations, not current cards)
   const totalEstimatedAnnualReward = recommendations.reduce(
     (sum, r) => sum + r.estimatedAnnualReward,
     0
@@ -542,7 +687,7 @@ export function generateRecommendations(
     0
   );
 
-  // 7. Project score impact
+  // 7. Project score impact (only counts new cards)
   const projectedScoreImpact = calculateScoreProjection(recommendations.length);
 
   return {
@@ -551,7 +696,8 @@ export function generateRecommendations(
     projectedScoreImpact,
     totalEstimatedAnnualReward,
     totalAnnualFees,
-    netAnnualBenefit: totalEstimatedAnnualReward - totalAnnualFees
+    netAnnualBenefit: totalEstimatedAnnualReward - totalAnnualFees,
+    currentCardRecommendations: currentCardRecommendations.length > 0 ? currentCardRecommendations : undefined,
   };
 }
 

@@ -24,6 +24,12 @@ import {
   Check,
   ArrowRight,
   DollarSign,
+  Tv,
+  Zap,
+  Train,
+  Smartphone,
+  Film,
+  Pill,
 } from 'lucide-react';
 import {
   RecommendationPreferences,
@@ -31,18 +37,31 @@ import {
   CreditScoreRange,
   RewardPreference,
 } from '@/types';
+import { useCalculatorStore } from '@/store/calculator-store';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface RecommendationQuestionnaireProps {
   onComplete: (preferences: RecommendationPreferences) => void;
 }
 
-// Category display config
-const SPENDING_CATEGORIES: { id: SpendingCategory; label: string; icon: React.ReactNode }[] = [
-  { id: 'dining', label: 'Dining', icon: <Utensils className="h-4 w-4" /> },
-  { id: 'groceries', label: 'Groceries', icon: <ShoppingCart className="h-4 w-4" /> },
-  { id: 'gas', label: 'Gas', icon: <Car className="h-4 w-4" /> },
-  { id: 'travel', label: 'Travel', icon: <Plane className="h-4 w-4" /> },
-  { id: 'online-shopping', label: 'Online Shopping', icon: <Globe className="h-4 w-4" /> },
+// Category display config - organized by group for visual scanning
+const SPENDING_CATEGORIES: { id: SpendingCategory; label: string; icon: React.ReactNode; group: string }[] = [
+  // Everyday essentials
+  { id: 'dining', label: 'Dining', icon: <Utensils className="h-4 w-4" />, group: 'everyday' },
+  { id: 'groceries', label: 'Groceries', icon: <ShoppingCart className="h-4 w-4" />, group: 'everyday' },
+  { id: 'gas', label: 'Gas', icon: <Car className="h-4 w-4" />, group: 'everyday' },
+  // Lifestyle & entertainment
+  { id: 'streaming', label: 'Streaming', icon: <Tv className="h-4 w-4" />, group: 'lifestyle' },
+  { id: 'entertainment', label: 'Entertainment', icon: <Film className="h-4 w-4" />, group: 'lifestyle' },
+  { id: 'online-shopping', label: 'Online Shopping', icon: <Globe className="h-4 w-4" />, group: 'lifestyle' },
+  // Bills & utilities
+  { id: 'utilities', label: 'Utilities', icon: <Zap className="h-4 w-4" />, group: 'bills' },
+  { id: 'phone', label: 'Phone', icon: <Smartphone className="h-4 w-4" />, group: 'bills' },
+  // Travel & other
+  { id: 'travel', label: 'Travel', icon: <Plane className="h-4 w-4" />, group: 'travel' },
+  { id: 'transit', label: 'Transit', icon: <Train className="h-4 w-4" />, group: 'travel' },
+  { id: 'drugstores', label: 'Drugstores', icon: <Pill className="h-4 w-4" />, group: 'other' },
 ];
 
 // Credit score descriptions
@@ -62,12 +81,17 @@ const SPENDING_LEVELS = [
 ];
 
 export function RecommendationQuestionnaire({ onComplete }: RecommendationQuestionnaireProps) {
+  // Access user's existing cards from dashboard
+  const { cards: userCards } = useCalculatorStore();
+  const hasExistingCards = userCards.length > 0;
+
   // Form state
   const [creditScore, setCreditScore] = useState<CreditScoreRange | ''>('');
   const [simplicityPreference, setSimplicityPreference] = useState<'fewer-cards' | 'more-rewards' | ''>('');
   const [selectedCategories, setSelectedCategories] = useState<SpendingCategory[]>([]);
   const [rewardPreference, setRewardPreference] = useState<RewardPreference | ''>('');
   const [monthlySpending, setMonthlySpending] = useState<{ [key in SpendingCategory]?: number }>({});
+  const [includeCurrentCards, setIncludeCurrentCards] = useState<boolean>(true); // ON by default
 
   // Validation state
   const [errors, setErrors] = useState<{
@@ -165,6 +189,8 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
       topCategories: selectedCategories,
       rewardPreference: rewardPreference as RewardPreference,
       monthlySpending: monthlySpending,
+      includeCurrentCards: hasExistingCards && includeCurrentCards,
+      currentCards: hasExistingCards && includeCurrentCards ? userCards : undefined,
     };
 
     onComplete(preferences);
@@ -304,25 +330,25 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
             {SPENDING_CATEGORIES.map(category => {
               const isSelected = selectedCategories.includes(category.id);
               return (
                 <button
                   key={category.id}
                   onClick={() => handleCategoryToggle(category.id)}
-                  className={`relative p-3 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${
+                  className={`relative p-2.5 border-2 rounded-lg transition-all flex flex-col items-center gap-1.5 ${
                     isSelected
                       ? 'border-primary bg-primary/5'
                       : 'border-gray-200 hover:border-gray-300'
                   } ${errors.categories ? 'border-destructive' : ''}`}
                 >
-                  <div className={`p-2 rounded-full ${isSelected ? 'bg-primary/20' : 'bg-gray-100'}`}>
+                  <div className={`p-1.5 rounded-full ${isSelected ? 'bg-primary/20' : 'bg-gray-100'}`}>
                     {category.icon}
                   </div>
-                  <span className="text-sm font-medium">{category.label}</span>
+                  <span className="text-xs font-medium text-center">{category.label}</span>
                   {isSelected && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
                       {selectedCategories.indexOf(category.id) + 1}
                     </Badge>
                   )}
@@ -461,6 +487,34 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
           )}
         </CardContent>
       </Card>
+
+      {/* Include Current Cards Toggle (only show if user has cards) */}
+      {hasExistingCards && (
+        <Card className="bg-blue-50/50 border-blue-200">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <Label htmlFor="include-cards" className="text-base font-medium cursor-pointer">
+                    Include my current cards
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show your {userCards.length} existing card{userCards.length > 1 ? 's' : ''} in the spending strategy
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="include-cards"
+                checked={includeCurrentCards}
+                onCheckedChange={setIncludeCurrentCards}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Submit Button */}
       <Button

@@ -203,7 +203,7 @@ export function calculateAnnualReward(
         yearlySpend = Math.min(yearlySpend, reward.cap * 12); // cap is monthly
       }
 
-      let rewardValue = yearlySpend * (rewardRate / 100);
+      const rewardValue = yearlySpend * (rewardRate / 100);
       annualReward += rewardValue;
     }
   } else {

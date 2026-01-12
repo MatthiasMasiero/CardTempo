@@ -1,10 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
 // These will need to be set in environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use SSR-compatible client that syncs sessions via cookies
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
 // Database types (for when Supabase is connected)
 export interface Database {

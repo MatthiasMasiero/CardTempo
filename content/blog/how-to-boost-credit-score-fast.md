@@ -2,7 +2,7 @@
 title: "How to Boost Your Credit Score Fast: 11 Strategies That Work in 30-90 Days"
 excerpt: "Need to improve your credit score quickly for a mortgage, car loan, or credit card approval? These proven strategies can increase your score by 40-150 points in as little as 30 days."
 date: "2025-01-17"
-author: "Credit Optimizer Team"
+author: "CardTempo Team"
 tags: ["improve credit score", "credit score boost", "fast credit repair", "credit tips"]
 ---
 
@@ -75,7 +75,7 @@ This is hands-down the **fastest way** to boost your score because:
 - **Pay before closing:** $6,000
 - **New score after 30 days:** ~720 (+60 points)
 
-**Pro tip:** Use our Credit Optimizer calculator to get exact payment amounts and dates for your specific cards.
+**Pro tip:** Use our CardTempo calculator to get exact payment amounts and dates for your specific cards.
 
 ## Strategy #2: Request Credit Limit Increases (FAST - 24 Hours)
 
@@ -534,6 +534,6 @@ Boosting your credit score fast is absolutely possible with the right strategies
 
 Most people can see **40-100 point improvements in 60-90 days** by focusing on utilization optimization alone.
 
-**Start today.** Check your utilization, find your closing dates, and make your first optimization payment. Use our free Credit Optimizer calculator to get your personalized plan.
+**Start today.** Check your utilization, find your closing dates, and make your first optimization payment. Use our free CardTempo calculator to get your personalized plan.
 
 Your better credit score (and the thousands you'll save in interest rates) is just 30-90 days away.

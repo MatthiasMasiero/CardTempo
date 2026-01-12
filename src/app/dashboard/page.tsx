@@ -34,14 +34,16 @@ import {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, checkSession } = useAuthStore();
   const { cards, result, calculateResults, updateCard, removeCard } = useCalculatorStore();
   const [mounted, setMounted] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Check session on mount - this picks up session from cookies (e.g., after email confirmation)
+    checkSession();
+  }, [checkSession]);
 
   useEffect(() => {
     if (mounted && !isAuthenticated) {
@@ -133,7 +135,7 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <CreditCardIcon className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">Credit Optimizer</span>
+            <span className="font-semibold text-lg">CardTempo</span>
           </Link>
           <nav className="flex items-center gap-4">
             <Link href="/settings">

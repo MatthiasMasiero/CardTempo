@@ -197,137 +197,67 @@ export function calculateCardPaymentPlan(
   };
 }
 
+// Score impact ranges for utilization changes (negative = utilization increased)
+const NEGATIVE_IMPACT_RANGES: Array<{ threshold: number; min: number; max: number }> = [
+  { threshold: 5, min: -15, max: -5 },
+  { threshold: 10, min: -25, max: -10 },
+  { threshold: 20, min: -45, max: -25 },
+  { threshold: 30, min: -70, max: -45 },
+  { threshold: 40, min: -90, max: -70 },
+  { threshold: Infinity, min: -120, max: -90 },
+];
+
+const POSITIVE_IMPACT_RANGES: Array<{ threshold: number; min: number; max: number }> = [
+  { threshold: 5, min: 5, max: 12 },
+  { threshold: 10, min: 8, max: 18 },
+  { threshold: 20, min: 15, max: 30 },
+  { threshold: 30, min: 25, max: 45 },
+  { threshold: 40, min: 40, max: 65 },
+  { threshold: 50, min: 60, max: 90 },
+  { threshold: Infinity, min: 85, max: 120 },
+];
+
+// Severity multiplier based on starting utilization (higher = bigger gains potential)
+function getSeverityMultiplier(currentUtilization: number): number {
+  if (currentUtilization >= 70) return 1.3;
+  if (currentUtilization >= 50) return 1.1;
+  if (currentUtilization >= 30) return 0.85;
+  return 0.6;
+}
+
 /**
- * Calculate estimated credit score impact based on utilization improvement
+ * Calculate estimated credit score impact based on utilization improvement.
+ * Credit utilization accounts for 30% of FICO score.
  *
- * Credit utilization accounts for 30-35% of FICO score (210-280 points out of 850)
- * Improving utilization can have significant impact on score
- *
- * Estimates are conservative and based on:
- * - Industry research on credit scoring models (2026)
- * - Utilization is 30% of FICO score
- * - Assumes good payment history (otherwise impact is lower)
- * - Research anchor: 60% → 20% drop = 50+ points
- *
- * @param utilizationImprovement - Percentage point drop in utilization (e.g., 33.5 for 38.5% → 5%)
- * @param currentUtilization - Starting utilization percentage (e.g., 38.5)
+ * @param utilizationImprovement - Percentage point drop in utilization (e.g., 33.5 for 38.5% to 5%)
+ * @param currentUtilization - Starting utilization percentage
  */
 export function calculateScoreImpact(
   utilizationImprovement: number,
-  currentUtilization: number = 50 // Default assumes medium starting utilization
+  currentUtilization: number = 50
 ): { min: number; max: number } {
-  // Handle negative impact (utilization increased)
-  if (utilizationImprovement < 0) {
-    const utilizationIncrease = Math.abs(utilizationImprovement);
-
-    // Very small increase (0-5% utilization increase)
-    if (utilizationIncrease <= 5) {
-      return { min: -15, max: -5 };
-    }
-
-    // Small increase (5-10% utilization increase)
-    if (utilizationIncrease <= 10) {
-      return { min: -25, max: -10 };
-    }
-
-    // Moderate increase (10-20% utilization increase)
-    if (utilizationIncrease <= 20) {
-      return { min: -45, max: -25 };
-    }
-
-    // Large increase (20-30% utilization increase)
-    if (utilizationIncrease <= 30) {
-      return { min: -70, max: -45 };
-    }
-
-    // Very large increase (30-40% utilization increase)
-    if (utilizationIncrease <= 40) {
-      return { min: -90, max: -70 };
-    }
-
-    // Extreme increase (40%+ utilization increase)
-    return { min: -120, max: -90 };
-  }
-
-  // No change
   if (utilizationImprovement === 0) {
     return { min: 0, max: 0 };
   }
 
-  // Determine severity multiplier based on starting utilization
-  // Higher starting utilization = bigger score impact potential
-  let severityMultiplier = 1.0;
-
-  if (currentUtilization >= 70) {
-    // Very high utilization (likely poor credit 500-600)
-    severityMultiplier = 1.3; // Biggest gains
-  } else if (currentUtilization >= 50) {
-    // High utilization (likely fair credit 600-670)
-    severityMultiplier = 1.1; // Above average gains
-  } else if (currentUtilization >= 30) {
-    // Medium utilization (likely good credit 670-740)
-    severityMultiplier = 0.85; // Moderate gains
-  } else {
-    // Low utilization (likely very good/excellent credit 740+)
-    severityMultiplier = 0.6; // Smallest gains (already optimized)
+  // Handle negative impact (utilization increased)
+  if (utilizationImprovement < 0) {
+    const increase = Math.abs(utilizationImprovement);
+    const range = NEGATIVE_IMPACT_RANGES.find(r => increase <= r.threshold);
+    return range ? { min: range.min, max: range.max } : { min: -120, max: -90 };
   }
 
-  // Base estimates (adjusted by research: 60%→20% = 50+ points)
-  let min: number;
-  let max: number;
-
-  // Very small improvement (0-5% utilization drop)
-  if (utilizationImprovement <= 5) {
-    min = 5;
-    max = 12;
-  }
-  // Small improvement (5-10% utilization drop)
-  // Example: 40% → 35% utilization
-  else if (utilizationImprovement <= 10) {
-    min = 8;
-    max = 18;
-  }
-  // Moderate improvement (10-20% utilization drop)
-  // Example: 45% → 30% or 35% → 20%
-  else if (utilizationImprovement <= 20) {
-    min = 15;
-    max = 30;
-  }
-  // Good improvement (20-30% utilization drop)
-  // Example: 50% → 25% or 40% → 15%
-  else if (utilizationImprovement <= 30) {
-    min = 25;
-    max = 45;
-  }
-  // Excellent improvement (30-40% utilization drop)
-  // Example: 60% → 25% or 50% → 15%
-  // Research: 60%→20% = 50+ points (40pt drop)
-  else if (utilizationImprovement <= 40) {
-    min = 40;
-    max = 65;
-  }
-  // Outstanding improvement (40-50% utilization drop)
-  // Example: 70% → 25% or 80% → 30%
-  else if (utilizationImprovement <= 50) {
-    min = 60;
-    max = 90;
-  }
-  // Extreme improvement (50%+ utilization drop)
-  // Example: 90% → 10% or 100% → 5%
-  else {
-    min = 85;
-    max = 120;
+  // Handle positive impact (utilization decreased)
+  const range = POSITIVE_IMPACT_RANGES.find(r => utilizationImprovement <= r.threshold);
+  if (!range) {
+    return { min: 85, max: 120 };
   }
 
-  // Apply severity multiplier based on starting utilization
-  min = Math.round(min * severityMultiplier);
-  max = Math.round(max * severityMultiplier);
-
-  // Cap at reasonable maximum (utilization is only 30% of score)
-  // Theoretical max: 30% of 850 = 255 points, but realistically much lower
-  max = Math.min(max, 150);
-
-  return { min, max };
+  const multiplier = getSeverityMultiplier(currentUtilization);
+  return {
+    min: Math.round(range.min * multiplier),
+    max: Math.min(Math.round(range.max * multiplier), 150),
+  };
 }
 
 /**

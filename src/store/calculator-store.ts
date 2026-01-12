@@ -28,9 +28,48 @@ interface CalculatorState {
 }
 
 // Helper to get user-specific storage key
-const getUserStorageKey = (userId: string | null) => {
+const getUserStorageKey = (userId: string | null): string => {
   return userId ? `credit-optimizer-${userId}` : 'credit-optimizer-guest';
 };
+
+// Convert database card format to app format
+interface DbCard {
+  id: string;
+  nickname: string;
+  credit_limit: number;
+  current_balance: number;
+  statement_date: number;
+  due_date: number;
+  apr?: number;
+  image_url?: string;
+}
+
+function dbCardToAppCard(dbCard: DbCard): CreditCard {
+  return {
+    id: dbCard.id,
+    nickname: dbCard.nickname,
+    creditLimit: Number(dbCard.credit_limit),
+    currentBalance: Number(dbCard.current_balance),
+    statementDate: dbCard.statement_date,
+    dueDate: dbCard.due_date,
+    apr: dbCard.apr ? Number(dbCard.apr) : undefined,
+    imageUrl: dbCard.image_url || '/cards/default-card.svg',
+  };
+}
+
+// Convert app card format to database format
+function appCardToDbCard(card: Omit<CreditCard, 'id'>, userId: string): object {
+  return {
+    user_id: userId,
+    nickname: card.nickname,
+    credit_limit: card.creditLimit,
+    current_balance: card.currentBalance,
+    statement_date: card.statementDate,
+    due_date: card.dueDate,
+    apr: card.apr,
+    image_url: card.imageUrl || '/cards/default-card.svg',
+  };
+}
 
 export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
   cards: [],
@@ -41,30 +80,19 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
   addCard: async (card) => {
     const { currentUserId } = get();
 
-    // GUEST MODE BRANCH
+    // Guest mode: save to localStorage
     if (!currentUserId) {
-      console.log('[AddCard] Guest mode - saving to localStorage');
-      const newCard = addGuestCardToStorage(card); // Generates UUID
+      const newCard = addGuestCardToStorage(card);
       set((state) => ({ cards: [...state.cards, newCard] }));
       saveGuestCards(get().cards);
       return;
     }
 
-    // AUTHENTICATED MODE
-    // Save to database first to get the UUID
+    // Authenticated mode: save to database
     try {
       const { data, error } = await supabase
         .from('credit_cards')
-        .insert({
-          user_id: currentUserId,
-          nickname: card.nickname,
-          credit_limit: card.creditLimit,
-          current_balance: card.currentBalance,
-          statement_date: card.statementDate,
-          due_date: card.dueDate,
-          apr: card.apr,
-          image_url: card.imageUrl || '/cards/default-card.svg',
-        })
+        .insert(appCardToDbCard(card, currentUserId))
         .select()
         .single();
 
@@ -73,20 +101,7 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
         return;
       }
 
-      // Add to state with the UUID from database
-      const newCard: CreditCard = {
-        id: data.id,
-        nickname: data.nickname,
-        creditLimit: Number(data.credit_limit),
-        currentBalance: Number(data.current_balance),
-        statementDate: data.statement_date,
-        dueDate: data.due_date,
-        apr: data.apr ? Number(data.apr) : undefined,
-        imageUrl: data.image_url || '/cards/default-card.svg',
-      };
-
-      set((state) => ({ cards: [...state.cards, newCard] }));
-      console.log(`[AddCard] Saved card ${newCard.id} to database`);
+      set((state) => ({ cards: [...state.cards, dbCardToAppCard(data)] }));
     } catch (err) {
       console.error('[AddCard] Unexpected error:', err);
     }
@@ -95,31 +110,36 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
   updateCard: async (id, updatedCard) => {
     const { currentUserId } = get();
 
-    // Optimistic update (works for both modes)
+    // Optimistic update
     set((state) => ({
-      cards: state.cards.map((card) =>
-        card.id === id ? { ...card, ...updatedCard } : card
-      ),
+      cards: state.cards.map(card => card.id === id ? { ...card, ...updatedCard } : card),
     }));
 
-    // GUEST MODE BRANCH
+    // Guest mode: save to localStorage
     if (!currentUserId) {
-      console.log('[UpdateCard] Guest mode - saving to localStorage');
       saveGuestCards(get().cards);
       return;
     }
 
-    // AUTHENTICATED MODE
-    // Save to database
+    // Authenticated mode: save to database
     try {
+      // Map app field names to database field names
+      const fieldMap: Record<string, string> = {
+        nickname: 'nickname',
+        creditLimit: 'credit_limit',
+        currentBalance: 'current_balance',
+        statementDate: 'statement_date',
+        dueDate: 'due_date',
+        apr: 'apr',
+        imageUrl: 'image_url',
+      };
+
       const dbUpdate: Record<string, unknown> = {};
-      if (updatedCard.nickname !== undefined) dbUpdate.nickname = updatedCard.nickname;
-      if (updatedCard.creditLimit !== undefined) dbUpdate.credit_limit = updatedCard.creditLimit;
-      if (updatedCard.currentBalance !== undefined) dbUpdate.current_balance = updatedCard.currentBalance;
-      if (updatedCard.statementDate !== undefined) dbUpdate.statement_date = updatedCard.statementDate;
-      if (updatedCard.dueDate !== undefined) dbUpdate.due_date = updatedCard.dueDate;
-      if (updatedCard.apr !== undefined) dbUpdate.apr = updatedCard.apr;
-      if (updatedCard.imageUrl !== undefined) dbUpdate.image_url = updatedCard.imageUrl;
+      for (const [appKey, dbKey] of Object.entries(fieldMap)) {
+        if ((updatedCard as Record<string, unknown>)[appKey] !== undefined) {
+          dbUpdate[dbKey] = (updatedCard as Record<string, unknown>)[appKey];
+        }
+      }
 
       const { error } = await supabase
         .from('credit_cards')
@@ -129,8 +149,6 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
       if (error) {
         console.error('[UpdateCard] Database error:', error);
-      } else {
-        console.log(`[UpdateCard] Updated card ${id} in database`);
       }
     } catch (err) {
       console.error('[UpdateCard] Unexpected error:', err);
@@ -140,20 +158,18 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
   removeCard: async (id) => {
     const { currentUserId } = get();
 
-    // Optimistic update (works for both modes)
+    // Optimistic update
     set((state) => ({
-      cards: state.cards.filter((card) => card.id !== id),
+      cards: state.cards.filter(card => card.id !== id),
     }));
 
-    // GUEST MODE BRANCH
+    // Guest mode: save to localStorage
     if (!currentUserId) {
-      console.log('[RemoveCard] Guest mode - saving to localStorage');
       saveGuestCards(get().cards);
       return;
     }
 
-    // AUTHENTICATED MODE
-    // Delete from database
+    // Authenticated mode: delete from database
     try {
       const { error } = await supabase
         .from('credit_cards')
@@ -163,8 +179,6 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
       if (error) {
         console.error('[RemoveCard] Database error:', error);
-      } else {
-        console.log(`[RemoveCard] Deleted card ${id} from database`);
       }
     } catch (err) {
       console.error('[RemoveCard] Unexpected error:', err);
@@ -173,19 +187,15 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
   clearCards: async () => {
     const { currentUserId } = get();
-
-    // Clear state (works for both modes)
     set({ cards: [], result: null });
 
-    // GUEST MODE BRANCH
+    // Guest mode: clear localStorage
     if (!currentUserId) {
-      console.log('[ClearCards] Guest mode - clearing localStorage');
       clearGuestCardsFromStorage();
       return;
     }
 
-    // AUTHENTICATED MODE
-    // Delete all cards from database
+    // Authenticated mode: delete all from database
     try {
       const { error } = await supabase
         .from('credit_cards')
@@ -194,8 +204,6 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
 
       if (error) {
         console.error('[ClearCards] Database error:', error);
-      } else {
-        console.log('[ClearCards] Deleted all cards from database');
       }
     } catch (err) {
       console.error('[ClearCards] Unexpected error:', err);
@@ -234,107 +242,74 @@ export const useCalculatorStore = create<CalculatorState>()((set, get) => ({
   },
 
   setUserId: async (userId) => {
-    const currentUserId = get().currentUserId;
+    if (userId === get().currentUserId) return;
 
-    // If userId changed, load user-specific data
-    if (userId !== currentUserId) {
-      console.log(`[Auth] User changed from ${currentUserId} to ${userId}`);
+    set({ currentUserId: userId });
 
-      // Set the new userId
-      set({ currentUserId: userId });
+    // User logged out
+    if (!userId) {
+      set({ cards: [], result: null });
+      return;
+    }
 
-      if (!userId) {
-        // User logged out
+    // Load cards from database
+    try {
+      const { data: dbCards, error } = await supabase
+        .from('credit_cards')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('[SetUserId] Error loading cards:', error);
         set({ cards: [], result: null });
         return;
       }
 
-      // Load cards from database
-      try {
-        const { data: dbCards, error } = await supabase
-          .from('credit_cards')
-          .select('*')
-          .eq('user_id', userId);
-
-        if (error) {
-          console.error('[SetUserId] Error loading cards:', error);
-          set({ cards: [], result: null });
-          return;
-        }
-
-        // Check if database is empty - if so, migrate from localStorage
-        if (!dbCards || dbCards.length === 0) {
-          console.log('[SetUserId] No cards in database, checking localStorage for migration');
-          const localCards = loadFromLocalStorage(null); // Load from guest storage key
-
-          if (localCards.length > 0) {
-            console.log(`[SetUserId] Migrating ${localCards.length} cards from localStorage to database`);
-
-            // Migrate each card to database
-            for (const card of localCards) {
-              await supabase.from('credit_cards').insert({
-                id: card.id,
-                user_id: userId,
-                nickname: card.nickname,
-                credit_limit: card.creditLimit,
-                current_balance: card.currentBalance,
-                statement_date: card.statementDate,
-                due_date: card.dueDate,
-                apr: card.apr,
-                image_url: card.imageUrl || '/cards/default-card.svg',
-              });
-            }
-
-            // Set migrated cards in state
-            set({ cards: localCards, result: null });
-
-            // Clear localStorage after successful migration
-            if (typeof window !== 'undefined') {
-              const key = getUserStorageKey(null); // Clear guest storage key
-              localStorage.removeItem(key);
-              console.log('[SetUserId] Migration complete, localStorage cleared');
-            }
-          } else {
-            set({ cards: [], result: null });
-          }
-        } else {
-          // Convert database format to app format
-          const cards: CreditCard[] = dbCards.map((dbCard) => ({
-            id: dbCard.id,
-            nickname: dbCard.nickname,
-            creditLimit: Number(dbCard.credit_limit),
-            currentBalance: Number(dbCard.current_balance),
-            statementDate: dbCard.statement_date,
-            dueDate: dbCard.due_date,
-            apr: dbCard.apr ? Number(dbCard.apr) : undefined,
-            imageUrl: dbCard.image_url || '/cards/default-card.svg',
-          }));
-
-          console.log(`[SetUserId] Loaded ${cards.length} cards from database`);
-          set({ cards, result: null });
-        }
-      } catch (err) {
-        console.error('[SetUserId] Unexpected error:', err);
-        set({ cards: [], result: null });
+      // If database has cards, use them
+      if (dbCards && dbCards.length > 0) {
+        set({ cards: dbCards.map(dbCardToAppCard), result: null });
+        return;
       }
+
+      // Check for guest cards to migrate
+      const localCards = loadFromLocalStorage(null);
+      if (localCards.length === 0) {
+        set({ cards: [], result: null });
+        return;
+      }
+
+      // Migrate guest cards to database
+      for (const card of localCards) {
+        await supabase.from('credit_cards').insert({
+          id: card.id,
+          ...appCardToDbCard(card, userId),
+        });
+      }
+
+      set({ cards: localCards, result: null });
+
+      // Clear guest storage after migration
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(getUserStorageKey(null));
+      }
+    } catch (err) {
+      console.error('[SetUserId] Unexpected error:', err);
+      set({ cards: [], result: null });
     }
   },
 }));
 
-// Helper function to load cards from localStorage (for migration only)
+// Load cards from localStorage (for migration only)
 function loadFromLocalStorage(userId: string | null): CreditCard[] {
   if (typeof window === 'undefined') return [];
 
-  const key = getUserStorageKey(userId);
-  const stored = localStorage.getItem(key);
-
+  const stored = localStorage.getItem(getUserStorageKey(userId));
   if (!stored) return [];
 
   try {
     const { state } = JSON.parse(stored);
     return state.cards || [];
-  } catch (e) {
-    console.error('[LocalStorage] Failed to parse stored data:', e);
+  } catch {
     return [];
   }
 }

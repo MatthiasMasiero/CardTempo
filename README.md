@@ -1,14 +1,14 @@
-# 💳 Credit Optimizer
+# 💳 CardTempo
 
 > **Boost your credit score by 15-160 points** through optimized credit card payment timing.
 
-Credit Optimizer is a smart financial tool that helps users improve their credit scores by optimizing when they pay their credit card bills. The secret? Credit bureaus report your balance on your **statement date**, not your due date.
+CardTempo is a smart financial tool that helps users improve their credit scores by optimizing when they pay their credit card bills. The secret? Credit bureaus report your balance on your **statement date**, not your due date.
 
 By paying most of your balance 2-3 days before your statement date, you can dramatically reduce your reported credit utilization and see significant credit score improvements.
 
 ---
 
-## 🎯 Why Credit Optimizer?
+## 🎯 Why CardTempo?
 
 **The Problem:** Most people pay their credit cards on the due date, but by then, their high balance has already been reported to credit bureaus, hurting their credit score.
 
@@ -117,8 +117,8 @@ By paying most of your balance 2-3 days before your statement date, you can dram
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/credit-optimizer.git
-   cd credit-optimizer
+   git clone https://github.com/yourusername/cardtempo.git
+   cd cardtempo
    ```
 
 2. **Install dependencies**
@@ -197,7 +197,7 @@ npm run lint         # Run ESLint
 ### Project Structure
 
 ```
-credit-optimizer/
+cardtempo/
 ├── src/
 │   ├── app/                 # Next.js App Router pages
 │   │   ├── calculator/      # Main calculator page
@@ -331,7 +331,7 @@ Based on research and credit scoring models:
    git add .
    git commit -m "Initial commit"
    git branch -M main
-   git remote add origin https://github.com/yourusername/credit-optimizer.git
+   git remote add origin https://github.com/yourusername/cardtempo.git
    git push -u origin main
    ```
 
@@ -449,8 +449,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/credit-optimizer/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/credit-optimizer/discussions)
+- **Issues:** [GitHub Issues](https://github.com/yourusername/cardtempo/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/yourusername/cardtempo/discussions)
 - **Email:** your.email@example.com
 
 ---
@@ -469,6 +469,6 @@ The application does not store or transmit credit card numbers, CVV codes, or ba
 
 **Built with ❤️ for better financial futures**
 
-[⭐ Star this repo](https://github.com/yourusername/credit-optimizer) if it helped you!
+[⭐ Star this repo](https://github.com/yourusername/cardtempo) if it helped you!
 
 </div>

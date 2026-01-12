@@ -8,6 +8,12 @@ import { Progress } from '@/components/ui/progress';
 import { CreditCard as CreditCardIcon, Trash2, Edit2 } from 'lucide-react';
 import { CreditCard } from '@/types';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
+import {
+  calculateUtilization,
+  getUtilizationColor,
+  getUtilizationBadge,
+  getUtilizationGradient,
+} from '@/lib/utilization';
 import Image from 'next/image';
 
 interface CardDisplayProps {
@@ -18,36 +24,13 @@ interface CardDisplayProps {
 
 export function CardDisplay({ card, onRemove, onEdit }: CardDisplayProps) {
   const [imageError, setImageError] = useState(false);
-  const utilization = (card.currentBalance / card.creditLimit) * 100;
-
-  const getUtilizationColor = (util: number) => {
-    if (util > 100) return 'bg-red-500';
-    if (util > 30) return 'bg-red-500';
-    if (util > 10) return 'bg-yellow-500';
-    return 'bg-green-500';
-  };
-
-  const getUtilizationBadge = (util: number) => {
-    if (util > 100) return { label: 'Over Limit', variant: 'destructive' as const };
-    if (util > 30) return { label: 'High', variant: 'destructive' as const };
-    if (util > 10) return { label: 'Medium', variant: 'secondary' as const };
-    return { label: 'Good', variant: 'default' as const };
-  };
-
+  const utilization = calculateUtilization(card.currentBalance, card.creditLimit);
   const badge = getUtilizationBadge(utilization);
 
   return (
     <Card className="relative overflow-hidden">
       {/* Card Header with gradient based on utilization */}
-      <div
-        className={`h-2 ${
-          utilization > 30
-            ? 'bg-gradient-to-r from-red-500 to-red-400'
-            : utilization > 10
-            ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-            : 'bg-gradient-to-r from-green-500 to-green-400'
-        }`}
-      />
+      <div className={`h-2 ${getUtilizationGradient(utilization)}`} />
       <CardContent className="pt-4">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">

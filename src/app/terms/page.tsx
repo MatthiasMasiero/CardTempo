@@ -13,7 +13,7 @@ export default function TermsPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <CreditCard className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">Credit Optimizer</span>
+            <span className="font-semibold text-lg">CardTempo</span>
           </Link>
           <Link href="/">
             <Button variant="ghost" size="sm" className="gap-2">
@@ -39,7 +39,7 @@ export default function TermsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  By accessing or using Credit Optimizer (&quot;the Service&quot;), you agree to be bound by these
+                  By accessing or using CardTempo (&quot;the Service&quot;), you agree to be bound by these
                   Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, please do not use the
                   Service. We reserve the right to modify these Terms at any time, and your continued use
                   of the Service constitutes acceptance of any changes.
@@ -53,7 +53,7 @@ export default function TermsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Credit Optimizer is an educational tool that helps users understand and optimize their
+                  CardTempo is an educational tool that helps users understand and optimize their
                   credit card payment strategies. The Service provides:
                 </p>
                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
@@ -74,7 +74,7 @@ export default function TermsPage() {
                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm font-semibold text-yellow-800 mb-2">Important Disclaimer:</p>
                   <p className="text-sm text-yellow-700">
-                    Credit Optimizer is provided for educational and informational purposes only. It is
+                    CardTempo is provided for educational and informational purposes only. It is
                     NOT financial advice, and should not be considered as such.
                   </p>
                 </div>
@@ -199,7 +199,7 @@ export default function TermsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  You agree to indemnify, defend, and hold harmless Credit Optimizer, its officers,
+                  You agree to indemnify, defend, and hold harmless CardTempo, its officers,
                   directors, employees, and agents from any claims, liabilities, damages, losses, or
                   expenses (including legal fees) arising from:
                 </p>
@@ -279,7 +279,7 @@ export default function TermsPage() {
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="pt-6">
                 <p className="text-sm text-blue-800">
-                  <strong>By using Credit Optimizer, you acknowledge that you have read, understood, and
+                  <strong>By using CardTempo, you acknowledge that you have read, understood, and
                   agree to be bound by these Terms of Service.</strong>
                 </p>
               </CardContent>

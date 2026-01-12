@@ -56,8 +56,7 @@ next-env.d.ts
 
 # claude code local files
 CLAUDE.local.md
-.claude/*.local.json
-.claude/.chat_history/
+.claude/
 
 # Temporary documentation and checklists
 BUILD_ERRORS_EXPLAINED.md
@@ -70,6 +69,7 @@ TOP_10_CARDS_QUICK_GUIDE.md
 *_SUMMARY.md
 *_CHECKLIST.md
 *_EXPLAINED.md
+public/card-image-checklist.html
 
 # Screenshots and temporary images in root
 Screenshot*.png

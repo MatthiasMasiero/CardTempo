@@ -83,7 +83,7 @@ export function getAllPosts(): BlogPostPreview[] {
         title: data.title,
         excerpt: data.excerpt,
         date: data.date,
-        author: data.author || 'Credit Optimizer Team',
+        author: data.author || 'CardTempo Team',
         tags: data.tags || [],
         readTime: calculateReadTime(content),
       };
@@ -120,7 +120,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       title: data.title,
       excerpt: data.excerpt,
       date: data.date,
-      author: data.author || 'Credit Optimizer Team',
+      author: data.author || 'CardTempo Team',
       tags: data.tags || [],
       readTime: calculateReadTime(content),
       content: contentHtml,

@@ -16,9 +16,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Credit Optimizer | Boost Your Credit Score with Smart Payment Timing",
+  title: "CardTempo | Boost Your Credit Score with Smart Payment Timing",
   description: "Optimize your credit card payments to improve your credit score. Learn when to pay to reduce your reported credit utilization and boost your score by 15-50 points.",
-  keywords: ["credit score", "credit utilization", "credit card payments", "credit optimizer", "improve credit score"],
+  keywords: ["credit score", "credit utilization", "credit card payments", "cardtempo", "improve credit score"],
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },

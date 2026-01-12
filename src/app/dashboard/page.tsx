@@ -15,7 +15,7 @@ import { HighUtilizationBanner } from '@/components/HighUtilizationBanner';
 import { useAuthStore } from '@/store/auth-store';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
-import { format, differenceInDays, addDays, startOfDay, isSameDay } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { CreditCard, CreditCardFormData } from '@/types';
 import {
   CreditCard as CreditCardIcon,

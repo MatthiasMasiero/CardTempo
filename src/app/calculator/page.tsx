@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,40 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 
+// Loading fallback for Suspense
+function CalculatorLoading() {
+  return (
+    <div className="min-h-screen bg-[#FAFAF8] font-body">
+      <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <CreditCardIcon className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-display text-xl text-stone-900">CardTempo</span>
+          </Link>
+        </div>
+      </header>
+      <main className="container mx-auto px-6 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-stone-200 rounded w-1/3"></div>
+          <div className="h-64 bg-stone-200 rounded"></div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Main page wrapper with Suspense boundary
 export default function CalculatorPage() {
+  return (
+    <Suspense fallback={<CalculatorLoading />}>
+      <CalculatorContent />
+    </Suspense>
+  );
+}
+
+function CalculatorContent() {
   const { cards, addCard, updateCard, removeCard, calculateResults, result, clearResults } =
     useCalculatorStore();
   const { isAuthenticated } = useAuthStore();

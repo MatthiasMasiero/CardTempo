@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import creditCardsData from '@/data/credit-cards.json';
 
+// Force dynamic rendering since we use request.url
+export const dynamic = 'force-dynamic';
+
 interface CreditCard {
   id: string;
   name: string;

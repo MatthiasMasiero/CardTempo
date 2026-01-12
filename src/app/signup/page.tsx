@@ -56,43 +56,45 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#FAFAF8] font-body flex flex-col">
       {/* Header */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center gap-2 w-fit">
-            <CreditCard className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">CardTempo</span>
+      <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md">
+        <div className="container mx-auto px-6 py-4">
+          <Link href="/" className="flex items-center gap-2.5 w-fit">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <CreditCard className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-display text-xl text-stone-900">CardTempo</span>
           </Link>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {confirmationSent ? (
-            <Card>
+            <Card className="border-stone-200">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <Mail className="h-8 w-8 text-primary" />
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100">
+                  <Mail className="h-8 w-8 text-emerald-600" />
                 </div>
-                <CardTitle className="text-2xl">Check Your Email</CardTitle>
-                <CardDescription className="text-base">
-                  We sent a confirmation link to <strong>{email}</strong>
+                <CardTitle className="font-display text-2xl text-stone-900">Check Your Email</CardTitle>
+                <CardDescription className="text-base text-stone-600">
+                  We sent a confirmation link to <strong className="text-stone-900">{email}</strong>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-center text-sm text-stone-600">
                   Click the link in the email to activate your account.
                   The link will expire in 24 hours.
                 </p>
                 <div className="pt-2 space-y-2">
-                  <p className="text-center text-sm text-muted-foreground">
+                  <p className="text-center text-sm text-stone-500">
                     Didn&apos;t receive the email? Check your spam folder.
                   </p>
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-stone-300 text-stone-700 hover:bg-stone-100"
                     onClick={() => setConfirmationSent(false)}
                   >
                     Try a different email
@@ -102,10 +104,10 @@ export default function SignupPage() {
             </Card>
           ) : (
             <>
-              <Card>
+              <Card className="border-stone-200">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">Create Your Account</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="font-display text-2xl text-stone-900">Create Your Account</CardTitle>
+                  <CardDescription className="text-stone-600">
                     Save your cards and get payment reminders
                   </CardDescription>
                 </CardHeader>
@@ -118,7 +120,7 @@ export default function SignupPage() {
                     )}
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="text-stone-700">Email</Label>
                       <Input
                         id="email"
                         type="email"
@@ -126,11 +128,12 @@ export default function SignupPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isLoading}
+                        className="border-stone-300 focus:border-emerald-500 focus:ring-emerald-500"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password" className="text-stone-700">Password</Label>
                       <Input
                         id="password"
                         type="password"
@@ -138,11 +141,12 @@ export default function SignupPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={isLoading}
+                        className="border-stone-300 focus:border-emerald-500 focus:ring-emerald-500"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <Label htmlFor="confirmPassword" className="text-stone-700">Confirm Password</Label>
                       <Input
                         id="confirmPassword"
                         type="password"
@@ -150,10 +154,11 @@ export default function SignupPage() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         disabled={isLoading}
+                        className="border-stone-300 focus:border-emerald-500 focus:ring-emerald-500"
                       />
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoading}>
                       {isLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -164,9 +169,9 @@ export default function SignupPage() {
                       )}
                     </Button>
 
-                    <p className="text-center text-sm text-muted-foreground">
+                    <p className="text-center text-sm text-stone-600">
                       Already have an account?{' '}
-                      <Link href="/login" className="text-primary hover:underline">
+                      <Link href="/login" className="text-emerald-600 hover:text-emerald-700 hover:underline font-medium">
                         Sign in
                       </Link>
                     </p>
@@ -177,7 +182,7 @@ export default function SignupPage() {
 
               {/* Benefits */}
               <div className="mt-6 space-y-3">
-                <h3 className="text-sm font-medium text-center">What you get:</h3>
+                <h3 className="text-sm font-medium text-center text-stone-700">What you get:</h3>
                 <div className="grid gap-2">
                   {[
                     'Save all your credit cards securely',
@@ -185,8 +190,8 @@ export default function SignupPage() {
                     'Track your utilization over time',
                     'Access your dashboard from any device',
                   ].map((benefit, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <div key={i} className="flex items-center gap-2 text-sm text-stone-600">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                       <span>{benefit}</span>
                     </div>
                   ))}

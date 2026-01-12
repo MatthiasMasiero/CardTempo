@@ -26,18 +26,18 @@ export function PaymentTimeline({ plan }: PaymentTimelineProps) {
   const { card, payments, currentUtilization, newUtilization, utilizationStatus } = plan;
   const [imageError, setImageError] = useState(false);
 
-  const getStatusColor = (status: string) => {
+  const getStatusBorderColor = (status: string) => {
     switch (status) {
       case 'overlimit':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'border-l-red-600';
       case 'high':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'border-l-red-500';
       case 'medium':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'border-l-amber-500';
       case 'good':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'border-l-emerald-500';
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return 'border-l-stone-400';
     }
   };
 
@@ -59,7 +59,7 @@ export function PaymentTimeline({ plan }: PaymentTimelineProps) {
   const statusBadge = getStatusBadge(utilizationStatus);
 
   return (
-    <Card className={`border-2 ${getStatusColor(utilizationStatus)}`}>
+    <Card className={`border-l-4 ${getStatusBorderColor(utilizationStatus)} border-stone-200`}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-3">
@@ -124,23 +124,23 @@ export function PaymentTimeline({ plan }: PaymentTimelineProps) {
 
         {/* Important Dates */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 border rounded-lg">
+          <div className="p-3 border border-stone-200 border-l-4 border-l-amber-400 rounded-lg bg-white">
             <div className="flex items-center gap-2 mb-1">
-              <Calendar className="h-4 w-4 text-yellow-600" />
-              <span className="text-xs text-muted-foreground">Statement Date</span>
+              <Calendar className="h-4 w-4 text-amber-600" />
+              <span className="text-xs text-stone-500">Statement Date</span>
             </div>
-            <p className="font-semibold">{format(plan.nextStatementDate, 'MMM d, yyyy')}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="font-semibold text-stone-900">{format(plan.nextStatementDate, 'MMM d, yyyy')}</p>
+            <p className="text-xs text-stone-500">
               {differenceInDays(plan.nextStatementDate, new Date())} days away
             </p>
           </div>
-          <div className="p-3 border rounded-lg">
+          <div className="p-3 border border-stone-200 border-l-4 border-l-blue-400 rounded-lg bg-white">
             <div className="flex items-center gap-2 mb-1">
               <Clock className="h-4 w-4 text-blue-600" />
-              <span className="text-xs text-muted-foreground">Due Date</span>
+              <span className="text-xs text-stone-500">Due Date</span>
             </div>
-            <p className="font-semibold">{format(plan.nextDueDate, 'MMM d, yyyy')}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="font-semibold text-stone-900">{format(plan.nextDueDate, 'MMM d, yyyy')}</p>
+            <p className="text-xs text-stone-500">
               {differenceInDays(plan.nextDueDate, new Date())} days away
             </p>
           </div>
@@ -221,11 +221,11 @@ export function PaymentTimeline({ plan }: PaymentTimelineProps) {
 
         {/* Explanation */}
         {plan.needsOptimization && (
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-700">
-              <strong>How it works:</strong> This payment will be reported to credit bureaus at{' '}
-              <span className="font-semibold">{formatPercentage(newUtilization)}</span> utilization
-              instead of <span className="font-semibold">{formatPercentage(currentUtilization)}</span>.
+          <div className="p-4 bg-white rounded-lg border border-stone-200 border-l-4 border-l-blue-500">
+            <p className="text-sm text-stone-700">
+              <strong className="text-stone-900">How it works:</strong> This payment will be reported to credit bureaus at{' '}
+              <span className="font-semibold text-emerald-600">{formatPercentage(newUtilization)}</span> utilization
+              instead of <span className="font-semibold text-stone-600">{formatPercentage(currentUtilization)}</span>.
               Lower reported utilization = higher credit score.
             </p>
           </div>

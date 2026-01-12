@@ -31,6 +31,10 @@ import {
   Star,
   ArrowUpRight,
   ChevronRight,
+  Shield,
+  ShieldCheck,
+  Lock,
+  EyeOff,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -111,10 +115,16 @@ function HeroSection({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 mb-8"
+              className="flex flex-wrap items-center gap-3 mb-8"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-sm font-medium text-emerald-700">Free tool — no signup required</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm font-medium text-emerald-700">Free — no signup required</span>
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200">
+                <Shield className="h-3.5 w-3.5 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">No card numbers needed</span>
+              </div>
             </motion.div>
 
             <motion.h1
@@ -368,6 +378,26 @@ export default function LandingPage() {
                 <Counter end={30} />
               </div>
               <p className="text-sm text-stone-500 mt-1">Days to see results</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Bar */}
+      <section className="py-5 bg-stone-50 border-b border-stone-200">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-3 text-sm text-stone-600">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <span>No credit card numbers required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <EyeOff className="h-4 w-4 text-emerald-600" />
+              <span>No SSN or personal data</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Lock className="h-4 w-4 text-emerald-600" />
+              <span>Calculations stay in your browser</span>
             </div>
           </div>
         </div>
@@ -654,6 +684,17 @@ export default function LandingPage() {
 
             <RevealOnScroll delay={0.1}>
               <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem value="item-0" className="border border-stone-200 rounded-xl px-6 bg-white">
+                  <AccordionTrigger className="text-left hover:no-underline py-5 text-stone-900">
+                    What information do I need to enter?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-stone-600 pb-5 leading-relaxed">
+                    Just basic card details: your credit limit, current balance, statement date, and due date.
+                    <strong className="text-stone-900"> We never ask for card numbers, SSN, or any sensitive personal information.</strong>{' '}
+                    The calculator works entirely with these simple numbers that you can find on any statement.
+                  </AccordionContent>
+                </AccordionItem>
+
                 <AccordionItem value="item-1" className="border border-stone-200 rounded-xl px-6 bg-white">
                   <AccordionTrigger className="text-left hover:no-underline py-5 text-stone-900">
                     Is this legitimate? Will it really help my score?
@@ -719,7 +760,7 @@ export default function LandingPage() {
               </h2>
               <p className="text-xl text-stone-400 mb-10 leading-relaxed">
                 Enter your cards and get a personalized payment plan in seconds.
-                No signup required for the free calculator.
+                No card numbers, no SSN, no signup — just limits and balances.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/calculator">

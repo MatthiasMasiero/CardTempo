@@ -105,7 +105,7 @@ function LoginPageContent() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-6">
-        <Card className="w-full max-w-md border-stone-200">
+        <Card className="w-full max-w-md border-l-4 border-l-emerald-500 border-stone-200">
           <CardHeader className="text-center">
             <CardTitle className="font-display text-2xl text-stone-900">Welcome Back</CardTitle>
             <CardDescription className="text-stone-600">

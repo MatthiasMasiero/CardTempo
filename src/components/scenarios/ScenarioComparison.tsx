@@ -44,8 +44,8 @@ export function ScenarioComparison({
   };
 
   return (
-    <Card className="shadow-lg border-2">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+    <Card className="border-l-4 border-l-blue-500 border-stone-200">
+      <CardHeader className="bg-white border-b border-stone-100">
         <CardTitle className="flex items-center gap-2">
           {isDifferent ? (
             <>
@@ -229,14 +229,14 @@ export function ScenarioComparison({
         {isDifferent && (
           <div className="mb-6 space-y-3">
             {comparison.improvements.length > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2">
+              <div className="bg-white border border-stone-200 border-l-4 border-l-emerald-500 rounded-lg p-3">
+                <h4 className="text-sm font-semibold text-emerald-800 mb-2 flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
                   Improvements
                 </h4>
                 <ul className="space-y-1">
                   {comparison.improvements.map((improvement, idx) => (
-                    <li key={idx} className="text-xs text-green-700">
+                    <li key={idx} className="text-xs text-emerald-700">
                       • {improvement}
                     </li>
                   ))}
@@ -245,7 +245,7 @@ export function ScenarioComparison({
             )}
 
             {comparison.declines.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="bg-white border border-stone-200 border-l-4 border-l-red-500 rounded-lg p-3">
                 <h4 className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
                   Concerns
@@ -281,8 +281,8 @@ export function ScenarioComparison({
         )}
 
         {!isDifferent && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-            <p className="text-sm text-blue-800">
+          <div className="bg-white border border-stone-200 border-l-4 border-l-blue-500 rounded-lg p-3 text-center">
+            <p className="text-sm text-stone-700">
               This is your current state. Test a scenario to see potential changes.
             </p>
           </div>

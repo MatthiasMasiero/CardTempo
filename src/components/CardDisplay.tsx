@@ -12,7 +12,6 @@ import {
   calculateUtilization,
   getUtilizationColor,
   getUtilizationBadge,
-  getUtilizationGradient,
 } from '@/lib/utilization';
 import Image from 'next/image';
 import { format } from 'date-fns';
@@ -30,10 +29,15 @@ export function CardDisplay({ card, onRemove, onEdit, payments }: CardDisplayPro
   const utilization = calculateUtilization(card.currentBalance, card.creditLimit);
   const badge = getUtilizationBadge(utilization);
 
+  // Get border color based on utilization
+  const getBorderColor = () => {
+    if (utilization <= 10) return 'border-l-emerald-500';
+    if (utilization <= 30) return 'border-l-amber-500';
+    return 'border-l-red-500';
+  };
+
   return (
-    <Card className="relative overflow-hidden transition-all">
-      {/* Card Header with gradient based on utilization */}
-      <div className={`h-2 ${getUtilizationGradient(utilization)}`} />
+    <Card className={`relative overflow-hidden transition-all border-l-4 ${getBorderColor()} border-stone-200 hover:border-stone-300 hover:shadow-sm`}>
       <CardContent className="pt-4">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">

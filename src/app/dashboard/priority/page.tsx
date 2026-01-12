@@ -105,23 +105,25 @@ export default function PriorityRankingPage() {
   // Show message if no cards
   if (cards.length === 0) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-[#FAFAF8] font-body">
         {/* Navigation Header */}
-        <header className="border-b bg-white sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <CreditCardIcon className="h-6 w-6 text-primary" />
-              <span className="font-semibold text-lg">CardTempo</span>
+        <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+                <CreditCardIcon className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-display text-xl text-stone-900">CardTempo</span>
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="ghost" size="sm" className="gap-2 text-stone-600 hover:text-stone-900">
                   <Home className="h-4 w-4" />
                   Home
                 </Button>
               </Link>
               <Link href="/dashboard">
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2 border-stone-300">
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Button>
@@ -130,23 +132,25 @@ export default function PriorityRankingPage() {
           </div>
         </header>
 
-        <div className="container mx-auto px-4 py-16 max-w-2xl">
-          <Card>
+        <div className="container mx-auto px-6 py-16 max-w-2xl">
+          <Card className="border-l-4 border-l-emerald-500 border-stone-200">
             <CardContent className="p-12 text-center">
-              <CreditCardIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">No Credit Cards Added</h2>
-              <p className="text-muted-foreground mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                <CreditCardIcon className="h-8 w-8 text-emerald-600" />
+              </div>
+              <h2 className="font-display text-2xl text-stone-900 mb-2">No Credit Cards Added</h2>
+              <p className="text-stone-600 mb-6">
                 Add your credit cards in the calculator to see smart payment allocation recommendations.
               </p>
               <div className="flex gap-3 justify-center">
                 <Link href="/calculator">
-                  <Button className="gap-2">
+                  <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                     <Calculator className="h-4 w-4" />
                     Go to Calculator
                   </Button>
                 </Link>
                 <Link href="/dashboard">
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
                     <LayoutDashboard className="h-4 w-4" />
                     Back to Dashboard
                   </Button>
@@ -160,23 +164,25 @@ export default function PriorityRankingPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#FAFAF8] font-body">
       {/* Navigation Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <CreditCardIcon className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">CardTempo</span>
+      <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <CreditCardIcon className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-display text-xl text-stone-900">CardTempo</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-stone-600 hover:text-stone-900">
                 <Home className="h-4 w-4" />
                 Home
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2 border-stone-300">
                 <LayoutDashboard className="h-4 w-4" />
                 Dashboard
               </Button>
@@ -185,39 +191,47 @@ export default function PriorityRankingPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Smart Payment Allocation</h1>
-          <p className="text-muted-foreground">
+      {/* Page Header */}
+      <div className="bg-white border-b border-stone-200">
+        <div className="container mx-auto px-6 py-8 max-w-6xl">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-emerald-600" />
+            </div>
+            <h1 className="font-display text-3xl text-stone-900">Smart Payment Allocation</h1>
+          </div>
+          <p className="text-stone-600 ml-13">
             Maximize your credit score impact with a limited budget
           </p>
         </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-8 max-w-6xl">
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
+        <Card className="border-l-4 border-l-stone-400 border-stone-200">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Total Card Debt</p>
-            <p className="text-2xl font-bold">${totalBalance.toLocaleString()}</p>
+            <p className="text-sm text-stone-500">Total Card Debt</p>
+            <p className="font-display text-2xl text-stone-900">${totalBalance.toLocaleString()}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-blue-500 border-stone-200">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Optimal Payment</p>
-            <p className="text-2xl font-bold">${optimalPayment.toLocaleString()}</p>
+            <p className="text-sm text-stone-500">Optimal Payment</p>
+            <p className="font-display text-2xl text-stone-900">${optimalPayment.toLocaleString()}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-emerald-500 border-stone-200">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Your Budget</p>
-            <p className="text-2xl font-bold text-primary">${budget.toLocaleString()}</p>
+            <p className="text-sm text-stone-500">Your Budget</p>
+            <p className="font-display text-2xl text-emerald-600">${budget.toLocaleString()}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-l-4 border-l-amber-500 border-stone-200">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Efficiency</p>
-            <p className="text-2xl font-bold text-green-600">{percentOfOptimal.toFixed(0)}%</p>
+            <p className="text-sm text-stone-500">Efficiency</p>
+            <p className="font-display text-2xl text-amber-600">{percentOfOptimal.toFixed(0)}%</p>
           </CardContent>
         </Card>
       </div>
@@ -225,13 +239,15 @@ export default function PriorityRankingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Budget Input */}
         <div className="lg:col-span-1 space-y-6">
-          <Card>
+          <Card className="border-l-4 border-l-emerald-500 border-stone-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-stone-900">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <DollarSign className="h-4 w-4 text-emerald-600" />
+                </div>
                 Budget Configuration
               </CardTitle>
-              <CardDescription>How much can you pay this month?</CardDescription>
+              <CardDescription className="text-stone-500">How much can you pay this month?</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Number Input */}
@@ -358,36 +374,38 @@ export default function PriorityRankingPage() {
 
           {/* Impact Summary Card */}
           {currentAllocation && (
-            <Card className="bg-primary/5 border-primary/20">
+            <Card className="border-l-4 border-l-blue-500 border-stone-200 bg-white">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg flex items-center gap-2 text-stone-900">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                  </div>
                   Expected Impact
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Utilization Change</span>
-                  <span className="font-bold text-lg">
+                  <span className="text-sm text-stone-500">Utilization Change</span>
+                  <span className="font-semibold text-lg text-stone-900">
                     {currentAllocation.expectedImpact.overallUtilizationBefore.toFixed(1)}% →{' '}
                     {currentAllocation.expectedImpact.overallUtilizationAfter.toFixed(1)}%
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Est. Score Impact</span>
-                  <span className="font-bold text-lg text-green-600">
+                  <span className="text-sm text-stone-500">Est. Score Impact</span>
+                  <span className="font-semibold text-lg text-emerald-600">
                     +{currentAllocation.expectedImpact.estimatedScoreImpact} points
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Interest Saved</span>
-                  <span className="font-bold text-lg">
+                  <span className="text-sm text-stone-500">Interest Saved</span>
+                  <span className="font-semibold text-lg text-stone-900">
                     ${currentAllocation.expectedImpact.interestSaved.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Cards Under 30%</span>
-                  <span className="font-bold text-lg">
+                  <span className="text-sm text-stone-500">Cards Under 30%</span>
+                  <span className="font-semibold text-lg text-stone-900">
                     {currentAllocation.expectedImpact.cardsUnder30Percent}/{cards.length}
                   </span>
                 </div>
@@ -401,10 +419,10 @@ export default function PriorityRankingPage() {
           {!isBelowMinimums && currentAllocation ? (
             <>
               {/* Strategy Selection */}
-              <Card>
+              <Card className="border-l-4 border-l-purple-500 border-stone-200">
                 <CardHeader>
-                  <CardTitle>Allocation Strategy</CardTitle>
-                  <CardDescription>Choose how to distribute your payment budget</CardDescription>
+                  <CardTitle className="text-stone-900">Allocation Strategy</CardTitle>
+                  <CardDescription className="text-stone-500">Choose how to distribute your payment budget</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Tabs value={selectedStrategy} onValueChange={(v) => setSelectedStrategy(v as 'max_score' | 'min_interest' | 'utilization_focus' | 'equal_distribution')}>
@@ -459,10 +477,10 @@ export default function PriorityRankingPage() {
               </div>
 
               {/* What You're Getting/Missing */}
-              <Card>
+              <Card className="border-l-4 border-l-amber-500 border-stone-200">
                 <CardHeader>
-                  <CardTitle>Trade-Off Analysis</CardTitle>
-                  <CardDescription>What you achieve vs what you need for optimal results</CardDescription>
+                  <CardTitle className="text-stone-900">Trade-Off Analysis</CardTitle>
+                  <CardDescription className="text-stone-500">What you achieve vs what you need for optimal results</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-6">
@@ -573,14 +591,14 @@ export default function PriorityRankingPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                <Button className="gap-2">
+                <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                   <Calculator className="h-4 w-4" />
                   Apply This Allocation
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
                   Set Payment Reminders
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
                   Download Schedule
                 </Button>
               </div>

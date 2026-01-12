@@ -38,24 +38,21 @@ export default function RecommendationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-[#FAFAF8] font-body">
       {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <CreditCardIcon className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">CardTempo</span>
+      <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <CreditCardIcon className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-display text-xl text-stone-900">CardTempo</span>
           </Link>
           <nav className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="gap-2">
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm" className="gap-2 border-stone-300">
                 <ArrowLeft className="h-4 w-4" />
-                Home
-              </Button>
-            </Link>
-            <Link href="/calculator">
-              <Button variant="outline" size="sm">
-                Calculator
+                Dashboard
               </Button>
             </Link>
           </nav>
@@ -63,15 +60,15 @@ export default function RecommendationsPage() {
       </header>
 
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-primary/5 via-blue-50 to-purple-50 border-b">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="bg-gradient-to-r from-amber-50 via-amber-50/50 to-orange-50/30 border-b border-stone-200">
+        <div className="container mx-auto px-6 py-8 max-w-4xl">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-amber-600" />
             </div>
-            <h1 className="text-3xl font-bold">Card Recommendations</h1>
+            <h1 className="font-display text-3xl text-stone-900">Card Recommendations</h1>
           </div>
-          <p className="text-muted-foreground ml-13">
+          <p className="text-stone-600 ml-13">
             {pageState === 'questionnaire'
               ? 'Answer a few questions to find the perfect credit cards for your spending habits'
               : 'Your personalized card recommendations based on your preferences'}
@@ -80,7 +77,7 @@ export default function RecommendationsPage() {
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-6 py-8 max-w-4xl">
         {pageState === 'questionnaire' && (
           <RecommendationQuestionnaire onComplete={handleQuestionnaireComplete} />
         )}
@@ -94,9 +91,9 @@ export default function RecommendationsPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 mt-8 border-t bg-white">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-sm text-muted-foreground">
+      <footer className="py-8 mt-8 border-t border-stone-200 bg-white">
+        <div className="container mx-auto px-6">
+          <p className="text-center text-sm text-stone-500">
             Recommendations are for educational purposes only. Always research cards thoroughly before applying.
           </p>
         </div>

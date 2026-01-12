@@ -86,27 +86,29 @@ export default function SettingsPage() {
 
   if (!mounted || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#FAFAF8] font-body">
         <div className="animate-pulse p-8">
-          <div className="h-8 bg-slate-200 rounded w-1/3 mb-4"></div>
-          <div className="h-64 bg-slate-200 rounded"></div>
+          <div className="h-8 bg-stone-200 rounded w-1/3 mb-4"></div>
+          <div className="h-64 bg-stone-200 rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#FAFAF8] font-body">
       {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <CreditCardIcon className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">CardTempo</span>
+      <header className="border-b border-stone-200 bg-[#FAFAF8]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <CreditCardIcon className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-display text-xl text-stone-900">CardTempo</span>
           </Link>
           <nav className="flex items-center gap-4">
             <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-stone-600 hover:text-stone-900">
                 <ArrowLeft className="h-4 w-4" />
                 Dashboard
               </Button>
@@ -116,36 +118,36 @@ export default function SettingsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Settings</h1>
-            <p className="text-muted-foreground">
+            <h1 className="font-display text-3xl text-stone-900 mb-2">Settings</h1>
+            <p className="text-stone-600">
               Manage your account preferences and notification settings
             </p>
           </div>
 
           <div className="space-y-6">
             {/* Account Settings */}
-            <Card>
+            <Card className="border-stone-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                <CardTitle className="font-display text-lg text-stone-900 flex items-center gap-2">
+                  <User className="h-5 w-5 text-emerald-600" />
                   Account
                 </CardTitle>
-                <CardDescription>Your account information</CardDescription>
+                <CardDescription className="text-stone-600">Your account information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-stone-700">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={user?.email || ''}
                     disabled
-                    className="bg-slate-50"
+                    className="bg-stone-50 border-stone-300"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-stone-500">
                     Contact support to change your email address
                   </p>
                 </div>
@@ -153,21 +155,21 @@ export default function SettingsPage() {
             </Card>
 
             {/* Notification Settings */}
-            <Card>
+            <Card className="border-stone-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
+                <CardTitle className="font-display text-lg text-stone-900 flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-blue-600" />
                   Notifications
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-stone-600">
                   Configure how and when you receive payment reminders
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="email-notifications">Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <Label htmlFor="email-notifications" className="text-stone-700">Email Notifications</Label>
+                    <p className="text-sm text-stone-500">
                       Receive payment reminders via email
                     </p>
                   </div>
@@ -178,12 +180,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <Separator />
+                <Separator className="bg-stone-200" />
 
                 <div className="space-y-2">
-                  <Label htmlFor="reminder-days">Reminder Timing</Label>
+                  <Label htmlFor="reminder-days" className="text-stone-700">Reminder Timing</Label>
                   <Select value={reminderDays} onValueChange={setReminderDays}>
-                    <SelectTrigger id="reminder-days">
+                    <SelectTrigger id="reminder-days" className="border-stone-300">
                       <SelectValue placeholder="Select timing" />
                     </SelectTrigger>
                     <SelectContent>
@@ -194,7 +196,7 @@ export default function SettingsPage() {
                       <SelectItem value="7">1 week before payment</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-stone-500">
                     When to receive reminders before each payment date
                   </p>
                 </div>
@@ -202,21 +204,21 @@ export default function SettingsPage() {
             </Card>
 
             {/* Optimization Settings */}
-            <Card>
+            <Card className="border-stone-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+                <CardTitle className="font-display text-lg text-stone-900 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-purple-600" />
                   Optimization Preferences
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-stone-600">
                   Customize your credit optimization strategy
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="target-utilization">Target Utilization (%)</Label>
+                  <Label htmlFor="target-utilization" className="text-stone-700">Target Utilization (%)</Label>
                   <Select value={targetUtil} onValueChange={setTargetUtil}>
-                    <SelectTrigger id="target-utilization">
+                    <SelectTrigger id="target-utilization" className="border-stone-300">
                       <SelectValue placeholder="Select target" />
                     </SelectTrigger>
                     <SelectContent>
@@ -227,7 +229,7 @@ export default function SettingsPage() {
                       <SelectItem value="9">9% (Maximum Optimal)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-stone-500">
                     The ideal utilization rate to target. 1-9% is the optimal range, with 5% being the sweet spot.
                   </p>
                 </div>
@@ -236,7 +238,7 @@ export default function SettingsPage() {
 
             {/* Save Button */}
             <div className="flex items-center justify-between">
-              <Button onClick={handleSave} className="gap-2">
+              <Button onClick={handleSave} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                 {saved ? (
                   <>
                     <CheckCircle2 className="h-4 w-4" />
@@ -252,13 +254,13 @@ export default function SettingsPage() {
             </div>
 
             {/* Danger Zone */}
-            <Card className="border-destructive/50">
+            <Card className="border-red-200">
               <CardHeader>
-                <CardTitle className="text-destructive flex items-center gap-2">
+                <CardTitle className="font-display text-lg text-red-600 flex items-center gap-2">
                   <Trash2 className="h-5 w-5" />
                   Danger Zone
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-stone-600">
                   Irreversible actions for your account
                 </CardDescription>
               </CardHeader>
@@ -289,7 +291,7 @@ export default function SettingsPage() {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-stone-500">
                   Once you delete your account, all your data will be permanently removed.
                 </p>
               </CardContent>

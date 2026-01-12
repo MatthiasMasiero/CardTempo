@@ -42,6 +42,33 @@ const DEFAULT_MONTHLY_SPENDING: Record<SpendingCategory, number> = {
 const APPLICATION_SPACING_DAYS = 90;
 
 // ============================================
+// CAP HANDLING
+// ============================================
+
+/**
+ * Calculate capped yearly spend based on the cap period.
+ * Different cards have different cap reset periods (monthly, quarterly, annual).
+ */
+function calculateCappedYearlySpend(
+  yearlySpend: number,
+  cap: number,
+  capPeriod: 'monthly' | 'quarterly' | 'annual' = 'annual'
+): number {
+  switch (capPeriod) {
+    case 'monthly':
+      // Cap resets each month, so yearly cap = cap * 12
+      return Math.min(yearlySpend, cap * 12);
+    case 'quarterly':
+      // Cap resets each quarter, so yearly cap = cap * 4
+      return Math.min(yearlySpend, cap * 4);
+    case 'annual':
+    default:
+      // Cap applies to the full year
+      return Math.min(yearlySpend, cap);
+  }
+}
+
+// ============================================
 // CURRENT CARD MATCHING
 // ============================================
 
@@ -136,14 +163,6 @@ const SIMPLICITY_TIER_SCORES: Record<string, Record<RewardTier, number>> = {
   'more-rewards': { aggressive: 15, moderate: 12, basic: 8 },
 };
 
-// Annual fee score thresholds (used as fallback when no spending data)
-const FEE_SCORES: Array<{ maxFee: number; score: number }> = [
-  { maxFee: 0, score: 10 },
-  { maxFee: 100, score: 5 },
-  { maxFee: 200, score: 2 },
-  { maxFee: Infinity, score: 0 },
-];
-
 /**
  * Calculate fee value score based on net benefit (rewards - fee).
  * Returns 0-15 points. Higher net benefit = higher score.
@@ -171,8 +190,55 @@ function calculateFeeValueScore(
 }
 
 /**
+ * Calculate penalty for spending caps that limit heavy spenders.
+ * Returns 0-10 penalty points to subtract from score.
+ */
+function calculateCapPenalty(
+  card: RecommendableCard,
+  monthlySpending: { [key in SpendingCategory]?: number }
+): number {
+  let penalty = 0;
+  const spending = { ...DEFAULT_MONTHLY_SPENDING, ...monthlySpending };
+
+  for (const reward of card.rewards) {
+    if (!reward.cap || reward.category === 'all' || reward.category === 'rotating') continue;
+
+    const category = reward.category as SpendingCategory;
+    const monthlyInCategory = spending[category] || 0;
+    const yearlyInCategory = monthlyInCategory * 12;
+
+    // Calculate the effective yearly cap using cap period
+    const yearlyCap = calculateCappedYearlySpend(
+      Infinity,
+      reward.cap,
+      reward.capPeriod || 'annual'
+    );
+
+    // If user spends significantly more than cap, penalize
+    if (yearlyInCategory > yearlyCap * 1.5) {
+      // Exceeds cap by 50%+ : significant penalty
+      penalty += 5;
+    } else if (yearlyInCategory > yearlyCap) {
+      // Exceeds cap: minor penalty
+      penalty += 2;
+    }
+  }
+
+  return Math.min(penalty, 10); // Max 10 point penalty
+}
+
+/**
  * Calculate match score for a card against user preferences.
  * Returns a score from 0-100.
+ *
+ * Score breakdown:
+ * - Credit Score Eligibility: 20 pts (must pass)
+ * - Category Match: 35 pts max
+ * - Reward Type Match: 10 pts
+ * - Simplicity Match: 10 pts
+ * - Fee Value: 15 pts
+ * - Signup Bonus: 10 pts
+ * Total: 100 pts
  */
 export function calculateMatchScore(
   card: RecommendableCard,
@@ -185,8 +251,8 @@ export function calculateMatchScore(
 
   let score = 20;
 
-  // Category Match (40 points max)
-  const categoryPoints = 40 / Math.max(preferences.topCategories.length, 1);
+  // Category Match (35 points max) - rebalanced from 40 to make room for signup bonus
+  const categoryPoints = 35 / Math.max(preferences.topCategories.length, 1);
 
   // For isAutoHighestCategory cards (like Citi Custom Cash), only count the BEST category
   // since the card only gives bonus rate on ONE category at a time
@@ -199,44 +265,45 @@ export function calculateMatchScore(
     }
     // Only give points for ONE category at the best rate, others at base rate
     const baseRate = card.rewards.find(r => r.category === 'all')?.rewardRate || 1;
-    score += categoryPoints * Math.min(bestRate / 5, 1); // Best category
+    score += categoryPoints * Math.min(bestRate / 6, 1); // Best category (6% max for cards like Amex BCP)
     // Remaining categories get base rate scoring
     for (let i = 1; i < preferences.topCategories.length; i++) {
-      score += categoryPoints * Math.min(baseRate / 5, 1);
+      score += categoryPoints * Math.min(baseRate / 6, 1);
     }
   } else {
     // Normal cards: score each category independently
     for (const category of preferences.topCategories) {
       const rewardRate = getBestRateForCategory(card, category);
-      score += categoryPoints * Math.min(rewardRate / 5, 1);
+      // Use 6 as divisor to give credit to 6% cards like Amex Blue Cash Preferred
+      score += categoryPoints * Math.min(rewardRate / 6, 1);
     }
   }
 
-  // Reward Type Match (15 points)
+  // Reward Type Match (10 points) - rebalanced from 15
   const cardRewardType = card.rewards[0]?.rewardType;
   if (preferences.rewardPreference === 'either' || preferences.rewardPreference === cardRewardType) {
-    score += 15;
+    score += 10;
   } else {
-    score += 5;
+    score += 3;
   }
 
-  // Simplicity Match (15 points)
-  score += SIMPLICITY_TIER_SCORES[preferences.simplicityPreference][card.tier];
+  // Simplicity Match (10 points) - rebalanced from 15
+  // Scale down SIMPLICITY_TIER_SCORES which originally gave 5-15 points
+  const simplicityRawScore = SIMPLICITY_TIER_SCORES[preferences.simplicityPreference][card.tier];
+  score += Math.round(simplicityRawScore * (10 / 15)); // Scale to new 10-point max
 
-  // Fee Value Score (15 points) - Use spending-based scoring if available
-  const hasSpendingData = preferences.monthlySpending &&
-    Object.keys(preferences.monthlySpending).length > 0;
+  // Fee Value Score (15 points) - Always use net benefit calculation
+  // Use defaults if no spending data provided for consistent scoring
+  const spendingData = preferences.monthlySpending || {};
+  score += calculateFeeValueScore(card, spendingData);
 
-  if (hasSpendingData) {
-    // Use dynamic scoring based on whether rewards justify the fee
-    score += calculateFeeValueScore(card, preferences.monthlySpending!);
-  } else {
-    // Fallback to static fee penalty (scaled to 15 points max)
-    const feeEntry = FEE_SCORES.find(f => card.annualFee <= f.maxFee)!;
-    score += Math.round(feeEntry.score * 1.5); // Scale 0-10 to 0-15
-  }
+  // Signup Bonus Score (10 points) - NEW: High-value bonuses significantly impact first-year value
+  score += calculateSignupBonusScore(card, spendingData);
 
-  return Math.round(score);
+  // Cap Penalty (0 to -10 points) - Heavy spenders lose value on capped cards
+  score -= calculateCapPenalty(card, spendingData);
+
+  return Math.round(Math.max(score, 0)); // Ensure score doesn't go negative
 }
 
 /**
@@ -280,9 +347,13 @@ export function calculateAnnualReward(
         ? reward.rewardRate
         : baseRate;
 
-      // Apply cap if this is the bonus category
+      // Apply cap if this is the bonus category (use capPeriod for correct calculation)
       if (category === bestCategory && reward?.cap) {
-        yearlySpend = Math.min(yearlySpend, reward.cap * 12); // cap is monthly
+        yearlySpend = calculateCappedYearlySpend(
+          yearlySpend,
+          reward.cap,
+          reward.capPeriod || 'monthly' // Default to monthly for auto-highest cards (Citi Custom Cash)
+        );
       }
 
       let rewardValue = yearlySpend * (rewardRate / 100);
@@ -305,9 +376,13 @@ export function calculateAnnualReward(
       const reward = card.rewards.find(r => r.category === category) ||
                     card.rewards.find(r => r.category === 'all');
 
-      // Apply caps if they exist
+      // Apply caps if they exist (use capPeriod for correct calculation)
       if (reward?.cap) {
-        yearlySpend = Math.min(yearlySpend, reward.cap);
+        yearlySpend = calculateCappedYearlySpend(
+          yearlySpend,
+          reward.cap,
+          reward.capPeriod || 'annual' // Default to annual for normal cards
+        );
       }
 
       // Calculate reward value (base assumes 1 cent per point/1% cashback)
@@ -326,6 +401,94 @@ export function calculateAnnualReward(
 }
 
 // ============================================
+// SIGNUP BONUS CALCULATIONS
+// ============================================
+
+/**
+ * Calculate the dollar value of a signup bonus
+ * Points bonuses are converted using the card's pointValue (e.g., 2cpp)
+ */
+export function calculateSignupBonusValue(card: RecommendableCard): number {
+  if (!card.signupBonus) return 0;
+
+  const isPointsCard = card.rewards[0]?.rewardType === 'points';
+  if (isPointsCard) {
+    const pointValue = card.rewards[0]?.pointValue || 1;
+    // Points bonuses are in raw points (e.g., 60000)
+    // pointValue is cents per point (e.g., 2 = 2cpp)
+    return (card.signupBonus.amount * pointValue) / 100;
+  }
+
+  // Cashback bonuses are already in dollars
+  return card.signupBonus.amount;
+}
+
+/**
+ * Check if user can reasonably achieve the signup bonus spend requirement
+ * based on their projected monthly spending
+ */
+export function isSignupBonusAttainable(
+  card: RecommendableCard,
+  monthlySpending: { [key in SpendingCategory]?: number }
+): { attainable: boolean; reason?: string } {
+  if (!card.signupBonus) return { attainable: true };
+
+  const spending = { ...DEFAULT_MONTHLY_SPENDING, ...monthlySpending };
+  const totalMonthly = Object.values(spending).reduce((sum, v) => sum + (v || 0), 0);
+  const bonusMonths = card.signupBonus.timeframeDays / 30;
+  const totalAvailable = totalMonthly * bonusMonths;
+
+  if (totalAvailable >= card.signupBonus.spendRequirement) {
+    return { attainable: true };
+  }
+
+  return {
+    attainable: false,
+    reason: `Requires $${card.signupBonus.spendRequirement.toLocaleString()} in ${Math.round(bonusMonths)} months, but estimated spend is $${Math.round(totalAvailable).toLocaleString()}`
+  };
+}
+
+/**
+ * Calculate first-year value including signup bonus (if attainable)
+ * Formula: annual rewards + signup bonus value - annual fee
+ */
+export function calculateFirstYearValue(
+  card: RecommendableCard,
+  monthlySpending: { [key in SpendingCategory]?: number } = {}
+): number {
+  const annualReward = calculateAnnualReward(card, monthlySpending);
+  const signupBonusValue = calculateSignupBonusValue(card);
+  const attainability = isSignupBonusAttainable(card, monthlySpending);
+
+  // Only include bonus if user can realistically achieve it
+  const effectiveBonus = attainability.attainable ? signupBonusValue : 0;
+
+  return annualReward + effectiveBonus - card.annualFee;
+}
+
+/**
+ * Calculate signup bonus score component (0-10 points)
+ * Higher bonus value = higher score
+ */
+function calculateSignupBonusScore(
+  card: RecommendableCard,
+  monthlySpending: { [key in SpendingCategory]?: number }
+): number {
+  const bonusValue = calculateSignupBonusValue(card);
+  const attainability = isSignupBonusAttainable(card, monthlySpending);
+
+  // No score if no bonus or can't achieve it
+  if (bonusValue === 0 || !attainability.attainable) return 0;
+
+  // Score based on bonus value
+  if (bonusValue >= 750) return 10;    // $750+ bonus (e.g., 60k points at 1.25cpp+)
+  if (bonusValue >= 500) return 8;     // $500-749
+  if (bonusValue >= 300) return 6;     // $300-499
+  if (bonusValue >= 150) return 4;     // $150-299
+  return 2;                             // Any smaller bonus
+}
+
+// ============================================
 // REASONING GENERATION
 // ============================================
 
@@ -334,7 +497,8 @@ export function calculateAnnualReward(
  */
 function generateReasoning(
   card: RecommendableCard,
-  preferences: RecommendationPreferences
+  preferences: RecommendationPreferences,
+  monthlySpending: { [key in SpendingCategory]?: number } = {}
 ): string[] {
   const reasons: string[] = [];
 
@@ -378,14 +542,19 @@ function generateReasoning(
     reasons.push('No annual fee');
   }
 
-  // Signup bonus with value estimate
+  // Signup bonus with value estimate and attainability warning
   if (card.signupBonus) {
+    const attainability = isSignupBonusAttainable(card, monthlySpending);
     if (card.rewards[0]?.rewardType === 'points') {
       const pointValue = card.rewards[0]?.pointValue || 1;
       const bonusDollarValue = Math.round(card.signupBonus.amount * pointValue / 100);
       reasons.push(`${card.signupBonus.amount.toLocaleString()} bonus points (~$${bonusDollarValue} value)`);
     } else {
       reasons.push(`$${card.signupBonus.amount} signup bonus`);
+    }
+    // Add attainability warning if bonus may be hard to achieve
+    if (!attainability.attainable) {
+      reasons.push(`⚠️ Bonus may be challenging: ${attainability.reason}`);
     }
   }
 
@@ -399,7 +568,7 @@ function generateReasoning(
     reasons.push('Simple flat-rate rewards');
   }
 
-  return reasons.slice(0, 5); // Max 5 reasons for display
+  return reasons.slice(0, 6); // Max 6 reasons for display (allowing for attainability warning)
 }
 
 /**
@@ -440,8 +609,9 @@ interface ScoredCard {
 }
 
 /**
- * Select an optimal set of complementary cards
- * Ensures cards cover different categories without too much overlap
+ * Select an optimal set of complementary cards.
+ * Respects score order while ensuring cards cover different user categories.
+ * Minimum score threshold prevents low-scoring cards from being selected just for coverage.
  */
 function selectOptimalCardSet(
   scoredCards: ScoredCard[],
@@ -450,25 +620,49 @@ function selectOptimalCardSet(
 ): ScoredCard[] {
   const selected: ScoredCard[] = [];
   const coveredCategories = new Set<string>();
+  const userCategories = new Set(preferences.topCategories);
 
-  for (const sc of scoredCards) {
+  // Minimum score threshold - don't add cards below 50% match
+  const MIN_SCORE_THRESHOLD = 50;
+
+  // Phase 1: Always select highest-scoring card first (already sorted by score)
+  if (scoredCards.length > 0) {
+    const topCard = scoredCards[0];
+    selected.push(topCard);
+
+    // Track which USER categories this card covers well (3%+ rate)
+    topCard.card.rewards
+      .filter(r => r.rewardRate >= 3 && userCategories.has(r.category as SpendingCategory))
+      .forEach(r => coveredCategories.add(r.category));
+  }
+
+  // Phase 2: Select complementary cards that add significant value
+  for (const sc of scoredCards.slice(1)) {
     if (selected.length >= maxCards) break;
 
-    // Find which categories this card excels in (3%+ rate)
-    const cardCategories = sc.card.rewards
-      .filter(r => r.category !== 'all' && r.category !== 'rotating' && r.rewardRate >= 3)
-      .map(r => r.category);
+    // Skip cards below score threshold
+    if (sc.matchScore < MIN_SCORE_THRESHOLD) continue;
 
-    // Check if this card adds value (covers new categories)
-    const addsNewCategory = cardCategories.some(c => !coveredCategories.has(c));
+    // Find which USER categories this card excels in that aren't covered yet
+    const uncoveredBonusCategories = sc.card.rewards.filter(r =>
+      r.rewardRate >= 3 &&
+      r.category !== 'all' &&
+      r.category !== 'rotating' &&
+      userCategories.has(r.category as SpendingCategory) &&
+      !coveredCategories.has(r.category)
+    );
 
-    // Or if it's a strong all-rounder
-    const isStrongAllRounder = sc.card.rewards.some(r => r.category === 'all' && r.rewardRate >= 1.5);
+    // Value threshold: must cover at least 1 uncovered user category at 3%+
+    const addsSignificantValue = uncoveredBonusCategories.length > 0;
 
-    // Always add the first card, then be selective
-    if (selected.length === 0 || addsNewCategory || (isStrongAllRounder && selected.length < 2)) {
+    // Or it's a strong all-rounder (2%+ on everything) - but only if we have few cards
+    const isStrongAllRounder = sc.card.rewards.some(r =>
+      r.category === 'all' && r.rewardRate >= 2
+    );
+
+    if (addsSignificantValue || (isStrongAllRounder && selected.length < 2)) {
       selected.push(sc);
-      cardCategories.forEach(c => coveredCategories.add(c));
+      uncoveredBonusCategories.forEach(r => coveredCategories.add(r.category));
     }
   }
 
@@ -643,16 +837,28 @@ export function generateRecommendations(
   const maxCards = preferences.simplicityPreference === 'fewer-cards' ? 2 : 4;
   const selectedCards = selectOptimalCardSet(scoredCards, preferences, maxCards);
 
-  // 4. Build recommendation objects with application order
-  const recommendations: CardRecommendation[] = selectedCards.map((sc, index) => ({
-    card: sc.card,
-    matchScore: sc.matchScore,
-    primaryUse: determinePrimaryUse(sc.card, preferences.topCategories),
-    reasoning: generateReasoning(sc.card, preferences),
-    estimatedAnnualReward: sc.estimatedReward,
-    applicationOrder: index + 1,
-    waitDays: index * APPLICATION_SPACING_DAYS
-  }));
+  // 4. Build recommendation objects with application order and first-year value
+  const spendingData = preferences.monthlySpending || {};
+  const recommendations: CardRecommendation[] = selectedCards.map((sc, index) => {
+    const bonusValue = calculateSignupBonusValue(sc.card);
+    const attainability = isSignupBonusAttainable(sc.card, spendingData);
+    const firstYearValue = calculateFirstYearValue(sc.card, spendingData);
+
+    return {
+      card: sc.card,
+      matchScore: sc.matchScore,
+      primaryUse: determinePrimaryUse(sc.card, preferences.topCategories),
+      reasoning: generateReasoning(sc.card, preferences, spendingData),
+      estimatedAnnualReward: sc.estimatedReward,
+      applicationOrder: index + 1,
+      waitDays: index * APPLICATION_SPACING_DAYS,
+      // First-year value metrics
+      signupBonusValue: bonusValue > 0 ? bonusValue : undefined,
+      firstYearValue: firstYearValue,
+      isSignupBonusAttainable: bonusValue > 0 ? attainability.attainable : undefined,
+      signupBonusAttainabilityReason: !attainability.attainable ? attainability.reason : undefined,
+    };
+  });
 
   // 4.5. Create CardRecommendation objects for matched current cards
   const currentCardRecommendations: CardRecommendation[] = [];
@@ -664,7 +870,7 @@ export function generateRecommendations(
           card: matchedCard,
           matchScore: 100, // Current cards get full match score
           primaryUse: determinePrimaryUse(matchedCard, preferences.topCategories),
-          reasoning: ['Card you already own', ...generateReasoning(matchedCard, preferences).slice(0, 2)],
+          reasoning: ['Card you already own', ...generateReasoning(matchedCard, preferences, spendingData).slice(0, 2)],
           estimatedAnnualReward: calculateAnnualReward(matchedCard, preferences.monthlySpending),
           applicationOrder: 0, // 0 indicates already owned
           waitDays: 0

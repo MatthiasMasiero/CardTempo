@@ -84,6 +84,13 @@
     "category": "cashback"
   },
   {
+    "id": "capital-one-savor-one",
+    "name": "Capital One SavorOne Cash Rewards Credit Card",
+    "issuer": "Capital One",
+    "imageUrl": "/cards/capital-one-savor-one.png",
+    "category": "cashback"
+  },
+  {
     "id": "capital-one-quicksilver",
     "name": "Capital One Quicksilver Cash Rewards Credit Card",
     "issuer": "Capital One",
@@ -122,28 +129,28 @@
     "id": "citi-premier",
     "name": "Citi Premier® Card",
     "issuer": "Citi",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/citi-premier.png",
     "category": "travel"
   },
   {
     "id": "wells-fargo-active-cash",
     "name": "Wells Fargo Active Cash® Card",
     "issuer": "Wells Fargo",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/wells-fargo-active-cash.png",
     "category": "cashback"
   },
   {
     "id": "wells-fargo-autograph",
     "name": "Wells Fargo Autograph℠ Card",
     "issuer": "Wells Fargo",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/wells-fargo-autograph.png",
     "category": "travel"
   },
   {
     "id": "bank-of-america-travel-rewards",
     "name": "Bank of America® Travel Rewards Credit Card",
     "issuer": "Bank of America",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/bank-of-america-travel-rewards.png",
     "category": "travel"
   },
   {
@@ -173,6 +180,13 @@
     "issuer": "U.S. Bank",
     "imageUrl": "/cards/default-card.svg",
     "category": "travel"
+  },
+  {
+    "id": "us-bank-cash-plus",
+    "name": "U.S. Bank Cash+® Visa Signature® Card",
+    "issuer": "U.S. Bank",
+    "imageUrl": "/cards/us-bank-cash-plus.png",
+    "category": "cashback"
   },
   {
     "id": "barclays-arrival-plus",

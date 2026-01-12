@@ -130,7 +130,9 @@ export interface CategoryReward {
   rewardType: 'cashback' | 'points';
   pointValue?: number;
   cap?: number;
+  capPeriod?: 'monthly' | 'quarterly' | 'annual'; // How often cap resets
   isRotating?: boolean;
+  rotatingCategories?: SpendingCategory[]; // Which categories rotate into this reward
 }
 
 // Extended card data for recommendations
@@ -164,6 +166,11 @@ export interface CardRecommendation {
   estimatedAnnualReward: number;
   applicationOrder: number;
   waitDays: number;
+  // First-year value metrics
+  signupBonusValue?: number; // Dollar value of signup bonus
+  firstYearValue?: number; // Total first-year value (rewards + bonus - fee)
+  isSignupBonusAttainable?: boolean; // Can user meet spend requirement?
+  signupBonusAttainabilityReason?: string; // Explanation if not attainable
 }
 
 // Spending strategy (which card to use for what)

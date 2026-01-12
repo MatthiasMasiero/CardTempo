@@ -181,7 +181,7 @@ export const recommendableCards: RecommendableCard[] = [
     annualFee: 0,
     signupBonus: { amount: 200, spendRequirement: 500, timeframeDays: 90 },
     rewards: [
-      { category: 'rotating', rewardRate: 5, rewardType: 'points', pointValue: 2, cap: 1500, isRotating: true },
+      { category: 'rotating', rewardRate: 5, rewardType: 'points', pointValue: 2, cap: 1500, capPeriod: 'quarterly', isRotating: true, rotatingCategories: ['groceries', 'gas', 'dining', 'online-shopping', 'drugstores', 'travel'] },
       { category: 'travel', rewardRate: 5, rewardType: 'points', pointValue: 2 },
       { category: 'dining', rewardRate: 3, rewardType: 'points', pointValue: 2 },
       { category: 'drugstores', rewardRate: 3, rewardType: 'points', pointValue: 2 },
@@ -200,7 +200,7 @@ export const recommendableCards: RecommendableCard[] = [
     tier: 'moderate',
     annualFee: 0,
     rewards: [
-      { category: 'rotating', rewardRate: 5, rewardType: 'cashback', cap: 1500, isRotating: true },
+      { category: 'rotating', rewardRate: 5, rewardType: 'cashback', cap: 1500, capPeriod: 'quarterly', isRotating: true, rotatingCategories: ['groceries', 'gas', 'dining', 'online-shopping', 'drugstores', 'travel'] },
       { category: 'all', rewardRate: 1, rewardType: 'cashback' }
     ],
     minCreditScore: 'fair',
@@ -217,7 +217,7 @@ export const recommendableCards: RecommendableCard[] = [
     annualFee: 95,
     signupBonus: { amount: 250, spendRequirement: 3000, timeframeDays: 180 },
     rewards: [
-      { category: 'groceries', rewardRate: 6, rewardType: 'cashback', cap: 6000 },
+      { category: 'groceries', rewardRate: 6, rewardType: 'cashback', cap: 6000, capPeriod: 'annual' },
       { category: 'streaming', rewardRate: 6, rewardType: 'cashback' },
       { category: 'gas', rewardRate: 3, rewardType: 'cashback' },
       { category: 'transit', rewardRate: 3, rewardType: 'cashback' },
@@ -275,11 +275,11 @@ export const recommendableCards: RecommendableCard[] = [
     annualFee: 0,
     signupBonus: { amount: 200, spendRequirement: 1500, timeframeDays: 180 },
     rewards: [
-      { category: 'dining', rewardRate: 5, rewardType: 'cashback', cap: 500 },
-      { category: 'groceries', rewardRate: 5, rewardType: 'cashback', cap: 500 },
-      { category: 'gas', rewardRate: 5, rewardType: 'cashback', cap: 500 },
-      { category: 'travel', rewardRate: 5, rewardType: 'cashback', cap: 500 },
-      { category: 'online-shopping', rewardRate: 5, rewardType: 'cashback', cap: 500 },
+      { category: 'dining', rewardRate: 5, rewardType: 'cashback', cap: 500, capPeriod: 'monthly' },
+      { category: 'groceries', rewardRate: 5, rewardType: 'cashback', cap: 500, capPeriod: 'monthly' },
+      { category: 'gas', rewardRate: 5, rewardType: 'cashback', cap: 500, capPeriod: 'monthly' },
+      { category: 'travel', rewardRate: 5, rewardType: 'cashback', cap: 500, capPeriod: 'monthly' },
+      { category: 'online-shopping', rewardRate: 5, rewardType: 'cashback', cap: 500, capPeriod: 'monthly' },
       { category: 'all', rewardRate: 1, rewardType: 'cashback' }
     ],
     minCreditScore: 'good',
@@ -315,9 +315,9 @@ export const recommendableCards: RecommendableCard[] = [
     signupBonus: { amount: 85000, spendRequirement: 3000, timeframeDays: 90 },
     rewards: [
       { category: 'travel', rewardRate: 6, rewardType: 'points', pointValue: 1 },
-      { category: 'groceries', rewardRate: 3, rewardType: 'points', cap: 6000, pointValue: 1 },
-      { category: 'gas', rewardRate: 3, rewardType: 'points', cap: 6000, pointValue: 1 },
-      { category: 'dining', rewardRate: 3, rewardType: 'points', cap: 6000, pointValue: 1 },
+      { category: 'groceries', rewardRate: 3, rewardType: 'points', cap: 6000, capPeriod: 'annual', pointValue: 1 },
+      { category: 'gas', rewardRate: 3, rewardType: 'points', cap: 6000, capPeriod: 'annual', pointValue: 1 },
+      { category: 'dining', rewardRate: 3, rewardType: 'points', cap: 6000, capPeriod: 'annual', pointValue: 1 },
       { category: 'all', rewardRate: 2, rewardType: 'points', pointValue: 1 }
     ],
     minCreditScore: 'good',
@@ -339,7 +339,7 @@ export const recommendableCards: RecommendableCard[] = [
     signupBonus: { amount: 100000, spendRequirement: 6000, timeframeDays: 180 },
     rewards: [
       { category: 'dining', rewardRate: 4, rewardType: 'points', pointValue: 2 },
-      { category: 'groceries', rewardRate: 4, rewardType: 'points', pointValue: 2, cap: 25000 },
+      { category: 'groceries', rewardRate: 4, rewardType: 'points', pointValue: 2, cap: 25000, capPeriod: 'annual' },
       { category: 'travel', rewardRate: 3, rewardType: 'points', pointValue: 2 },
       { category: 'all', rewardRate: 1, rewardType: 'points', pointValue: 2 }
     ],
@@ -374,7 +374,7 @@ export const recommendableCards: RecommendableCard[] = [
     annualFee: 395,
     signupBonus: { amount: 75000, spendRequirement: 4000, timeframeDays: 90 },
     rewards: [
-      { category: 'travel', rewardRate: 10, rewardType: 'points', pointValue: 2 },
+      { category: 'travel', rewardRate: 5, rewardType: 'points', pointValue: 2 }, // 10x hotels/rentals only via Capital One Travel portal
       { category: 'all', rewardRate: 2, rewardType: 'points', pointValue: 2 }
     ],
     minCreditScore: 'excellent',
@@ -411,7 +411,7 @@ export const recommendableCards: RecommendableCard[] = [
     annualFee: 550,
     signupBonus: { amount: 60000, spendRequirement: 4000, timeframeDays: 90 },
     rewards: [
-      { category: 'travel', rewardRate: 10, rewardType: 'points', pointValue: 2 }, // 10x hotels/cars via Chase, 5x flights
+      { category: 'travel', rewardRate: 5, rewardType: 'points', pointValue: 2 }, // 5x on flights, 10x hotels/cars only via Chase Travel portal
       { category: 'dining', rewardRate: 3, rewardType: 'points', pointValue: 2 },
       { category: 'all', rewardRate: 1, rewardType: 'points', pointValue: 2 }
     ],
@@ -651,7 +651,7 @@ export const recommendableCards: RecommendableCard[] = [
     tier: 'moderate',
     annualFee: 0,
     rewards: [
-      { category: 'rotating', rewardRate: 5, rewardType: 'cashback', cap: 1500, isRotating: true },
+      { category: 'rotating', rewardRate: 5, rewardType: 'cashback', cap: 1500, capPeriod: 'quarterly', isRotating: true, rotatingCategories: ['groceries', 'gas', 'dining', 'online-shopping', 'drugstores', 'travel'] },
       { category: 'all', rewardRate: 1, rewardType: 'cashback' }
     ],
     minCreditScore: 'building',
@@ -812,12 +812,27 @@ export function getCardsForCategory(category: SpendingCategory): RecommendableCa
 }
 
 /**
- * Get the best reward rate a card offers for a specific category
+ * Get the best reward rate a card offers for a specific category.
+ * Handles rotating categories by checking if the category is in the rotation list.
+ * Applies a 25% discount to rotating rates since they're only active ~3 months/year.
  */
 export function getBestRateForCategory(card: RecommendableCard, category: SpendingCategory): number {
+  // First check for direct category match
   const categoryReward = card.rewards.find(r => r.category === category);
   if (categoryReward) return categoryReward.rewardRate;
 
+  // Check if this category is part of a rotating category reward
+  const rotatingReward = card.rewards.find(r =>
+    r.category === 'rotating' &&
+    r.rotatingCategories?.includes(category)
+  );
+  if (rotatingReward) {
+    // Apply 25% discount since rotating categories are only active ~3 months/year
+    // This gives partial credit while not overvaluing the card
+    return rotatingReward.rewardRate * 0.25;
+  }
+
+  // Fallback to "all" category rate
   const allReward = card.rewards.find(r => r.category === 'all');
   return allReward?.rewardRate || 0;
 }

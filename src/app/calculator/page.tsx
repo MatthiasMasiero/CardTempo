@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreditCardForm } from '@/components/CreditCardForm';
@@ -22,6 +23,7 @@ export default function CalculatorPage() {
   const { cards, addCard, updateCard, removeCard, calculateResults, result, clearResults } =
     useCalculatorStore();
   const { isAuthenticated } = useAuthStore();
+  const searchParams = useSearchParams();
 
   const [showForm, setShowForm] = useState(cards.length === 0);
   const [mounted, setMounted] = useState(false);
@@ -30,6 +32,13 @@ export default function CalculatorPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Check for addCard query param to auto-open form
+  useEffect(() => {
+    if (mounted && searchParams.get('addCard') === 'true') {
+      setShowForm(true);
+    }
+  }, [mounted, searchParams]);
 
   // Helper to convert CreditCard to CreditCardFormData
   const cardToFormData = (card: CreditCard): CreditCardFormData => ({
@@ -245,7 +254,7 @@ export default function CalculatorPage() {
 
           {/* Calculate Button */}
           {cards.length > 0 && !showForm && (
-            <Card className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-100/50 border-emerald-200">
+            <Card className="p-6 border-l-4 border-l-emerald-600 border-stone-200 bg-white">
               <CardContent className="p-0">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div>
@@ -272,7 +281,7 @@ export default function CalculatorPage() {
                 </div>
 
                 {result && (
-                  <div className="mt-4 pt-4 border-t border-emerald-200">
+                  <div className="mt-4 pt-4 border-t border-stone-200">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                       <div>
                         <p className="font-display text-2xl text-stone-700">
@@ -308,7 +317,7 @@ export default function CalculatorPage() {
           )}
 
           {/* Tips Section */}
-          <Card className="mt-8 border-stone-200">
+          <Card className="mt-8 border-l-4 border-l-emerald-600 border-stone-200">
             <CardHeader>
               <CardTitle className="font-display text-xl text-stone-900">Tips for Best Results</CardTitle>
             </CardHeader>

@@ -174,22 +174,22 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Tell us about yourself</h2>
-        <p className="text-muted-foreground">
+        <h2 className="font-display text-2xl text-stone-900 mb-2">Tell us about yourself</h2>
+        <p className="text-stone-600">
           Answer a few questions to get personalized card recommendations
         </p>
       </div>
 
       {/* Question 1: Credit Score */}
-      <Card>
+      <Card className="border-l-4 border-l-emerald-500 border-stone-200">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <TrendingUp className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-emerald-600" />
             </div>
             <div>
-              <CardTitle className="text-lg">What&apos;s your credit score range?</CardTitle>
-              <CardDescription>This helps us show cards you&apos;re likely to be approved for</CardDescription>
+              <CardTitle className="text-lg text-stone-900">What&apos;s your credit score range?</CardTitle>
+              <CardDescription className="text-stone-500">This helps us show cards you&apos;re likely to be approved for</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -222,15 +222,15 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
       </Card>
 
       {/* Question 2: Simplicity vs Rewards */}
-      <Card>
+      <Card className="border-l-4 border-l-blue-500 border-stone-200">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Target className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center">
+              <Target className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <CardTitle className="text-lg">What&apos;s your priority?</CardTitle>
-              <CardDescription>Choose between simplicity or maximizing rewards</CardDescription>
+              <CardTitle className="text-lg text-stone-900">What&apos;s your priority?</CardTitle>
+              <CardDescription className="text-stone-500">Choose between simplicity or maximizing rewards</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -291,15 +291,15 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
       </Card>
 
       {/* Question 3: Spending Categories */}
-      <Card>
+      <Card className="border-l-4 border-l-amber-500 border-stone-200">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <ShoppingCart className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
+              <ShoppingCart className="h-4 w-4 text-amber-600" />
             </div>
             <div>
-              <CardTitle className="text-lg">Where do you spend the most?</CardTitle>
-              <CardDescription>Select 1-3 categories (we&apos;ll prioritize cards for these)</CardDescription>
+              <CardTitle className="text-lg text-stone-900">Where do you spend the most?</CardTitle>
+              <CardDescription className="text-stone-500">Select 1-3 categories (we&apos;ll prioritize cards for these)</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -345,15 +345,15 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
 
       {/* Question 4: Spending Amounts (conditional) */}
       {selectedCategories.length > 0 && (
-        <Card>
+        <Card className="border-l-4 border-l-purple-500 border-stone-200">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <DollarSign className="h-4 w-4 text-primary" />
+              <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <CardTitle className="text-lg">How much do you spend monthly?</CardTitle>
-                <CardDescription>This helps us recommend cards that are worth any annual fees</CardDescription>
+                <CardTitle className="text-lg text-stone-900">How much do you spend monthly?</CardTitle>
+                <CardDescription className="text-stone-500">This helps us recommend cards that are worth any annual fees</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -397,15 +397,15 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
       )}
 
       {/* Question 5: Reward Type */}
-      <Card>
+      <Card className="border-l-4 border-l-emerald-500 border-stone-200">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Wallet className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <Wallet className="h-4 w-4 text-emerald-600" />
             </div>
             <div>
-              <CardTitle className="text-lg">Cash back or points?</CardTitle>
-              <CardDescription>How do you prefer to earn rewards?</CardDescription>
+              <CardTitle className="text-lg text-stone-900">Cash back or points?</CardTitle>
+              <CardDescription className="text-stone-500">How do you prefer to earn rewards?</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -465,7 +465,7 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
       {/* Submit Button */}
       <Button
         size="lg"
-        className="w-full gap-2"
+        className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700"
         onClick={handleSubmit}
       >
         Get My Recommendations

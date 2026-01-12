@@ -60,7 +60,7 @@ export default function RecommendationsPage() {
       </header>
 
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-amber-50 via-amber-50/50 to-orange-50/30 border-b border-stone-200">
+      <div className="bg-white border-b border-stone-200">
         <div className="container mx-auto px-6 py-8 max-w-4xl">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">

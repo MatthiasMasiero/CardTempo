@@ -161,14 +161,6 @@ export default function DashboardPage() {
 
   const utilizationInsight = getUtilizationInsight();
 
-  // Generate next 7 days for mini calendar
-  const today = startOfDay(new Date());
-  const next7Days = Array.from({ length: 7 }, (_, i) => addDays(today, i));
-
-  // Get payment dates for mini calendar dots
-  const paymentDates = upcomingPayments.map(p => startOfDay(p.date));
-  const hasPaymentOnDay = (day: Date) => paymentDates.some(pd => isSameDay(pd, day));
-
   return (
     <div className="min-h-screen bg-[#FAFAF8] font-body">
       {/* Header */}
@@ -317,54 +309,14 @@ export default function DashboardPage() {
                     <RefreshCw className={`h-4 w-4 ${isRecalculating ? 'animate-spin' : ''}`} />
                     {isRecalculating ? 'Calculating...' : 'Recalculate'}
                   </Button>
-                  <Link href="/calculator">
-                    <Button size="sm" className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                  <Link href="/calculator?addCard=true">
+                    <Button size="sm" className="gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-transform">
                       <Plus className="h-4 w-4" />
                       Add Card
                     </Button>
                   </Link>
                 </div>
               </div>
-
-              {/* Mini Calendar Preview */}
-              {cards.length > 0 && upcomingPayments.length > 0 && (
-                <div className="mb-6 p-4 bg-stone-50 rounded-xl border border-stone-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="h-4 w-4 text-stone-500" />
-                    <span className="text-sm font-medium text-stone-700">Upcoming Week</span>
-                  </div>
-                  <div className="flex gap-2">
-                    {next7Days.map((day, i) => {
-                      const hasPayment = hasPaymentOnDay(day);
-                      const isToday = i === 0;
-                      return (
-                        <div
-                          key={i}
-                          className={`flex-1 text-center py-2 px-1 rounded-lg transition-colors ${
-                            isToday ? 'bg-white border border-stone-200 shadow-sm' : ''
-                          }`}
-                        >
-                          <p className={`text-xs ${isToday ? 'text-emerald-600 font-medium' : 'text-stone-500'}`}>
-                            {format(day, 'EEE')}
-                          </p>
-                          <p className={`text-sm font-medium ${isToday ? 'text-stone-900' : 'text-stone-700'}`}>
-                            {format(day, 'd')}
-                          </p>
-                          {hasPayment && (
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mx-auto mt-1" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {upcomingPayments.length > 0 && upcomingPayments[0].daysUntil <= 7 && (
-                    <p className="text-xs text-stone-500 mt-3">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 align-middle" />
-                      Next payment: {upcomingPayments[0].cardName} on {format(upcomingPayments[0].date, 'MMM d')}
-                    </p>
-                  )}
-                </div>
-              )}
 
               {cards.length === 0 ? (
                 <Card className="p-12 text-center border-stone-200">
@@ -375,8 +327,8 @@ export default function DashboardPage() {
                   <p className="text-stone-600 mb-4">
                     Add your credit cards to start optimizing your payments
                   </p>
-                  <Link href="/calculator">
-                    <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                  <Link href="/calculator?addCard=true">
+                    <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-transform">
                       <Plus className="h-4 w-4" />
                       Add Your First Card
                     </Button>
@@ -590,8 +542,8 @@ export default function DashboardPage() {
                       <p className="text-sm text-stone-500 mb-4">
                         Add your credit cards to see your payment calendar
                       </p>
-                      <Link href="/calculator">
-                        <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700">
+                      <Link href="/calculator?addCard=true">
+                        <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-transform">
                           <Plus className="h-4 w-4" />
                           Add Cards
                         </Button>

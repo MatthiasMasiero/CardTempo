@@ -47,6 +47,7 @@ export default function ResultsPage() {
   const [mounted, setMounted] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -63,7 +64,10 @@ export default function ResultsPage() {
   };
 
   const handleRecalculate = () => {
+    setIsRecalculating(true);
     calculateResults();
+    // Brief delay to show the animation
+    setTimeout(() => setIsRecalculating(false), 600);
   };
 
   // Convert payment plans to calendar events
@@ -239,8 +243,8 @@ export default function ResultsPage() {
       <main className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Summary Card */}
-          <Card className="mb-8 overflow-hidden border-stone-200">
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-6">
+          <Card className="mb-8 overflow-hidden border-l-4 border-l-emerald-600 border-stone-200">
+            <div className="bg-emerald-600 text-white p-6">
               <h1 className="font-display text-2xl mb-2">Your Optimized Payment Plan</h1>
               <p className="text-white/80">
                 Based on your {result.cards.length} credit card{result.cards.length > 1 ? 's' : ''}
@@ -319,9 +323,15 @@ export default function ResultsPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display text-xl text-stone-900">Card-by-Card Payment Plans</h2>
-              <Button variant="outline" size="sm" onClick={handleRecalculate} className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
-                <RefreshCw className="h-4 w-4" />
-                Recalculate
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRecalculate}
+                disabled={isRecalculating}
+                className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRecalculating ? 'animate-spin' : ''}`} />
+                {isRecalculating ? 'Calculating...' : 'Recalculate'}
               </Button>
             </div>
             <div className="space-y-6">
@@ -332,7 +342,7 @@ export default function ResultsPage() {
           </div>
 
           {/* Call to Action */}
-          <Card className="bg-gradient-to-r from-emerald-50 to-emerald-100/50 border-emerald-200">
+          <Card className="border-l-4 border-l-emerald-600 border-stone-200 bg-white">
             <CardContent className="p-6">
               <div className="flex flex-col gap-6">
                 <div>
@@ -435,7 +445,7 @@ export default function ResultsPage() {
           </Card>
 
           {/* Tips */}
-          <Card className="mt-8 border-stone-200">
+          <Card className="mt-8 border-l-4 border-l-emerald-600 border-stone-200">
             <CardHeader>
               <CardTitle className="font-display text-lg text-stone-900 flex items-center gap-2">
                 <Target className="h-5 w-5 text-emerald-600" />
@@ -444,25 +454,25 @@ export default function ResultsPage() {
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 bg-stone-50 rounded-xl">
+                <div className="p-4 bg-white border border-stone-200 border-l-4 border-l-emerald-400 rounded-lg">
                   <h4 className="font-medium text-stone-900 mb-2">Set Calendar Reminders</h4>
                   <p className="text-sm text-stone-600">
                     Add payment dates to your calendar so you don&apos;t miss the optimization window.
                   </p>
                 </div>
-                <div className="p-4 bg-stone-50 rounded-xl">
+                <div className="p-4 bg-white border border-stone-200 border-l-4 border-l-blue-400 rounded-lg">
                   <h4 className="font-medium text-stone-900 mb-2">Schedule Payments</h4>
                   <p className="text-sm text-stone-600">
                     Many banks allow scheduling future payments. Set them up now!
                   </p>
                 </div>
-                <div className="p-4 bg-stone-50 rounded-xl">
+                <div className="p-4 bg-white border border-stone-200 border-l-4 border-l-amber-400 rounded-lg">
                   <h4 className="font-medium text-stone-900 mb-2">Check Your Score</h4>
                   <p className="text-sm text-stone-600">
                     Wait 1-2 weeks after statement date, then check for score improvements.
                   </p>
                 </div>
-                <div className="p-4 bg-stone-50 rounded-xl">
+                <div className="p-4 bg-white border border-stone-200 border-l-4 border-l-purple-400 rounded-lg">
                   <h4 className="font-medium text-stone-900 mb-2">Repeat Monthly</h4>
                   <p className="text-sm text-stone-600">
                     Use this strategy every billing cycle to maintain optimal utilization.

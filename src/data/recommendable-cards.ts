@@ -192,6 +192,7 @@ export const recommendableCards: RecommendableCard[] = [
     ],
     minCreditScore: 'good',
     foreignTransactionFee: true,
+    isAutoHighestCategory: true, // Only ONE category earns 5% - whichever you spend most in
     pros: ['5% on your TOP spending category automatically each month', 'No need to choose categories', '4% via Citi Travel portal', '0% intro APR for 15 months'],
     cons: ['$500 monthly cap on 5% category', '3% foreign transaction fee', 'Only 1 category earns 5%']
   },

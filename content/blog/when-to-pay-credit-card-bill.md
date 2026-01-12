@@ -2,7 +2,7 @@
 title: "When to Pay Your Credit Card Bill to Maximize Your Credit Score"
 excerpt: "Most people pay on the due date and wonder why their score isn't improving. Learn the secret timing that can boost your score by 40-100 points without changing how much you pay."
 date: "2025-01-18"
-author: "Credit Optimizer Team"
+author: "CardTempo Team"
 tags: ["payment timing", "credit score tips", "credit utilization", "credit strategy"]
 ---
 
@@ -322,7 +322,7 @@ Let's break down exactly how much this strategy can improve your score:
 
 ## Tools to Help You Succeed
 
-### Credit Optimizer Calculator (Free)
+### CardTempo Calculator (Free)
 - Input all your cards with limits, balances, and closing dates
 - Get exact amounts to pay and when
 - See estimated score impact

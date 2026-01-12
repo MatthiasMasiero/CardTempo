@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { createServerClient } from '@supabase/ssr';
 
 // Rate limit configuration
 const RATE_LIMIT_WINDOW = 60; // 1 minute in seconds
@@ -115,6 +116,44 @@ async function rateLimitCheck(ip: string): Promise<{
 }
 
 export async function middleware(request: NextRequest) {
+  // Create a response that we can modify
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  // Refresh Supabase session (keeps auth cookies fresh)
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    // This refreshes the session if expired and updates cookies
+    await supabase.auth.getUser();
+  }
+
   // Get client IP address
   const ip = request.ip ?? request.headers.get('x-forwarded-for') ?? 'unknown';
 
@@ -146,8 +185,7 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    // Continue with rate limit headers
-    const response = NextResponse.next();
+    // Continue with rate limit headers (use existing response with Supabase cookies)
     headers.forEach((value, key) => {
       response.headers.set(key, value);
     });
@@ -158,8 +196,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Add security headers to all other routes
-  const response = NextResponse.next();
+  // Add security headers to all other routes (use existing response with Supabase cookies)
   addSecurityHeaders(response);
   return response;
 }

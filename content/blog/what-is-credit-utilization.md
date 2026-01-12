@@ -2,7 +2,7 @@
 title: "What is Credit Utilization? The Single Most Important Factor for Your Credit Score"
 excerpt: "Credit utilization accounts for 30% of your FICO score. Learn exactly what it is, why it matters, and how to optimize it to boost your score by 40-150 points."
 date: "2025-01-19"
-author: "Credit Optimizer Team"
+author: "CardTempo Team"
 tags: ["credit utilization", "FICO score", "credit basics", "improve credit score"]
 ---
 
@@ -162,7 +162,7 @@ Start optimizing **3 months before** applying:
 Track your utilization using:
 1. **Free credit monitoring**: Credit Karma, Experian, Credit.com
 2. **Card issuer apps**: Most show your utilization percentage
-3. **Credit Optimizer Calculator**: Get a personalized payment plan to optimize utilization
+3. **CardTempo Calculator**: Get a personalized payment plan to optimize utilization
 
 ## Real Success Stories
 
@@ -186,7 +186,7 @@ Track your utilization using:
 
 ## Take Action Now
 
-Ready to optimize your credit utilization and boost your score? Use our **free Credit Optimizer calculator** to:
+Ready to optimize your credit utilization and boost your score? Use our **free CardTempo calculator** to:
 
 ✅ See your exact utilization percentage (overall and per-card)
 ✅ Get a personalized payment plan with specific dates and amounts

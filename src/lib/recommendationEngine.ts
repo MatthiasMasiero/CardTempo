@@ -6,7 +6,8 @@ import {
   SpendingStrategy,
   SpendingCategory,
   RecommendationTimelineEvent,
-  CreditScoreRange
+  CreditScoreRange,
+  RewardTier,
 } from '@/types';
 import {
   recommendableCards,
@@ -48,70 +49,56 @@ function meetsMinCreditScore(cardMin: CreditScoreRange, userScore: CreditScoreRa
 // SCORING FUNCTIONS
 // ============================================
 
+// Tier score mappings
+const SIMPLICITY_TIER_SCORES: Record<string, Record<RewardTier, number>> = {
+  'fewer-cards': { basic: 15, moderate: 10, aggressive: 5 },
+  'more-rewards': { aggressive: 15, moderate: 12, basic: 8 },
+};
+
+// Annual fee score thresholds
+const FEE_SCORES: Array<{ maxFee: number; score: number }> = [
+  { maxFee: 0, score: 10 },
+  { maxFee: 100, score: 5 },
+  { maxFee: 200, score: 2 },
+  { maxFee: Infinity, score: 0 },
+];
+
 /**
- * Calculate match score for a card against user preferences
- * Returns a score from 0-100
- *
- * Scoring breakdown:
- * - Credit score eligibility: 20 points (pass/fail)
- * - Category match: 40 points (based on reward rates in user's categories)
- * - Reward type match: 15 points (cashback vs points preference)
- * - Simplicity match: 15 points (tier alignment with user preference)
- * - Fee consideration: 10 points (no fee = full points)
+ * Calculate match score for a card against user preferences.
+ * Returns a score from 0-100.
  */
 export function calculateMatchScore(
   card: RecommendableCard,
   preferences: RecommendationPreferences
 ): number {
-  let score = 0;
-
-  // 1. Credit Score Eligibility (20 points) - Must pass to continue
+  // Credit Score Eligibility (20 points) - Must pass to continue
   if (!meetsMinCreditScore(card.minCreditScore, preferences.creditScoreRange)) {
-    return 0; // Disqualified
+    return 0;
   }
-  score += 20;
 
-  // 2. Category Match (40 points max)
+  let score = 20;
+
+  // Category Match (40 points max)
   const categoryPoints = 40 / Math.max(preferences.topCategories.length, 1);
   for (const category of preferences.topCategories) {
     const rewardRate = getBestRateForCategory(card, category);
-    // Scale: 5%+ = full points, 1% = 20% of points
-    const rateMultiplier = Math.min(rewardRate / 5, 1);
-    score += categoryPoints * rateMultiplier;
+    score += categoryPoints * Math.min(rewardRate / 5, 1);
   }
 
-  // 3. Reward Type Match (15 points)
+  // Reward Type Match (15 points)
   const cardRewardType = card.rewards[0]?.rewardType;
-  if (preferences.rewardPreference === 'either') {
-    score += 15;
-  } else if (preferences.rewardPreference === cardRewardType) {
+  if (preferences.rewardPreference === 'either' || preferences.rewardPreference === cardRewardType) {
     score += 15;
   } else {
-    score += 5; // Partial credit for mismatch
-  }
-
-  // 4. Simplicity Match (15 points)
-  if (preferences.simplicityPreference === 'fewer-cards') {
-    // Prefer basic/flat rate cards for simplicity seekers
-    if (card.tier === 'basic') score += 15;
-    else if (card.tier === 'moderate') score += 10;
-    else score += 5;
-  } else {
-    // Prefer aggressive/specialized cards for reward maximizers
-    if (card.tier === 'aggressive') score += 15;
-    else if (card.tier === 'moderate') score += 12;
-    else score += 8;
-  }
-
-  // 5. Annual Fee Consideration (10 points)
-  if (card.annualFee === 0) {
-    score += 10;
-  } else if (card.annualFee <= 100) {
     score += 5;
-  } else if (card.annualFee <= 200) {
-    score += 2;
   }
-  // High-fee cards can still score well if other factors are strong
+
+  // Simplicity Match (15 points)
+  score += SIMPLICITY_TIER_SCORES[preferences.simplicityPreference][card.tier];
+
+  // Annual Fee Consideration (10 points)
+  const feeEntry = FEE_SCORES.find(f => card.annualFee <= f.maxFee)!;
+  score += feeEntry.score;
 
   return Math.round(score);
 }
@@ -287,13 +274,61 @@ function selectOptimalCardSet(
 // ============================================
 
 /**
- * Generate a spending strategy showing which card to use for each category
+ * Find the best category to focus an auto-highest card on.
+ * Uses monthly spending if available, otherwise falls back to category priority order.
+ */
+function findBestCategoryForAutoHighest(
+  card: RecommendableCard,
+  categories: SpendingCategory[],
+  monthlySpending: { [key in SpendingCategory]?: number } = {}
+): SpendingCategory {
+  // Get categories this card has bonus rates for (excluding 'all')
+  const bonusCategories = card.rewards
+    .filter(r => r.category !== 'all' && r.category !== 'rotating' && r.rewardRate > 1)
+    .map(r => r.category as SpendingCategory);
+
+  // Filter to only categories the user cares about
+  const eligibleCategories = categories.filter(c => bonusCategories.includes(c));
+
+  if (eligibleCategories.length === 0) {
+    return categories[0]; // Fallback to first user category
+  }
+
+  // If we have spending data, pick the category with highest spending
+  const spending = { ...DEFAULT_MONTHLY_SPENDING, ...monthlySpending };
+  let highestSpendCategory = eligibleCategories[0];
+  let highestSpend = spending[highestSpendCategory] || 0;
+
+  for (const cat of eligibleCategories) {
+    const catSpend = spending[cat] || 0;
+    if (catSpend > highestSpend) {
+      highestSpend = catSpend;
+      highestSpendCategory = cat;
+    }
+  }
+
+  return highestSpendCategory;
+}
+
+/**
+ * Generate a spending strategy showing which card to use for each category.
+ * Handles auto-highest cards by assigning them to only ONE category.
  */
 function generateSpendingStrategy(
   recommendations: CardRecommendation[],
-  categories: SpendingCategory[]
+  categories: SpendingCategory[],
+  monthlySpending: { [key in SpendingCategory]?: number } = {}
 ): SpendingStrategy[] {
   const strategy: SpendingStrategy[] = [];
+
+  // Pre-assign auto-highest cards to their best single category
+  const autoHighestAssignments = new Map<string, SpendingCategory>();
+  for (const rec of recommendations) {
+    if (rec.card.isAutoHighestCategory) {
+      const bestCategory = findBestCategoryForAutoHighest(rec.card, categories, monthlySpending);
+      autoHighestAssignments.set(rec.card.id, bestCategory);
+    }
+  }
 
   for (const category of categories) {
     let bestCard = recommendations[0];
@@ -301,6 +336,14 @@ function generateSpendingStrategy(
 
     // Find the best card for this category among recommendations
     for (const rec of recommendations) {
+      // Skip auto-highest cards if this isn't their assigned category
+      if (rec.card.isAutoHighestCategory) {
+        const assignedCategory = autoHighestAssignments.get(rec.card.id);
+        if (assignedCategory !== category) {
+          continue; // This auto-highest card is reserved for another category
+        }
+      }
+
       const rate = getBestRateForCategory(rec.card, category);
       if (rate > bestRate) {
         bestRate = rate;
@@ -308,11 +351,19 @@ function generateSpendingStrategy(
       }
     }
 
+    // Build reasoning - special message for auto-highest cards
+    let reasoning: string;
+    if (bestCard.card.isAutoHighestCategory && autoHighestAssignments.get(bestCard.card.id) === category) {
+      reasoning = `Focus your ${formatCategoryName(category).toLowerCase()} spending here for ${bestRate}% back (your highest category)`;
+    } else {
+      reasoning = `${bestRate}% ${bestCard.card.rewards[0]?.rewardType || 'back'} on ${formatCategoryName(category)}`;
+    }
+
     strategy.push({
       category,
       recommendedCard: bestCard.card.name,
       rewardRate: bestRate,
-      reasoning: `${bestRate}% ${bestCard.card.rewards[0]?.rewardType || 'back'} on ${formatCategoryName(category)}`
+      reasoning
     });
   }
 
@@ -385,7 +436,7 @@ export function generateRecommendations(
   }));
 
   // 5. Generate spending strategy
-  const spendingStrategy = generateSpendingStrategy(recommendations, preferences.topCategories);
+  const spendingStrategy = generateSpendingStrategy(recommendations, preferences.topCategories, preferences.monthlySpending);
 
   // 6. Calculate totals
   const totalEstimatedAnnualReward = recommendations.reduce(

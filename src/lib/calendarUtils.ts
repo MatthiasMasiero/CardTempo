@@ -71,7 +71,7 @@ export function generateICSFile(
             (event.newBalance !== undefined ? `After this payment:\n- New balance: $${event.newBalance.toLocaleString()}\n` : '') +
             (event.utilization !== undefined ? `- Utilization: ${event.utilization.toFixed(1)}%\n` : '') +
             (event.scoreImpact ? `- Estimated score impact: ${event.scoreImpact}\n\n` : '\n') +
-            `View your full payment plan: ${typeof window !== 'undefined' ? window.location.origin : 'https://creditoptimizer.com'}/dashboard`;
+            `View your full payment plan: ${typeof window !== 'undefined' ? window.location.origin : 'https://cardtempo.com'}/dashboard`;
           break;
 
         case 'balance':
@@ -84,7 +84,7 @@ export function generateICSFile(
             `- Zero interest charges\n` +
             `- Maintains good payment history\n` +
             `- Keeps account in good standing\n\n` +
-            `View dashboard: ${typeof window !== 'undefined' ? window.location.origin : 'https://creditoptimizer.com'}/dashboard`;
+            `View dashboard: ${typeof window !== 'undefined' ? window.location.origin : 'https://cardtempo.com'}/dashboard`;
           break;
 
         case 'statement':
@@ -120,7 +120,7 @@ export function generateICSFile(
 /**
  * Download .ics file
  */
-export function downloadICSFile(icsContent: string, filename: string = 'creditoptimizer-payments.ics') {
+export function downloadICSFile(icsContent: string, filename: string = 'cardtempo-payments.ics') {
   const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -151,11 +151,11 @@ export function addToGoogleCalendar(event: PaymentEvent) {
   switch (event.type) {
     case 'optimization':
       title = `Pay $${event.amount.toLocaleString()} to ${event.cardName} (Credit Optimization)`;
-      description = `Card: ${event.cardName}\nAmount: $${event.amount.toLocaleString()}\nPurpose: Reduce utilization before statement closes\n\nView plan: ${typeof window !== 'undefined' ? window.location.origin : 'https://creditoptimizer.com'}/dashboard`;
+      description = `Card: ${event.cardName}\nAmount: $${event.amount.toLocaleString()}\nPurpose: Reduce utilization before statement closes\n\nView plan: ${typeof window !== 'undefined' ? window.location.origin : 'https://cardtempo.com'}/dashboard`;
       break;
     case 'balance':
       title = `Pay $${event.amount.toLocaleString()} to ${event.cardName} (Avoid Interest)`;
-      description = `Final payment to avoid interest charges.\n\nView dashboard: ${typeof window !== 'undefined' ? window.location.origin : 'https://creditoptimizer.com'}/dashboard`;
+      description = `Final payment to avoid interest charges.\n\nView dashboard: ${typeof window !== 'undefined' ? window.location.origin : 'https://cardtempo.com'}/dashboard`;
       break;
     case 'statement':
       title = `Statement Closes - ${event.cardName}`;
@@ -191,11 +191,11 @@ export function addToOutlook(event: PaymentEvent) {
   switch (event.type) {
     case 'optimization':
       title = `Pay $${event.amount.toLocaleString()} to ${event.cardName} (Credit Optimization)`;
-      description = `Card: ${event.cardName}\nAmount: $${event.amount.toLocaleString()}\nPurpose: Reduce utilization\n\nView plan: ${typeof window !== 'undefined' ? window.location.origin : 'https://creditoptimizer.com'}/dashboard`;
+      description = `Card: ${event.cardName}\nAmount: $${event.amount.toLocaleString()}\nPurpose: Reduce utilization\n\nView plan: ${typeof window !== 'undefined' ? window.location.origin : 'https://cardtempo.com'}/dashboard`;
       break;
     case 'balance':
       title = `Pay $${event.amount.toLocaleString()} to ${event.cardName} (Avoid Interest)`;
-      description = `Final payment due.\n\nView dashboard: ${typeof window !== 'undefined' ? window.location.origin : 'https://creditoptimizer.com'}/dashboard`;
+      description = `Final payment due.\n\nView dashboard: ${typeof window !== 'undefined' ? window.location.origin : 'https://cardtempo.com'}/dashboard`;
       break;
     case 'statement':
       title = `Statement Closes - ${event.cardName}`;
@@ -244,7 +244,7 @@ export function addToAppleCalendar(event: PaymentEvent, preferences: CalendarPre
 /**
  * Format date for filename
  */
-export function getCalendarFilename(prefix: string = 'creditoptimizer-payments'): string {
+export function getCalendarFilename(prefix: string = 'cardtempo-payments'): string {
   const now = new Date();
   const dateStr = format(now, 'yyyy-MM');
   return `${prefix}-${dateStr}.ics`;

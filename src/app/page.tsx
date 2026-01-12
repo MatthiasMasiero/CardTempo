@@ -126,7 +126,7 @@ export default function LandingPage() {
               />
             </div>
             <span className="font-semibold text-lg bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-              Credit Optimizer
+              CardTempo
             </span>
           </button>
           <nav className="hidden md:flex items-center gap-8">
@@ -705,7 +705,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
               <CreditCard className="h-5 w-5" />
-              <span className="font-semibold text-white">Credit Optimizer</span>
+              <span className="font-semibold text-white">CardTempo</span>
             </div>
             <p className="text-sm">
               For educational purposes. Not financial advice. Results may vary.

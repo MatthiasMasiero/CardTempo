@@ -2,7 +2,7 @@
 title: "Credit Score Factors Explained: What Actually Affects Your FICO Score"
 excerpt: "Understanding the 5 factors that make up your credit score is the first step to improving it. Learn exactly how each factor is weighted and which ones you can optimize quickly."
 date: "2025-01-16"
-author: "Credit Optimizer Team"
+author: "CardTempo Team"
 tags: ["FICO score", "credit basics", "credit factors", "credit education"]
 ---
 
@@ -413,7 +413,7 @@ When you check your credit score, you'll usually see **key factors** affecting y
 
 Focus on utilization first (30% of score, 100% in your control, changes monthly). You can boost your score **40-100 points in 30-60 days** just by optimizing when and how much you pay.
 
-**Use our Credit Optimizer calculator** to get a personalized payment plan that tells you exactly when to pay each card and how much to pay to maximize your score.
+**Use our CardTempo calculator** to get a personalized payment plan that tells you exactly when to pay each card and how much to pay to maximize your score.
 
 Understanding these factors is the first step. **Taking action** is what changes your score (and your financial future).
 

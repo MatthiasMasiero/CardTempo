@@ -1,6 +1,6 @@
-# Testing Guide - Credit Optimizer
+# Testing Guide - CardTempo
 
-This document provides comprehensive information about the testing setup and how to run tests for the Credit Optimizer application.
+This document provides comprehensive information about the testing setup and how to run tests for the CardTempo application.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ This document provides comprehensive information about the testing setup and how
 
 ## Overview
 
-The Credit Optimizer uses a comprehensive testing strategy with two main testing frameworks:
+The CardTempo uses a comprehensive testing strategy with two main testing frameworks:
 
 1. **Jest + React Testing Library** - Unit and component tests
 2. **Playwright** - End-to-end (E2E) tests

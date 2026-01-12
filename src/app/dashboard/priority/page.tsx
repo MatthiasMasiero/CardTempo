@@ -111,7 +111,7 @@ export default function PriorityRankingPage() {
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <CreditCardIcon className="h-6 w-6 text-primary" />
-              <span className="font-semibold text-lg">Credit Optimizer</span>
+              <span className="font-semibold text-lg">CardTempo</span>
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/">
@@ -166,7 +166,7 @@ export default function PriorityRankingPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <CreditCardIcon className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-lg">Credit Optimizer</span>
+            <span className="font-semibold text-lg">CardTempo</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/">

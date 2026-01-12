@@ -11,15 +11,17 @@ import {
   DollarSign,
   Star,
   Clock,
+  CheckCircle2,
 } from 'lucide-react';
 import { CardRecommendation } from '@/types';
 import { formatCategoryName } from '@/data/recommendable-cards';
 
 interface RecommendedCardDisplayProps {
   recommendation: CardRecommendation;
+  isCurrentCard?: boolean;
 }
 
-export function RecommendedCardDisplay({ recommendation }: RecommendedCardDisplayProps) {
+export function RecommendedCardDisplay({ recommendation, isCurrentCard = false }: RecommendedCardDisplayProps) {
   const [expanded, setExpanded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -43,18 +45,25 @@ export function RecommendedCardDisplay({ recommendation }: RecommendedCardDispla
   };
 
   return (
-    <Card className="border-2 hover:shadow-lg transition-shadow overflow-hidden">
+    <Card className={`border-2 hover:shadow-lg transition-shadow overflow-hidden ${isCurrentCard ? 'border-green-300 bg-green-50/30' : ''}`}>
       <CardContent className="p-0">
         {/* Header with order badge */}
         <div className="relative">
-          {/* Application Order Badge */}
-          <div className={`absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${getOrderColor(applicationOrder)}`}>
-            #{applicationOrder}
-          </div>
+          {/* Application Order Badge or Owned Badge */}
+          {isCurrentCard ? (
+            <div className="absolute top-4 left-4 z-10 px-2 py-1 rounded-full flex items-center gap-1 font-medium text-xs bg-green-600 text-white">
+              <CheckCircle2 className="h-3 w-3" />
+              Owned
+            </div>
+          ) : (
+            <div className={`absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${getOrderColor(applicationOrder)}`}>
+              #{applicationOrder}
+            </div>
+          )}
 
           {/* Match Score Badge */}
-          <div className={`absolute top-4 right-4 z-10 px-2 py-1 rounded-full text-xs font-medium border ${getScoreColor(matchScore)}`}>
-            {matchScore}% match
+          <div className={`absolute top-4 right-4 z-10 px-2 py-1 rounded-full text-xs font-medium border ${isCurrentCard ? 'bg-green-100 text-green-700 border-green-200' : getScoreColor(matchScore)}`}>
+            {isCurrentCard ? 'Your card' : `${matchScore}% match`}
           </div>
 
           {/* Card Image Header */}

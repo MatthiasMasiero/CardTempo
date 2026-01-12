@@ -88,7 +88,18 @@ export interface CreditCardFormData {
 // ========== RECOMMENDATION TYPES ==========
 
 // Spending categories for card recommendations
-export type SpendingCategory = 'dining' | 'groceries' | 'gas' | 'travel' | 'online-shopping';
+export type SpendingCategory =
+  | 'dining'
+  | 'groceries'
+  | 'gas'
+  | 'travel'
+  | 'online-shopping'
+  | 'streaming'
+  | 'utilities'
+  | 'transit'
+  | 'phone'
+  | 'entertainment'
+  | 'drugstores';
 
 // Reward tier (simplified classification)
 export type RewardTier = 'basic' | 'moderate' | 'aggressive';
@@ -108,6 +119,8 @@ export interface RecommendationPreferences {
   monthlySpending?: {
     [key in SpendingCategory]?: number;
   };
+  includeCurrentCards?: boolean;
+  currentCards?: CreditCard[];
 }
 
 // Reward rate structure for a card
@@ -172,6 +185,7 @@ export interface RecommendationResult {
   totalEstimatedAnnualReward: number;
   totalAnnualFees: number;
   netAnnualBenefit: number;
+  currentCardRecommendations?: CardRecommendation[]; // Matched current cards from user's dashboard
 }
 
 // Timeline event for visualization

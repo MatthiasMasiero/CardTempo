@@ -9,6 +9,8 @@ import {
   TrendingDown,
   RefreshCw,
   Wallet,
+  CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import { RecommendationResult, RecommendationPreferences } from '@/types';
 import { RecommendedCardDisplay } from './RecommendedCardDisplay';
@@ -102,11 +104,35 @@ export function RecommendationResults({
         </CardContent>
       </Card>
 
+      {/* Your Current Cards (if included) */}
+      {results.currentCardRecommendations && results.currentCardRecommendations.length > 0 && (
+        <div>
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            Your Current Cards
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            These cards you already own are included in your spending strategy below.
+          </p>
+          <div className="grid md:grid-cols-2 gap-6">
+            {results.currentCardRecommendations.map((rec) => (
+              <RecommendedCardDisplay
+                key={`current-${rec.card.id}`}
+                recommendation={rec}
+                isCurrentCard={true}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recommended Cards */}
       <div>
         <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-primary" />
-          Recommended Cards
+          <Sparkles className="h-5 w-5 text-amber-500" />
+          {results.currentCardRecommendations && results.currentCardRecommendations.length > 0
+            ? 'New Cards to Consider'
+            : 'Recommended Cards'}
         </h3>
         <div className="grid md:grid-cols-2 gap-6">
           {results.recommendations.map((rec) => (

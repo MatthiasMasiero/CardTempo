@@ -108,14 +108,14 @@
     "id": "citi-double-cash",
     "name": "Citi® Double Cash Card",
     "issuer": "Citi",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/citi-double-cash.png",
     "category": "cashback"
   },
   {
     "id": "citi-custom-cash",
     "name": "Citi Custom Cash℠ Card",
     "issuer": "Citi",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/citi-custom-cash.png",
     "category": "cashback"
   },
   {
@@ -213,7 +213,7 @@
     "id": "chase-ink-business-preferred",
     "name": "Ink Business Preferred® Credit Card",
     "issuer": "Chase",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/chase-ink-business-preferred.png",
     "category": "business"
   },
   {
@@ -248,7 +248,7 @@
     "id": "marriott-bonvoy-boundless",
     "name": "Marriott Bonvoy Boundless™ Credit Card",
     "issuer": "Chase",
-    "imageUrl": "/cards/default-card.svg",
+    "imageUrl": "/cards/marriott-bonvoy-boundless.png",
     "category": "hotel"
   },
   {

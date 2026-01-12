@@ -55,13 +55,39 @@ const SIMPLICITY_TIER_SCORES: Record<string, Record<RewardTier, number>> = {
   'more-rewards': { aggressive: 15, moderate: 12, basic: 8 },
 };
 
-// Annual fee score thresholds
+// Annual fee score thresholds (used as fallback when no spending data)
 const FEE_SCORES: Array<{ maxFee: number; score: number }> = [
   { maxFee: 0, score: 10 },
   { maxFee: 100, score: 5 },
   { maxFee: 200, score: 2 },
   { maxFee: Infinity, score: 0 },
 ];
+
+/**
+ * Calculate fee value score based on net benefit (rewards - fee).
+ * Returns 0-15 points. Higher net benefit = higher score.
+ *
+ * This is purely money-driven: a $325 card earning $600 (net $275)
+ * scores higher than a $0 card earning $200 (net $200).
+ */
+function calculateFeeValueScore(
+  card: RecommendableCard,
+  monthlySpending: { [key in SpendingCategory]?: number }
+): number {
+  const annualReward = calculateAnnualReward(card, monthlySpending);
+  const annualFee = card.annualFee;
+  const netBenefit = annualReward - annualFee;
+
+  // Pure net benefit scoring - the card that makes you more money wins
+  if (netBenefit >= 300) return 15;  // Excellent value
+  if (netBenefit >= 200) return 13;  // Great value
+  if (netBenefit >= 150) return 11;  // Very good
+  if (netBenefit >= 100) return 9;   // Good value
+  if (netBenefit >= 50) return 7;    // Decent value
+  if (netBenefit >= 0) return 5;     // Breaks even
+  if (netBenefit >= -50) return 3;   // Slight loss
+  return 1;                           // Poor value - fee exceeds rewards
+}
 
 /**
  * Calculate match score for a card against user preferences.
@@ -80,9 +106,29 @@ export function calculateMatchScore(
 
   // Category Match (40 points max)
   const categoryPoints = 40 / Math.max(preferences.topCategories.length, 1);
-  for (const category of preferences.topCategories) {
-    const rewardRate = getBestRateForCategory(card, category);
-    score += categoryPoints * Math.min(rewardRate / 5, 1);
+
+  // For isAutoHighestCategory cards (like Citi Custom Cash), only count the BEST category
+  // since the card only gives bonus rate on ONE category at a time
+  if (card.isAutoHighestCategory) {
+    // Find the best rate among user's selected categories
+    let bestRate = 0;
+    for (const category of preferences.topCategories) {
+      const rate = getBestRateForCategory(card, category);
+      if (rate > bestRate) bestRate = rate;
+    }
+    // Only give points for ONE category at the best rate, others at base rate
+    const baseRate = card.rewards.find(r => r.category === 'all')?.rewardRate || 1;
+    score += categoryPoints * Math.min(bestRate / 5, 1); // Best category
+    // Remaining categories get base rate scoring
+    for (let i = 1; i < preferences.topCategories.length; i++) {
+      score += categoryPoints * Math.min(baseRate / 5, 1);
+    }
+  } else {
+    // Normal cards: score each category independently
+    for (const category of preferences.topCategories) {
+      const rewardRate = getBestRateForCategory(card, category);
+      score += categoryPoints * Math.min(rewardRate / 5, 1);
+    }
   }
 
   // Reward Type Match (15 points)
@@ -96,9 +142,18 @@ export function calculateMatchScore(
   // Simplicity Match (15 points)
   score += SIMPLICITY_TIER_SCORES[preferences.simplicityPreference][card.tier];
 
-  // Annual Fee Consideration (10 points)
-  const feeEntry = FEE_SCORES.find(f => card.annualFee <= f.maxFee)!;
-  score += feeEntry.score;
+  // Fee Value Score (15 points) - Use spending-based scoring if available
+  const hasSpendingData = preferences.monthlySpending &&
+    Object.keys(preferences.monthlySpending).length > 0;
+
+  if (hasSpendingData) {
+    // Use dynamic scoring based on whether rewards justify the fee
+    score += calculateFeeValueScore(card, preferences.monthlySpending!);
+  } else {
+    // Fallback to static fee penalty (scaled to 15 points max)
+    const feeEntry = FEE_SCORES.find(f => card.annualFee <= f.maxFee)!;
+    score += Math.round(feeEntry.score * 1.5); // Scale 0-10 to 0-15
+  }
 
   return Math.round(score);
 }
@@ -114,29 +169,68 @@ export function calculateAnnualReward(
 
   // Use default spending for categories not specified
   const spending = { ...DEFAULT_MONTHLY_SPENDING, ...monthlySpending };
+  const spendingEntries = Object.entries(spending) as [SpendingCategory, number][];
 
-  for (const [category, monthly] of Object.entries(spending) as [SpendingCategory, number][]) {
-    const rewardRate = getBestRateForCategory(card, category);
-    let yearlySpend = monthly * 12;
+  // For isAutoHighestCategory cards (like Citi Custom Cash), only ONE category
+  // gets the bonus rate - whichever has the highest spending
+  if (card.isAutoHighestCategory) {
+    // Find the category with highest spending that has a bonus rate
+    let bestCategory: SpendingCategory | null = null;
+    let bestSpend = 0;
 
-    // Find the specific reward to check for caps
-    const reward = card.rewards.find(r => r.category === category) ||
-                   card.rewards.find(r => r.category === 'all');
-
-    // Apply caps if they exist
-    if (reward?.cap) {
-      yearlySpend = Math.min(yearlySpend, reward.cap);
+    for (const [category, monthly] of spendingEntries) {
+      const reward = card.rewards.find(r => r.category === category);
+      if (reward && reward.rewardRate > 1 && monthly > bestSpend) {
+        bestSpend = monthly;
+        bestCategory = category;
+      }
     }
 
-    // Calculate reward value
-    let rewardValue = yearlySpend * (rewardRate / 100);
+    // Calculate rewards: best category gets bonus rate, others get base rate
+    const baseRate = card.rewards.find(r => r.category === 'all')?.rewardRate || 1;
 
-    // Convert points to dollar value if applicable
-    if (reward?.rewardType === 'points' && reward?.pointValue) {
-      rewardValue = rewardValue * (reward.pointValue / 100);
+    for (const [category, monthly] of spendingEntries) {
+      let yearlySpend = monthly * 12;
+      const reward = card.rewards.find(r => r.category === category);
+
+      // Only the best-spending category gets the bonus rate
+      const rewardRate = (category === bestCategory && reward)
+        ? reward.rewardRate
+        : baseRate;
+
+      // Apply cap if this is the bonus category
+      if (category === bestCategory && reward?.cap) {
+        yearlySpend = Math.min(yearlySpend, reward.cap * 12); // cap is monthly
+      }
+
+      let rewardValue = yearlySpend * (rewardRate / 100);
+      annualReward += rewardValue;
     }
+  } else {
+    // Normal cards: each category calculated independently
+    for (const [category, monthly] of spendingEntries) {
+      const rewardRate = getBestRateForCategory(card, category);
+      let yearlySpend = monthly * 12;
 
-    annualReward += rewardValue;
+      // Find the specific reward to check for caps
+      const reward = card.rewards.find(r => r.category === category) ||
+                    card.rewards.find(r => r.category === 'all');
+
+      // Apply caps if they exist
+      if (reward?.cap) {
+        yearlySpend = Math.min(yearlySpend, reward.cap);
+      }
+
+      // Calculate reward value (base assumes 1 cent per point/1% cashback)
+      let rewardValue = yearlySpend * (rewardRate / 100);
+
+      // Apply point value multiplier (e.g., pointValue: 2 means 2cpp = 2x value)
+      if (reward?.rewardType === 'points' && reward?.pointValue) {
+        rewardValue = rewardValue * reward.pointValue;
+      }
+
+      annualReward += rewardValue;
+    }
   }
 
   return Math.round(annualReward);

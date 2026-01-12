@@ -23,6 +23,7 @@ import {
   Globe,
   Check,
   ArrowRight,
+  DollarSign,
 } from 'lucide-react';
 import {
   RecommendationPreferences,
@@ -52,12 +53,21 @@ const CREDIT_SCORE_OPTIONS: { value: CreditScoreRange; label: string; descriptio
   { value: 'building', label: 'Building (<650)', description: 'Focus on starter cards' },
 ];
 
+// Spending level presets for dropdown selection
+const SPENDING_LEVELS = [
+  { value: 'light', label: 'Light', description: 'Under $150/mo', amount: 100 },
+  { value: 'moderate', label: 'Moderate', description: '$150-400/mo', amount: 275 },
+  { value: 'heavy', label: 'Heavy', description: '$400-800/mo', amount: 600 },
+  { value: 'very-heavy', label: 'Very Heavy', description: '$800+/mo', amount: 1000 },
+];
+
 export function RecommendationQuestionnaire({ onComplete }: RecommendationQuestionnaireProps) {
   // Form state
   const [creditScore, setCreditScore] = useState<CreditScoreRange | ''>('');
   const [simplicityPreference, setSimplicityPreference] = useState<'fewer-cards' | 'more-rewards' | ''>('');
   const [selectedCategories, setSelectedCategories] = useState<SpendingCategory[]>([]);
   const [rewardPreference, setRewardPreference] = useState<RewardPreference | ''>('');
+  const [monthlySpending, setMonthlySpending] = useState<{ [key in SpendingCategory]?: number }>({});
 
   // Validation state
   const [errors, setErrors] = useState<{
@@ -65,15 +75,28 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
     simplicityPreference?: string;
     categories?: string;
     rewardPreference?: string;
+    spending?: string;
   }>({});
 
   const handleCategoryToggle = (category: SpendingCategory) => {
     setSelectedCategories(prev => {
       if (prev.includes(category)) {
+        // Also remove spending for this category
+        setMonthlySpending(spending => {
+          const updated = { ...spending };
+          delete updated[category];
+          return updated;
+        });
         return prev.filter(c => c !== category);
       }
       if (prev.length >= 3) {
-        // Replace the oldest selection
+        // Replace the oldest selection and its spending
+        const removed = prev[0];
+        setMonthlySpending(spending => {
+          const updated = { ...spending };
+          delete updated[removed];
+          return updated;
+        });
         return [...prev.slice(1), category];
       }
       return [...prev, category];
@@ -82,6 +105,26 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
     if (errors.categories) {
       setErrors(prev => ({ ...prev, categories: undefined }));
     }
+  };
+
+  const handleSpendingLevelChange = (category: SpendingCategory, levelValue: string) => {
+    const level = SPENDING_LEVELS.find(l => l.value === levelValue);
+    if (level) {
+      setMonthlySpending(prev => ({
+        ...prev,
+        [category]: level.amount
+      }));
+    }
+    if (errors.spending) {
+      setErrors(prev => ({ ...prev, spending: undefined }));
+    }
+  };
+
+  const getSpendingLevelValue = (category: SpendingCategory): string => {
+    const amount = monthlySpending[category];
+    if (!amount) return '';
+    const level = SPENDING_LEVELS.find(l => l.amount === amount);
+    return level?.value || '';
   };
 
   const validateForm = (): boolean => {
@@ -97,6 +140,12 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
 
     if (selectedCategories.length === 0) {
       newErrors.categories = 'Please select at least one spending category';
+    }
+
+    // Check that all selected categories have spending levels
+    const missingSpending = selectedCategories.some(cat => !monthlySpending[cat]);
+    if (selectedCategories.length > 0 && missingSpending) {
+      newErrors.spending = 'Please select spending levels for all categories';
     }
 
     if (!rewardPreference) {
@@ -115,6 +164,7 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
       simplicityPreference: simplicityPreference as 'fewer-cards' | 'more-rewards',
       topCategories: selectedCategories,
       rewardPreference: rewardPreference as RewardPreference,
+      monthlySpending: monthlySpending,
     };
 
     onComplete(preferences);
@@ -293,7 +343,60 @@ export function RecommendationQuestionnaire({ onComplete }: RecommendationQuesti
         </CardContent>
       </Card>
 
-      {/* Question 4: Reward Type */}
+      {/* Question 4: Spending Amounts (conditional) */}
+      {selectedCategories.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">How much do you spend monthly?</CardTitle>
+                <CardDescription>This helps us recommend cards that are worth any annual fees</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {selectedCategories.map(categoryId => {
+              const category = SPENDING_CATEGORIES.find(c => c.id === categoryId);
+              return (
+                <div key={categoryId} className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 min-w-[120px]">
+                    <div className="p-1.5 rounded-full bg-primary/10">
+                      {category?.icon}
+                    </div>
+                    <span className="text-sm font-medium">{category?.label}</span>
+                  </div>
+                  <Select
+                    value={getSpendingLevelValue(categoryId)}
+                    onValueChange={(value) => handleSpendingLevelChange(categoryId, value)}
+                  >
+                    <SelectTrigger className={`flex-1 ${errors.spending && !monthlySpending[categoryId] ? 'border-destructive' : ''}`}>
+                      <SelectValue placeholder="Select spending level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SPENDING_LEVELS.map(level => (
+                        <SelectItem key={level.value} value={level.value}>
+                          <div className="flex items-center justify-between gap-4">
+                            <span>{level.label}</span>
+                            <span className="text-xs text-muted-foreground">{level.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })}
+            {errors.spending && (
+              <p className="text-sm text-destructive">{errors.spending}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Question 5: Reward Type */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">

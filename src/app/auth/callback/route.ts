@@ -8,6 +8,10 @@ export async function GET(request: Request) {
   const type = requestUrl.searchParams.get('type');
   const next = requestUrl.searchParams.get('next') ?? '/dashboard';
 
+  // Use NEXT_PUBLIC_APP_URL for reliable redirects in production
+  // Falls back to request origin for local development
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin;
+
   if (token_hash && type) {
     const cookieStore = await cookies();
 
@@ -37,16 +41,16 @@ export async function GET(request: Request) {
 
     if (!error) {
       // Session is now set in cookies - redirect to dashboard
-      return NextResponse.redirect(new URL(next, requestUrl.origin));
+      return NextResponse.redirect(new URL(next, baseUrl));
     }
 
     // Verification failed
     console.error('[Auth Callback] Verification error:', error.message);
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent('Email verification failed. Please try again.')}`, requestUrl.origin)
+      new URL(`/login?error=${encodeURIComponent('Email verification failed. Please try again.')}`, baseUrl)
     );
   }
 
   // Missing parameters
-  return NextResponse.redirect(new URL('/', requestUrl.origin));
+  return NextResponse.redirect(new URL('/', baseUrl));
 }

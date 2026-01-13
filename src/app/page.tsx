@@ -462,23 +462,25 @@ export default function LandingPage() {
             {/* Card Preview Stack */}
             <RevealOnScroll delay={0.2} className="relative">
               <div className="relative h-[400px] md:h-[500px]">
-                {/* Background card */}
+                {/* Background card - furthest back */}
                 <motion.div
-                  className="absolute top-8 left-8 right-0 bottom-0 bg-stone-800 rounded-2xl border border-stone-700"
+                  className="absolute top-12 -right-4 left-8 bottom-[-3rem] bg-stone-800/60 rounded-2xl border border-stone-700/50 backdrop-blur-sm"
                   initial={{ rotate: 6 }}
                   whileHover={{ rotate: 8, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
+                  style={{ transformOrigin: "center" }}
                 />
                 {/* Middle card */}
                 <motion.div
-                  className="absolute top-4 left-4 right-4 bottom-4 bg-stone-800 rounded-2xl border border-stone-700"
+                  className="absolute top-6 -right-2 left-4 bottom-[-1.5rem] bg-stone-800/80 rounded-2xl border border-stone-700/70 backdrop-blur-sm"
                   initial={{ rotate: 3 }}
                   whileHover={{ rotate: 4, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
+                  style={{ transformOrigin: "center" }}
                 />
                 {/* Front card */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl border border-stone-700 p-6 md:p-8 flex flex-col"
+                  className="absolute inset-0 bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl border border-stone-700 p-6 md:p-8 flex flex-col shadow-2xl"
                   whileHover={{ scale: 1.02, y: -5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >

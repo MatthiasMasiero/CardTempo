@@ -11,6 +11,30 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/store/auth-store';
 import { CreditCard, Loader2, CheckCircle2, Mail } from 'lucide-react';
 
+// Detect email provider from email address and return appropriate inbox URL
+function getEmailProviderUrl(email: string): { provider: string; url: string } {
+  const domain = email.split('@')[1]?.toLowerCase();
+
+  // Common email providers with direct inbox links
+  const providers: Record<string, { name: string; url: string }> = {
+    'gmail.com': { name: 'Gmail', url: 'https://mail.google.com/mail/u/0/#inbox' },
+    'googlemail.com': { name: 'Gmail', url: 'https://mail.google.com/mail/u/0/#inbox' },
+    'outlook.com': { name: 'Outlook', url: 'https://outlook.live.com/mail/0/inbox' },
+    'hotmail.com': { name: 'Outlook', url: 'https://outlook.live.com/mail/0/inbox' },
+    'live.com': { name: 'Outlook', url: 'https://outlook.live.com/mail/0/inbox' },
+    'yahoo.com': { name: 'Yahoo', url: 'https://mail.yahoo.com/' },
+    'icloud.com': { name: 'iCloud', url: 'https://www.icloud.com/mail' },
+    'me.com': { name: 'iCloud', url: 'https://www.icloud.com/mail' },
+  };
+
+  if (domain && providers[domain]) {
+    return { provider: providers[domain].name, url: providers[domain].url };
+  }
+
+  // Default: generic mailto link for other providers
+  return { provider: 'Email', url: `mailto:${email}` };
+}
+
 export default function SignupPage() {
   const router = useRouter();
   const { signup, isLoading } = useAuthStore();
@@ -88,10 +112,22 @@ export default function SignupPage() {
                   Click the link in the email to activate your account.
                   The link will expire in 24 hours.
                 </p>
-                <div className="pt-2 space-y-2">
+                <div className="pt-2 space-y-3">
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={() => {
+                      const { url } = getEmailProviderUrl(email);
+                      window.open(url, '_blank');
+                    }}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Open {getEmailProviderUrl(email).provider}
+                  </Button>
+
                   <p className="text-center text-sm text-stone-500">
                     Didn&apos;t receive the email? Check your spam folder.
                   </p>
+
                   <Button
                     variant="outline"
                     className="w-full border-stone-300 text-stone-700 hover:bg-stone-100"

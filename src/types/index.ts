@@ -293,7 +293,7 @@ export const FEATURE_DESCRIPTIONS: Record<keyof TierFeatures, {
   icon: string;
 }> = {
   maxCards: {
-    title: 'Unlimited Cards',
+    title: 'Credit Cards',
     description: 'Track all your credit cards in one place',
     icon: 'credit-card',
   },

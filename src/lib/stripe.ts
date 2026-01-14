@@ -58,11 +58,15 @@ export async function getOrCreateStripeCustomer(
     },
   });
 
-  // Save customer ID to database
+  // Save customer ID to database (upsert to handle missing records)
   await supabase
     .from('subscriptions')
-    .update({ stripe_customer_id: customer.id })
-    .eq('user_id', userId);
+    .upsert({
+      user_id: userId,
+      stripe_customer_id: customer.id,
+    }, {
+      onConflict: 'user_id',
+    });
 
   return customer.id;
 }

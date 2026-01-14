@@ -166,7 +166,8 @@ async function handleStripeEvent(
 
       const { error } = await supabaseAdmin
         .from('subscriptions')
-        .update({
+        .upsert({
+          user_id: userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscriptionId,
           tier: 'premium',
@@ -177,8 +178,9 @@ async function handleStripeEvent(
           cancel_at_period_end: false,
           canceled_at: null,
           grandfathered_until: null, // Clear grandfathered status on upgrade
-        })
-        .eq('user_id', userId);
+        }, {
+          onConflict: 'user_id',
+        });
 
       if (error) {
         console.error('[Webhook] Error updating subscription after checkout:', error);
@@ -211,8 +213,10 @@ async function handleStripeEvent(
 
       const { error } = await supabaseAdmin
         .from('subscriptions')
-        .update({
+        .upsert({
+          user_id: userId,
           stripe_subscription_id: subscription.id,
+          stripe_customer_id: subscription.customer as string,
           tier: isPremium ? 'premium' : 'free',
           status: subscription.status as string,
           billing_interval: interval === 'year' ? 'annual' : 'monthly',
@@ -222,8 +226,9 @@ async function handleStripeEvent(
           canceled_at: subscription.canceled_at
             ? new Date(subscription.canceled_at * 1000).toISOString()
             : null,
-        })
-        .eq('user_id', userId);
+        }, {
+          onConflict: 'user_id',
+        });
 
       if (error) {
         console.error('[Webhook] Error updating subscription:', error);

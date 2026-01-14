@@ -12,6 +12,8 @@ import { RecommendationQuestionnaire } from '@/components/recommendations/Recomm
 import { RecommendationResults } from '@/components/recommendations/RecommendationResults';
 import { RecommendationPreferences, RecommendationResult } from '@/types';
 import { generateRecommendations } from '@/lib/recommendationEngine';
+import { PremiumGate } from '@/components/PremiumGate';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 
 type PageState = 'questionnaire' | 'results';
 
@@ -78,16 +80,27 @@ export default function RecommendationsPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8 max-w-4xl">
-        {pageState === 'questionnaire' && (
-          <RecommendationQuestionnaire onComplete={handleQuestionnaireComplete} />
-        )}
+        <PremiumGate
+          feature="hasRecommendations"
+          fallback={
+            <UpgradePrompt
+              variant="card"
+              feature="Card Recommendations"
+              description="Get personalized credit card recommendations based on your spending habits, credit profile, and financial goals. Upgrade to Premium to find the perfect cards for you."
+            />
+          }
+        >
+          {pageState === 'questionnaire' && (
+            <RecommendationQuestionnaire onComplete={handleQuestionnaireComplete} />
+          )}
 
-        {pageState === 'results' && results && (
-          <RecommendationResults
-            results={results}
-            onStartOver={handleStartOver}
-          />
-        )}
+          {pageState === 'results' && results && (
+            <RecommendationResults
+              results={results}
+              onStartOver={handleStartOver}
+            />
+          )}
+        </PremiumGate>
       </main>
 
       {/* Footer */}

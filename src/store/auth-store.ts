@@ -70,10 +70,12 @@ export const useAuthStore = create<AuthState>()(
 
           set({ user, isAuthenticated: true, isLoading: false });
 
-          // Update calculator store with user ID
+          // Update calculator store with user ID and load subscription
           if (typeof window !== 'undefined') {
             const { useCalculatorStore } = await import('./calculator-store');
+            const { useSubscriptionStore } = await import('./subscription-store');
             useCalculatorStore.getState().setUserId(user.id);
+            await useSubscriptionStore.getState().loadSubscription(user.id);
           }
 
           // Update last_login in database
@@ -162,10 +164,12 @@ export const useAuthStore = create<AuthState>()(
 
           set({ user, isAuthenticated: true, isLoading: false });
 
-          // Update calculator store with user ID
+          // Update calculator store with user ID and load subscription
           if (typeof window !== 'undefined') {
             const { useCalculatorStore } = await import('./calculator-store');
+            const { useSubscriptionStore } = await import('./subscription-store');
             useCalculatorStore.getState().setUserId(user.id);
+            await useSubscriptionStore.getState().loadSubscription(user.id);
           }
 
           return { success: true, needsConfirmation: false };
@@ -182,10 +186,13 @@ export const useAuthStore = create<AuthState>()(
 
         set({ user: null, isAuthenticated: false });
 
-        // Clear calculator store data by setting userId to null (guest mode)
+        // Clear calculator store and subscription data
         if (typeof window !== 'undefined') {
           import('./calculator-store').then(({ useCalculatorStore }) => {
             useCalculatorStore.getState().setUserId(null);
+          });
+          import('./subscription-store').then(({ useSubscriptionStore }) => {
+            useSubscriptionStore.getState().clearSubscription();
           });
         }
       },
@@ -248,13 +255,21 @@ export const useAuthStore = create<AuthState>()(
 
             set({ user, isAuthenticated: true });
 
-            // Update calculator store
+            // Update calculator store and load subscription
             if (typeof window !== 'undefined') {
               const { useCalculatorStore } = await import('./calculator-store');
+              const { useSubscriptionStore } = await import('./subscription-store');
               useCalculatorStore.getState().setUserId(user.id);
+              await useSubscriptionStore.getState().loadSubscription(user.id);
             }
           } else {
             set({ user: null, isAuthenticated: false });
+            // Clear subscription when no session
+            if (typeof window !== 'undefined') {
+              import('./subscription-store').then(({ useSubscriptionStore }) => {
+                useSubscriptionStore.getState().clearSubscription();
+              });
+            }
           }
         } catch (error) {
           console.error('Session check error:', error);

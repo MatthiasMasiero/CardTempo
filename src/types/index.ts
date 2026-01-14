@@ -203,3 +203,133 @@ export interface RecommendationTimelineEvent {
   description: string;
   icon: 'card' | 'calendar' | 'trending-up' | 'wallet';
 }
+
+// ============================================
+// SUBSCRIPTION TYPES
+// ============================================
+
+export type SubscriptionTier = 'free' | 'premium';
+
+export type SubscriptionStatus =
+  | 'active'
+  | 'canceled'
+  | 'past_due'
+  | 'trialing'
+  | 'unpaid'
+  | 'incomplete'
+  | 'incomplete_expired';
+
+export type BillingInterval = 'monthly' | 'annual';
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  tier: SubscriptionTier;
+  status: SubscriptionStatus;
+  billingInterval: BillingInterval | null;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean;
+  canceledAt: Date | null;
+  grandfatheredUntil: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Feature flags for each tier
+export interface TierFeatures {
+  maxCards: number;
+  hasWhatIfScenarios: boolean;
+  hasPdfExport: boolean;
+  hasCalendarExport: boolean;
+  hasRecommendations: boolean;
+  hasEmailReminders: boolean;
+  hasPriorityAllocation: boolean;
+  hasAdvancedAnalytics: boolean;
+}
+
+// Feature definitions per tier
+export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
+  free: {
+    maxCards: 2,
+    hasWhatIfScenarios: false,
+    hasPdfExport: false,
+    hasCalendarExport: false,
+    hasRecommendations: false,
+    hasEmailReminders: false,
+    hasPriorityAllocation: false,
+    hasAdvancedAnalytics: false,
+  },
+  premium: {
+    maxCards: Infinity,
+    hasWhatIfScenarios: true,
+    hasPdfExport: true,
+    hasCalendarExport: true,
+    hasRecommendations: true,
+    hasEmailReminders: true,
+    hasPriorityAllocation: true,
+    hasAdvancedAnalytics: true,
+  },
+};
+
+// Subscription plan info for pricing page
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  tier: SubscriptionTier;
+  priceMonthly: number;  // in cents
+  priceAnnual: number;   // in cents
+  stripePriceIdMonthly: string;
+  stripePriceIdAnnual: string;
+  features: string[];
+}
+
+// Feature descriptions for UI
+export const FEATURE_DESCRIPTIONS: Record<keyof TierFeatures, {
+  title: string;
+  description: string;
+  icon: string;
+}> = {
+  maxCards: {
+    title: 'Unlimited Cards',
+    description: 'Track all your credit cards in one place',
+    icon: 'credit-card',
+  },
+  hasWhatIfScenarios: {
+    title: 'What-If Scenarios',
+    description: 'Test financial decisions before making them',
+    icon: 'git-branch',
+  },
+  hasPdfExport: {
+    title: 'PDF Export',
+    description: 'Download payment plans as professional PDFs',
+    icon: 'file-text',
+  },
+  hasCalendarExport: {
+    title: 'Calendar Sync',
+    description: 'Export payment dates to your calendar',
+    icon: 'calendar',
+  },
+  hasRecommendations: {
+    title: 'Card Recommendations',
+    description: 'Get personalized credit card suggestions',
+    icon: 'sparkles',
+  },
+  hasEmailReminders: {
+    title: 'Email Reminders',
+    description: 'Never miss a payment with smart reminders',
+    icon: 'bell',
+  },
+  hasPriorityAllocation: {
+    title: 'Smart Allocation',
+    description: 'Optimize payment distribution across cards',
+    icon: 'trending-up',
+  },
+  hasAdvancedAnalytics: {
+    title: 'Advanced Analytics',
+    description: 'Deep insights into your credit health',
+    icon: 'bar-chart',
+  },
+};

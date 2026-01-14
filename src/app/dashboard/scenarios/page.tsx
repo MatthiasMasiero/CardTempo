@@ -17,6 +17,8 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useCalculatorStore } from '@/store/calculator-store';
+import { PremiumGate } from '@/components/PremiumGate';
+import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { ScenarioComparison } from '@/components/scenarios/ScenarioComparison';
 import { PaymentScenario } from '@/components/scenarios/PaymentScenario';
 import { PurchaseScenario } from '@/components/scenarios/PurchaseScenario';
@@ -199,15 +201,27 @@ export default function ScenariosPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column: Scenario Cards */}
-          <div className="lg:col-span-2">
-            {!activeScenario ? (
-              <>
-                <div className="mb-8">
-                  <h2 className="font-display text-2xl text-stone-900 mb-2">Choose a Scenario</h2>
-                  <p className="text-stone-600">
+      <PremiumGate
+        feature="hasWhatIfScenarios"
+        fallback={
+          <div className="container mx-auto px-4 py-12 max-w-2xl">
+            <UpgradePrompt
+              variant="card"
+              feature="What-If Scenarios"
+              description="Test different financial decisions risk-free and see how they would affect your credit score. Upgrade to Premium to unlock this powerful planning tool."
+            />
+          </div>
+        }
+      >
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left Column: Scenario Cards */}
+            <div className="lg:col-span-2">
+              {!activeScenario ? (
+                <>
+                  <div className="mb-8">
+                    <h2 className="font-display text-2xl text-stone-900 mb-2">Choose a Scenario</h2>
+                    <p className="text-stone-600">
                     Select a what-if scenario to see how it would affect your credit score
                   </p>
                 </div>
@@ -343,22 +357,23 @@ export default function ScenariosPage() {
             )}
           </div>
 
-          {/* Right Column: Comparison Panel (Sticky) */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              {baselineScenario && currentScenario && (
-                <ScenarioComparison
-                  baseline={baselineScenario}
-                  scenario={currentScenario}
-                  onApply={handleApplyScenario}
-                  onReset={handleResetScenario}
-                  showActions={activeScenario !== null}
-                />
-              )}
+            {/* Right Column: Comparison Panel (Sticky) */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                {baselineScenario && currentScenario && (
+                  <ScenarioComparison
+                    baseline={baselineScenario}
+                    scenario={currentScenario}
+                    onApply={handleApplyScenario}
+                    onReset={handleResetScenario}
+                    showActions={activeScenario !== null}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </PremiumGate>
     </div>
   );
 }

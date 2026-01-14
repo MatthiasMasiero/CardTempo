@@ -98,17 +98,40 @@ export const useAuthStore = create<AuthState>()(
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+              emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard`,
+            },
           });
 
           if (error) {
             console.error('Signup error:', error.message);
             set({ isLoading: false });
+
+            // Check for duplicate email error and provide user-friendly message
+            if (
+              error.message.toLowerCase().includes('already registered') ||
+              error.message.toLowerCase().includes('user already registered') ||
+              error.message.toLowerCase().includes('duplicate')
+            ) {
+              return { success: false, error: 'This email is already in use. Please try logging in instead.' };
+            }
+
             return { success: false, error: error.message };
           }
 
           if (!data.user) {
             set({ isLoading: false });
             return { success: false, error: 'Failed to create account' };
+          }
+
+          // Check if user already exists (Supabase returns user but with no identities)
+          // This happens when signup succeeds but email is already registered
+          if (data.user.identities && data.user.identities.length === 0) {
+            set({ isLoading: false });
+            return {
+              success: false,
+              error: 'This email is already in use. Please try logging in instead.'
+            };
           }
 
           // Check if email confirmation is required

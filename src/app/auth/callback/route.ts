@@ -34,14 +34,38 @@ export async function GET(request: Request) {
     );
 
     // Verify the OTP - this also creates a session and sets cookies
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       type: type as 'signup' | 'email',
       token_hash,
     });
 
     if (!error) {
-      // Session is now set in cookies - redirect to dashboard
-      return NextResponse.redirect(new URL(next, baseUrl));
+      // Session is now set in cookies
+      // If this was a signup confirmation, create user record if it doesn't exist
+      if (type === 'signup' && data.user) {
+        // Check if user record exists
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+
+        // Create user record if it doesn't exist (in case trigger didn't fire)
+        if (!existingUser) {
+          await supabase.from('users').insert({
+            id: data.user.id,
+            email: data.user.email,
+            target_utilization: 0.05,
+            reminder_days_before: 3,
+            email_notifications: true,
+          });
+        }
+      }
+
+      // Add a URL parameter to indicate fresh auth from email confirmation
+      const redirectUrl = new URL(next, baseUrl);
+      redirectUrl.searchParams.set('verified', 'true');
+      return NextResponse.redirect(redirectUrl);
     }
 
     // Verification failed

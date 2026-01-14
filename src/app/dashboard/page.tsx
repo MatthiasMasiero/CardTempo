@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [isRecalculating, setIsRecalculating] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   const handleRecalculate = () => {
     setIsRecalculating(true);
@@ -52,15 +53,33 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
-    // Check session on mount - this picks up session from cookies (e.g., after email confirmation)
-    checkSession();
+
+    // Check if user just verified their email (coming from callback route)
+    const params = new URLSearchParams(window.location.search);
+    const justVerified = params.get('verified') === 'true';
+
+    // Force a session check on mount, especially important after email verification
+    const checkAuth = async () => {
+      setIsCheckingSession(true);
+      await checkSession();
+      setIsCheckingSession(false);
+
+      // Clean up the URL parameter after processing
+      if (justVerified) {
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }
+    };
+
+    checkAuth();
   }, [checkSession]);
 
   useEffect(() => {
-    if (mounted && !isAuthenticated) {
+    // Only redirect if we've finished checking the session and user is not authenticated
+    if (mounted && !isCheckingSession && !isAuthenticated) {
       router.push('/login');
     }
-  }, [mounted, isAuthenticated, router]);
+  }, [mounted, isCheckingSession, isAuthenticated, router]);
 
   useEffect(() => {
     if (cards.length > 0 && !result) {
@@ -109,8 +128,8 @@ export default function DashboardPage() {
     setEditingCardId(null);
   };
 
-  // Hydration fix
-  if (!mounted || !isAuthenticated) {
+  // Hydration fix and loading state while checking session
+  if (!mounted || isCheckingSession || !isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#FAFAF8] font-body">
         <div className="animate-pulse p-8">

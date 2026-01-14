@@ -36,42 +36,24 @@ function getEmailProviderUrl(email: string): { provider: string; url: string } {
 }
 
 /**
- * Validates password strength for financial application security
+ * Validates password strength
+ * Requires: 6+ characters and at least 2 character types (letters, numbers, or special)
  * Returns error message if invalid, null if valid
  */
 function validatePassword(password: string): string | null {
-  if (password.length < 12) {
-    return 'Password must be at least 12 characters long';
+  if (password.length < 6) {
+    return 'Password must be at least 6 characters long';
   }
 
-  if (!/[a-z]/.test(password)) {
-    return 'Password must contain at least one lowercase letter';
-  }
+  // Count how many character types are present
+  const hasLetters = /[a-zA-Z]/.test(password);
+  const hasNumbers = /[0-9]/.test(password);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(password);
 
-  if (!/[A-Z]/.test(password)) {
-    return 'Password must contain at least one uppercase letter';
-  }
+  const typeCount = [hasLetters, hasNumbers, hasSpecial].filter(Boolean).length;
 
-  if (!/[0-9]/.test(password)) {
-    return 'Password must contain at least one number';
-  }
-
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    return 'Password must contain at least one special character (!@#$%^&* etc.)';
-  }
-
-  // Check against common weak passwords
-  const commonPasswords = [
-    'password', '123456', 'qwerty', 'abc123', 'letmein',
-    'welcome', 'monkey', 'dragon', 'master', 'sunshine',
-    'princess', 'login', 'admin', 'iloveyou', 'passw0rd'
-  ];
-
-  const lowerPassword = password.toLowerCase();
-  for (const common of commonPasswords) {
-    if (lowerPassword.includes(common)) {
-      return 'Password contains common patterns. Please choose a stronger password.';
-    }
+  if (typeCount < 2) {
+    return 'Password must include at least 2 of: letters, numbers, or special characters';
   }
 
   return null; // Password is valid

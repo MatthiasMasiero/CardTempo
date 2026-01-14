@@ -155,7 +155,7 @@ function PricingPageContent() {
   }> = [
     { key: 'maxCards', free: '2 cards', premium: 'Unlimited' },
     { key: 'hasWhatIfScenarios', free: false, premium: true },
-    { key: 'hasPdfExport', free: false, premium: true },
+    { key: 'hasPdfExport', free: true, premium: true },
     { key: 'hasCalendarExport', free: false, premium: true },
     { key: 'hasRecommendations', free: false, premium: true },
     { key: 'hasEmailReminders', free: false, premium: true },

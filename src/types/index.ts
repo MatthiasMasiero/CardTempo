@@ -255,7 +255,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
   free: {
     maxCards: 2,
     hasWhatIfScenarios: false,
-    hasPdfExport: false,
+    hasPdfExport: true,  // PDF export available for all users
     hasCalendarExport: false,
     hasRecommendations: false,
     hasEmailReminders: false,

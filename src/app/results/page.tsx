@@ -48,9 +48,10 @@ export default function ResultsPage() {
   const { canAccessFeature } = useSubscriptionStore();
   const [email, setEmail] = useState('');
 
-  // Check feature access for exports
+  // Check feature access for exports and reminders
   const canExportPdf = canAccessFeature('hasPdfExport');
   const canExportCalendar = canAccessFeature('hasCalendarExport');
+  const canSetReminders = canAccessFeature('hasEmailReminders');
   const [emailSent, setEmailSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
@@ -415,16 +416,29 @@ export default function ResultsPage() {
                       </Button>
                     </Link>
                   )}
-                  <EmailReminderModal
-                    cardPlans={result.cards}
-                    userEmail={email}
-                    trigger={
-                      <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
-                        <Bell className="h-4 w-4" />
+                  {canSetReminders ? (
+                    <EmailReminderModal
+                      cardPlans={result.cards}
+                      userEmail={email}
+                      trigger={
+                        <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
+                          <Bell className="h-4 w-4" />
+                          Set Reminders
+                        </Button>
+                      }
+                    />
+                  ) : (
+                    <Link href="/pricing">
+                      <Button
+                        variant="outline"
+                        className="gap-2 border-stone-300 text-stone-500 hover:bg-stone-100"
+                      >
+                        <Lock className="h-4 w-4" />
                         Set Reminders
+                        <PremiumBadge />
                       </Button>
-                    }
-                  />
+                    </Link>
+                  )}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">

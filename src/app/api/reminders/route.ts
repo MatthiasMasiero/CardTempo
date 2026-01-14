@@ -1,17 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { addDays, format, subDays } from 'date-fns';
 
-// Initialize Supabase client with service role key for server-side operations
-// Will be needed when database integration is complete
-// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-// const supabase = createClient(supabaseUrl, supabaseServiceKey);
+/**
+ * Helper function to create authenticated Supabase client for API routes
+ */
+function createAuthenticatedClient(request: NextRequest) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+          });
+        },
+      },
+    }
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    const supabase = createAuthenticatedClient(request);
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error('[Reminders] Unauthorized POST attempt');
+      return NextResponse.json(
+        { error: 'Unauthorized. Please log in to manage reminders.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { email, cardIds, daysBefore } = body;
+
+    // Verify email matches authenticated user
+    if (email !== user.email) {
+      console.error('[Reminders] Email mismatch - user:', user.email, 'requested:', email);
+      return NextResponse.json(
+        { error: 'You can only create reminders for your own email address.' },
+        { status: 403 }
+      );
+    }
 
     // Validation
     if (!email || !cardIds || !Array.isArray(cardIds) || cardIds.length === 0) {
@@ -112,10 +149,30 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // Authentication check
+    const supabase = createAuthenticatedClient(request);
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error('[Reminders] Unauthorized GET attempt');
+      return NextResponse.json(
+        { error: 'Unauthorized. Please log in to view reminders.' },
+        { status: 401 }
+      );
+    }
+
     // Get user's reminders
-    // In production, you'd get the user ID from the session
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
+
+    // Verify email matches authenticated user (if provided)
+    if (email && email !== user.email) {
+      console.error('[Reminders] Unauthorized email access - user:', user.email, 'requested:', email);
+      return NextResponse.json(
+        { error: 'You can only view your own reminders.' },
+        { status: 403 }
+      );
+    }
 
     if (!email) {
       return NextResponse.json(
@@ -147,6 +204,18 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Authentication check
+    const supabase = createAuthenticatedClient(request);
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error('[Reminders] Unauthorized DELETE attempt');
+      return NextResponse.json(
+        { error: 'Unauthorized. Please log in to delete reminders.' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const reminderId = searchParams.get('id');
 

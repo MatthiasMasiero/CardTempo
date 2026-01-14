@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { subDays, format } from 'date-fns';
 import { z } from 'zod';
+import { createServerClient } from '@supabase/ssr';
 
 // Zod validation schema for input sanitization and injection prevention
 const ReminderRequestSchema = z.object({
@@ -40,6 +41,34 @@ interface ReminderData {
 
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value);
+            });
+          },
+        },
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error('[Reminders Create] Unauthorized access attempt');
+      return NextResponse.json(
+        { error: 'Unauthorized. Please log in to create reminders.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate and sanitize input using Zod
@@ -59,6 +88,15 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, cardPlans, daysBefore, sendTips } = validationResult.data;
+
+    // Verify the email belongs to the authenticated user
+    if (email !== user.email) {
+      console.error('[Reminders Create] Email mismatch - user:', user.email, 'requested:', email);
+      return NextResponse.json(
+        { error: 'You can only create reminders for your own email address.' },
+        { status: 403 }
+      );
+    }
 
     // Process each card plan and create reminder schedule
     const scheduledDates: string[] = [];

@@ -105,12 +105,53 @@ export default function SettingsPage() {
     setIsLoadingPortal(true);
     try {
       const response = await fetch('/api/stripe/portal', { method: 'POST' });
-      const { url } = await response.json();
-      if (url) window.location.href = url;
+
+      if (!response.ok) {
+        throw new Error('Failed to create portal session');
+      }
+
+      const data = await response.json();
+
+      // SECURITY: Validate redirect URL before following it
+      if (data.url && typeof data.url === 'string') {
+        try {
+          const redirectUrl = new URL(data.url);
+
+          // Whitelist only Stripe domains
+          const allowedHosts = [
+            'billing.stripe.com',
+            'manage.stripe.com',
+            'dashboard.stripe.com'
+          ];
+
+          const isValidStripeUrl =
+            redirectUrl.protocol === 'https:' &&
+            allowedHosts.some(
+              host =>
+                redirectUrl.hostname === host ||
+                redirectUrl.hostname.endsWith(`.${host}`)
+            );
+
+          if (isValidStripeUrl) {
+            window.location.href = data.url;
+          } else {
+            console.error('[Settings] Invalid billing portal URL hostname:', redirectUrl.hostname);
+            alert('Invalid billing portal URL. Please contact support.');
+          }
+        } catch (e) {
+          console.error('[Settings] Invalid URL format:', e);
+          alert('Invalid billing portal URL. Please contact support.');
+        }
+      } else {
+        console.error('[Settings] No URL in portal response');
+        alert('Failed to get billing portal URL. Please contact support.');
+      }
     } catch (error) {
-      console.error('Portal error:', error);
+      console.error('[Settings] Portal error:', error);
+      alert('Failed to open billing portal. Please try again.');
+    } finally {
+      setIsLoadingPortal(false);
     }
-    setIsLoadingPortal(false);
   };
 
   if (!mounted || !isAuthenticated) {

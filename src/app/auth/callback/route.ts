@@ -2,11 +2,33 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+/**
+ * Validates that a redirect path is safe (relative path only, no external URLs)
+ * Prevents open redirect vulnerabilities
+ */
+function isValidRedirectPath(path: string): boolean {
+  // Must start with / but NOT with // (protocol-relative URLs)
+  if (!path.startsWith('/') || path.startsWith('//')) {
+    return false;
+  }
+
+  // Whitelist allowed redirect paths for additional security
+  const allowedPaths = ['/dashboard', '/calculator', '/results', '/scenarios', '/settings', '/priority'];
+  return allowedPaths.some(allowed => path.startsWith(allowed));
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const token_hash = requestUrl.searchParams.get('token_hash');
   const type = requestUrl.searchParams.get('type');
-  const next = requestUrl.searchParams.get('next') ?? '/dashboard';
+  const nextParam = requestUrl.searchParams.get('next') ?? '/dashboard';
+
+  // SECURITY: Validate redirect path to prevent open redirect attacks
+  const next = isValidRedirectPath(nextParam) ? nextParam : '/dashboard';
+
+  if (nextParam !== next) {
+    console.warn('[Auth Callback] Invalid redirect path blocked:', nextParam);
+  }
 
   // Use NEXT_PUBLIC_APP_URL for reliable redirects in production
   // Falls back to request origin for local development

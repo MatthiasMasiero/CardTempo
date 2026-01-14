@@ -326,9 +326,36 @@ export function formatPercentage(value: number, decimals: number = 1): string {
 }
 
 /**
- * Generate a unique ID
+ * Generate a cryptographically secure unique ID
+ * Uses crypto.randomUUID() for better security and unpredictability
  */
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 15) +
-         Math.random().toString(36).substring(2, 15);
+  // Modern browsers and Node.js 16+ support crypto.randomUUID()
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  // Server-side Node.js fallback
+  if (typeof require !== 'undefined') {
+    try {
+      const cryptoNode = require('crypto');
+      return cryptoNode.randomUUID();
+    } catch (e) {
+      console.warn('[generateId] crypto module not available, using fallback');
+    }
+  }
+
+  // Fallback for older browsers - UUID v4 format using crypto.getRandomValues
+  // Still much better than Math.random()
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (crypto.getRandomValues(new Uint8Array(1))[0] % 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  // Last resort fallback (should rarely happen)
+  console.error('[generateId] No secure random number generator available');
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
 }

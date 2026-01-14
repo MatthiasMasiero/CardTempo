@@ -75,13 +75,13 @@ export async function POST(request: NextRequest) {
     const validationResult = ReminderRequestSchema.safeParse(body);
 
     if (!validationResult.success) {
+      // SECURITY: Log validation errors server-side only
+      console.error('[Reminders Create] Validation failed:', validationResult.error.issues);
+
       return NextResponse.json(
         {
-          error: 'Invalid request data',
-          details: validationResult.error.issues.map(e => ({
-            field: e.path.join('.'),
-            message: e.message,
-          })),
+          error: 'Invalid request data. Please check your input and try again.',
+          // Don't expose schema structure to clients
         },
         { status: 400 }
       );

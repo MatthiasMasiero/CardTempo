@@ -26,10 +26,36 @@ function getSupabaseClient() {
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Verify cron secret is configured
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret || cronSecret.length < 32) {
+      console.error('[Cron] CRON_SECRET not properly configured');
+      return NextResponse.json(
+        { error: 'Server misconfiguration' },
+        { status: 500 }
+      );
+    }
+
     // Verify the request is from Vercel Cron
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('[Cron] Missing or invalid authorization header');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const providedSecret = authHeader.substring(7); // Remove "Bearer "
+
+    if (providedSecret !== cronSecret) {
+      console.error('[Cron] Invalid cron secret provided');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Additional verification: Check Vercel cron header if present
+    const cronHeader = request.headers.get('x-vercel-cron');
+    if (!cronHeader) {
+      console.warn('[Cron] Request missing x-vercel-cron header - may be manual trigger');
     }
 
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -89,7 +115,8 @@ export async function GET(request: NextRequest) {
         console.log(`[Cron] Sent reminder ${reminder.id}`);
       } catch (emailError) {
         console.error(`[Cron] Failed to send reminder ${reminder.id}:`, emailError);
-        results.push({ id: reminder.id, status: 'failed', error: String(emailError) });
+        // Don't include error details in results (could be exposed in logs)
+        results.push({ id: reminder.id, status: 'failed' });
       }
     }
 
@@ -107,12 +134,18 @@ export async function GET(request: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('[Cron] Error in send-reminders:', error);
+    // SECURITY: Log full error server-side, but don't expose details to client
+    console.error('[Cron] Error in send-reminders:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to send reminders',
-        details: String(error),
+        error: 'Failed to send reminders. Please check server logs.',
+        // Never include error details in production responses
       },
       { status: 500 }
     );

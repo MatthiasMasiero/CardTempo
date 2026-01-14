@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtml from 'sanitize-html';
 
 const postsDirectory = path.join(process.cwd(), 'content/blog');
 
@@ -117,8 +117,8 @@ export function getPostBySlug(slug: string): BlogPost | null {
     const contentHtml = processedContent.toString();
 
     // SECURITY: Sanitize HTML to prevent XSS attacks
-    const sanitizedHtml = DOMPurify.sanitize(contentHtml, {
-      ALLOWED_TAGS: [
+    const sanitizedContent = sanitizeHtml(contentHtml, {
+      allowedTags: [
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
         'p', 'br', 'strong', 'em', 'u', 'del', 'ins',
         'ul', 'ol', 'li',
@@ -126,7 +126,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
         'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
         'div', 'span',
       ],
-      ALLOWED_ATTR: {
+      allowedAttributes: {
         'a': ['href', 'title', 'target', 'rel'],
         'img': ['src', 'alt', 'title', 'width', 'height'],
         'code': ['class'],
@@ -134,10 +134,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
         'div': ['class'],
         'span': ['class'],
       },
-      // Only allow safe URL protocols
-      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
-      KEEP_CONTENT: true,
-      ALLOW_DATA_ATTR: false,
+      allowedSchemes: ['http', 'https', 'mailto'],
     });
 
     return {
@@ -148,7 +145,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       author: data.author || 'CardTempo Team',
       tags: data.tags || [],
       readTime: calculateReadTime(content),
-      content: sanitizedHtml,
+      content: sanitizedContent,
       headings,
     };
   } catch (error) {

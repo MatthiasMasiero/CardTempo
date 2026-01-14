@@ -488,6 +488,30 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
+            {/* Need Help? */}
+            <Card className="border-stone-200 bg-stone-50/50">
+              <CardHeader>
+                <CardTitle className="font-display text-lg text-stone-900 flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-stone-500" />
+                  Need Help?
+                </CardTitle>
+                <CardDescription className="text-stone-600">
+                  Questions or feedback? We are here to help.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <a
+                  href="mailto:cardtempohelp@gmail.com"
+                  className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 transition-colors font-medium"
+                >
+                  <span>cardtempohelp@gmail.com</span>
+                </a>
+                <p className="text-sm text-stone-500 mt-2">
+                  We typically respond within 24-48 hours.
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Save Button */}
             <div className="flex items-center justify-between">
               <Button

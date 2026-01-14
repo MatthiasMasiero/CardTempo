@@ -35,6 +35,7 @@ import {
   ShieldCheck,
   Lock,
   EyeOff,
+  Mail,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -786,23 +787,32 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-12 bg-stone-950 text-stone-400">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-stone-800 flex items-center justify-center">
                 <CreditCard className="h-3.5 w-3.5 text-stone-400" />
               </div>
               <span className="font-display text-lg text-stone-300">CardTempo</span>
             </div>
-            <p className="text-sm">
+            <p className="text-sm text-center">
               For educational purposes. Not financial advice. Results may vary.
             </p>
-            <div className="flex gap-6 text-sm">
-              <Link href="/privacy" className="hover:text-stone-200 transition-colors">
-                Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-stone-200 transition-colors">
-                Terms
-              </Link>
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-sm">
+              <a
+                href="mailto:cardtempohelp@gmail.com"
+                className="flex items-center gap-1.5 hover:text-stone-200 transition-colors"
+              >
+                <Mail className="h-3.5 w-3.5" />
+                <span>Support</span>
+              </a>
+              <div className="flex gap-6">
+                <Link href="/privacy" className="hover:text-stone-200 transition-colors">
+                  Privacy
+                </Link>
+                <Link href="/terms" className="hover:text-stone-200 transition-colors">
+                  Terms
+                </Link>
+              </div>
             </div>
           </div>
         </div>

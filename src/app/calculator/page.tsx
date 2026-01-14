@@ -9,6 +9,9 @@ import { CreditCardForm } from '@/components/CreditCardForm';
 import { CardDisplay } from '@/components/CardDisplay';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { useAuthStore } from '@/store/auth-store';
+import { useSubscriptionStore } from '@/store/subscription-store';
+import { PremiumGateForCards } from '@/components/PremiumGate';
+import { CardLimitBanner } from '@/components/UpgradePrompt';
 import { CreditCard, CreditCardFormData } from '@/types';
 import {
   CreditCard as CreditCardIcon,
@@ -56,11 +59,16 @@ function CalculatorContent() {
   const { cards, addCard, updateCard, removeCard, calculateResults, result, clearResults } =
     useCalculatorStore();
   const { isAuthenticated } = useAuthStore();
+  const { canAddCard, getRemainingCards } = useSubscriptionStore();
   const searchParams = useSearchParams();
 
   const [showForm, setShowForm] = useState(cards.length === 0);
   const [mounted, setMounted] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
+
+  // Check if user can add more cards based on subscription
+  const canAddMoreCards = canAddCard(cards.length);
+  const remainingCards = getRemainingCards(cards.length);
 
   useEffect(() => {
     setMounted(true);
@@ -207,6 +215,9 @@ function CalculatorContent() {
             </p>
           </div>
 
+          {/* Card Limit Banner */}
+          <CardLimitBanner currentCount={cards.length} className="mb-6" />
+
           {/* Cards Grid */}
           {cards.length > 0 && (
             <div className="mb-6">
@@ -217,10 +228,14 @@ function CalculatorContent() {
                   size="sm"
                   onClick={() => setShowForm(true)}
                   className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100"
-                  disabled={!!editingCardId}
+                  disabled={!!editingCardId || !canAddMoreCards}
+                  title={!canAddMoreCards ? 'Upgrade to Premium to add more cards' : undefined}
                 >
                   <Plus className="h-4 w-4" />
                   Add Card
+                  {remainingCards !== Infinity && remainingCards > 0 && (
+                    <span className="text-xs text-stone-500">({remainingCards} left)</span>
+                  )}
                 </Button>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
@@ -241,12 +256,14 @@ function CalculatorContent() {
           {/* Add Card Form */}
           {showForm && !editingCardId && (
             <div className="mb-6">
-              <CreditCardForm
-                index={cards.length}
-                onSubmit={handleAddCard}
-                onRemove={cards.length > 0 ? () => setShowForm(false) : undefined}
-                showRemove={cards.length > 0}
-              />
+              <PremiumGateForCards currentCardCount={cards.length}>
+                <CreditCardForm
+                  index={cards.length}
+                  onSubmit={handleAddCard}
+                  onRemove={cards.length > 0 ? () => setShowForm(false) : undefined}
+                  showRemove={cards.length > 0}
+                />
+              </PremiumGateForCards>
             </div>
           )}
 

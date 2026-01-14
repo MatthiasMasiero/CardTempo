@@ -17,6 +17,14 @@ import { useCalculatorStore } from '@/store/calculator-store';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
 import { format, differenceInDays } from 'date-fns';
 import { CreditCard, CreditCardFormData } from '@/types';
+import { PremiumGate } from '@/components/PremiumGate';
+import { CardLimitBanner } from '@/components/UpgradePrompt';
+import { useSubscriptionStore } from '@/store/subscription-store';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   CreditCard as CreditCardIcon,
   Plus,
@@ -33,12 +41,16 @@ import {
   Sparkles,
   ChevronRight,
   Percent,
+  Lock,
+  Crown,
+  User,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, logout, checkSession } = useAuthStore();
   const { cards, result, calculateResults, updateCard, removeCard } = useCalculatorStore();
+  const { isPremium } = useSubscriptionStore();
   const [mounted, setMounted] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [isRecalculating, setIsRecalculating] = useState(false);
@@ -192,21 +204,39 @@ export default function DashboardPage() {
             <span className="font-display text-xl text-stone-900">CardTempo</span>
           </Link>
           <nav className="flex items-center gap-4">
-            <Link href="/settings">
-              <Button variant="ghost" size="sm" className="gap-2 text-stone-600 hover:text-stone-900">
-                <Settings className="h-4 w-4" />
-                <span className="hidden md:inline">Settings</span>
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-2 text-stone-500 hover:text-stone-700"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden md:inline">Logout</span>
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2 text-stone-600 hover:text-stone-900">
+                  <User className="h-4 w-4" />
+                  <span className="hidden md:inline">Account</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-2">
+                <div className="space-y-1">
+                  {!isPremium && (
+                    <Link href="/pricing">
+                      <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 transition-colors">
+                        <Crown className="h-4 w-4 text-emerald-600" />
+                        Upgrade to Premium
+                      </button>
+                    </Link>
+                  )}
+                  <Link href="/settings">
+                    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 hover:bg-stone-100 transition-colors">
+                      <Settings className="h-4 w-4 text-stone-500" />
+                      Settings
+                    </button>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 hover:bg-stone-100 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4 text-stone-500" />
+                    Sign out
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </nav>
         </div>
       </header>
@@ -231,6 +261,9 @@ export default function DashboardPage() {
 
           {/* High Utilization Banner */}
           <HighUtilizationBanner overallUtilization={overallUtilization} />
+
+          {/* Card Limit Banner for Free Users */}
+          <CardLimitBanner currentCount={cards.length} className="mb-6" />
 
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -417,62 +450,143 @@ export default function DashboardPage() {
                       </Link>
                     )}
 
-                    <Link href="/dashboard/priority">
-                      <Card className="border-stone-200 border-l-4 border-l-emerald-400 hover:shadow-sm transition-all group">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                              <DollarSign className="h-5 w-5 text-emerald-600" />
+                    <PremiumGate
+                      feature="hasPriorityAllocation"
+                      fallback={
+                        <Link href="/pricing">
+                          <Card className="border-stone-200 border-l-4 border-l-stone-300 hover:shadow-sm transition-all group opacity-75">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
+                                  <Lock className="h-5 w-5 text-stone-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-display text-base text-stone-900 mb-0.5 flex items-center gap-2">
+                                    Smart Payment Allocation
+                                    <Crown className="h-4 w-4 text-amber-500" />
+                                  </h3>
+                                  <p className="text-sm text-stone-500">
+                                    Upgrade to Premium to unlock
+                                  </p>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      }
+                    >
+                      <Link href="/dashboard/priority">
+                        <Card className="border-stone-200 border-l-4 border-l-emerald-400 hover:shadow-sm transition-all group">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                                <DollarSign className="h-5 w-5 text-emerald-600" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-display text-base text-stone-900 mb-0.5">Smart Payment Allocation</h3>
+                                <p className="text-sm text-stone-500">
+                                  Distribute limited budget optimally
+                                </p>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-display text-base text-stone-900 mb-0.5">Smart Payment Allocation</h3>
-                              <p className="text-sm text-stone-500">
-                                Distribute limited budget optimally
-                              </p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </PremiumGate>
 
-                    <Link href="/dashboard/scenarios">
-                      <Card className="border-stone-200 border-l-4 border-l-blue-400 hover:shadow-sm transition-all group">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                              <Zap className="h-5 w-5 text-blue-600" />
+                    <PremiumGate
+                      feature="hasWhatIfScenarios"
+                      fallback={
+                        <Link href="/pricing">
+                          <Card className="border-stone-200 border-l-4 border-l-stone-300 hover:shadow-sm transition-all group opacity-75">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
+                                  <Lock className="h-5 w-5 text-stone-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-display text-base text-stone-900 mb-0.5 flex items-center gap-2">
+                                    What-If Scenarios
+                                    <Crown className="h-4 w-4 text-amber-500" />
+                                  </h3>
+                                  <p className="text-sm text-stone-500">
+                                    Upgrade to Premium to unlock
+                                  </p>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      }
+                    >
+                      <Link href="/dashboard/scenarios">
+                        <Card className="border-stone-200 border-l-4 border-l-blue-400 hover:shadow-sm transition-all group">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                                <Zap className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-display text-base text-stone-900 mb-0.5">What-If Scenarios</h3>
+                                <p className="text-sm text-stone-500">
+                                  Test decisions before making them
+                                </p>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-display text-base text-stone-900 mb-0.5">What-If Scenarios</h3>
-                              <p className="text-sm text-stone-500">
-                                Test decisions before making them
-                              </p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </PremiumGate>
 
-                    <Link href="/recommendations">
-                      <Card className="border-stone-200 border-l-4 border-l-amber-400 hover:shadow-sm transition-all group">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-                              <Sparkles className="h-5 w-5 text-amber-600" />
+                    <PremiumGate
+                      feature="hasRecommendations"
+                      fallback={
+                        <Link href="/pricing">
+                          <Card className="border-stone-200 border-l-4 border-l-stone-300 hover:shadow-sm transition-all group opacity-75">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
+                                  <Lock className="h-5 w-5 text-stone-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-display text-base text-stone-900 mb-0.5 flex items-center gap-2">
+                                    Card Recommendations
+                                    <Crown className="h-4 w-4 text-amber-500" />
+                                  </h3>
+                                  <p className="text-sm text-stone-500">
+                                    Upgrade to Premium to unlock
+                                  </p>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      }
+                    >
+                      <Link href="/recommendations">
+                        <Card className="border-stone-200 border-l-4 border-l-amber-400 hover:shadow-sm transition-all group">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                                <Sparkles className="h-5 w-5 text-amber-600" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-display text-base text-stone-900 mb-0.5">Card Recommendations</h3>
+                                <p className="text-sm text-stone-500">
+                                  Find cards for your spending habits
+                                </p>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-display text-base text-stone-900 mb-0.5">Card Recommendations</h3>
-                              <p className="text-sm text-stone-500">
-                                Find cards for your spending habits
-                              </p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-stone-600 transition-colors" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </PremiumGate>
                   </div>
                 </>
               )}

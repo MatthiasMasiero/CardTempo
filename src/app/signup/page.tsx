@@ -35,6 +35,48 @@ function getEmailProviderUrl(email: string): { provider: string; url: string } {
   return { provider: 'Email', url: `mailto:${email}` };
 }
 
+/**
+ * Validates password strength for financial application security
+ * Returns error message if invalid, null if valid
+ */
+function validatePassword(password: string): string | null {
+  if (password.length < 12) {
+    return 'Password must be at least 12 characters long';
+  }
+
+  if (!/[a-z]/.test(password)) {
+    return 'Password must contain at least one lowercase letter';
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    return 'Password must contain at least one uppercase letter';
+  }
+
+  if (!/[0-9]/.test(password)) {
+    return 'Password must contain at least one number';
+  }
+
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return 'Password must contain at least one special character (!@#$%^&* etc.)';
+  }
+
+  // Check against common weak passwords
+  const commonPasswords = [
+    'password', '123456', 'qwerty', 'abc123', 'letmein',
+    'welcome', 'monkey', 'dragon', 'master', 'sunshine',
+    'princess', 'login', 'admin', 'iloveyou', 'passw0rd'
+  ];
+
+  const lowerPassword = password.toLowerCase();
+  for (const common of commonPasswords) {
+    if (lowerPassword.includes(common)) {
+      return 'Password contains common patterns. Please choose a stronger password.';
+    }
+  }
+
+  return null; // Password is valid
+}
+
 export default function SignupPage() {
   const router = useRouter();
   const { signup, isLoading } = useAuthStore();
@@ -58,8 +100,10 @@ export default function SignupPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // SECURITY: Enforce strong password requirements for financial application
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
 

@@ -19,15 +19,45 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
 *.pem
 
+# macOS
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# logs
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
 
 # local env files
 .env*.local
@@ -53,6 +83,43 @@ secrets/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDEs and editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+.atom/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.tmproj
+*.swp
+*.swo
+*~.nib
+*.iml
+
+# Cache directories
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.stylelintcache
+.node_repl_history
+.yarn-integrity
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
 
 # claude code local files
 CLAUDE.local.md

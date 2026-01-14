@@ -19,6 +19,8 @@ import { EmailReminderModal } from '@/components/EmailReminderModal';
 import { CalendarExportModal } from '@/components/CalendarExportModal';
 import { useCalculatorStore } from '@/store/calculator-store';
 import { useAuthStore } from '@/store/auth-store';
+import { useSubscriptionStore } from '@/store/subscription-store';
+import { PremiumBadge } from '@/components/UpgradePrompt';
 import { formatCurrency, formatPercentage } from '@/lib/calculator';
 import { PaymentEvent } from '@/lib/calendarUtils';
 import {
@@ -37,12 +39,19 @@ import {
   Loader2,
   Calendar,
   LayoutDashboard,
+  Lock,
 } from 'lucide-react';
 
 export default function ResultsPage() {
   const { result, cards, calculateResults } = useCalculatorStore();
   const { isAuthenticated } = useAuthStore();
+  const { canAccessFeature } = useSubscriptionStore();
   const [email, setEmail] = useState('');
+
+  // Check feature access for exports and reminders
+  const canExportPdf = canAccessFeature('hasPdfExport');
+  const canExportCalendar = canAccessFeature('hasCalendarExport');
+  const canSetReminders = canAccessFeature('hasEmailReminders');
   const [emailSent, setEmailSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
@@ -356,41 +365,80 @@ export default function ResultsPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                  <Button
-                    className="gap-2 bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() => setShowCalendarModal(true)}
-                  >
-                    <Calendar className="h-4 w-4" />
-                    Add to Calendar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100"
-                    onClick={handleDownloadPDF}
-                    disabled={downloadingPDF}
-                  >
-                    {downloadingPDF ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4" />
-                        Download PDF
-                      </>
-                    )}
-                  </Button>
-                  <EmailReminderModal
-                    cardPlans={result.cards}
-                    userEmail={email}
-                    trigger={
-                      <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
-                        <Bell className="h-4 w-4" />
-                        Set Reminders
+                  {canExportCalendar ? (
+                    <Button
+                      className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                      onClick={() => setShowCalendarModal(true)}
+                    >
+                      <Calendar className="h-4 w-4" />
+                      Add to Calendar
+                    </Button>
+                  ) : (
+                    <Link href="/pricing">
+                      <Button
+                        variant="outline"
+                        className="gap-2 border-stone-300 text-stone-500 hover:bg-stone-100"
+                      >
+                        <Lock className="h-4 w-4" />
+                        Add to Calendar
+                        <PremiumBadge />
                       </Button>
-                    }
-                  />
+                    </Link>
+                  )}
+                  {canExportPdf ? (
+                    <Button
+                      variant="outline"
+                      className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100"
+                      onClick={handleDownloadPDF}
+                      disabled={downloadingPDF}
+                    >
+                      {downloadingPDF ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4" />
+                          Download PDF
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <Link href="/pricing">
+                      <Button
+                        variant="outline"
+                        className="gap-2 border-stone-300 text-stone-500 hover:bg-stone-100"
+                      >
+                        <Lock className="h-4 w-4" />
+                        Download PDF
+                        <PremiumBadge />
+                      </Button>
+                    </Link>
+                  )}
+                  {canSetReminders ? (
+                    <EmailReminderModal
+                      cardPlans={result.cards}
+                      userEmail={email}
+                      trigger={
+                        <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">
+                          <Bell className="h-4 w-4" />
+                          Set Reminders
+                        </Button>
+                      }
+                    />
+                  ) : (
+                    <Link href="/pricing">
+                      <Button
+                        variant="outline"
+                        className="gap-2 border-stone-300 text-stone-500 hover:bg-stone-100"
+                      >
+                        <Lock className="h-4 w-4" />
+                        Set Reminders
+                        <PremiumBadge />
+                      </Button>
+                    </Link>
+                  )}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="gap-2 border-stone-300 text-stone-700 hover:bg-stone-100">

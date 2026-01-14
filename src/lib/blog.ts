@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
+import sanitizeHtml from 'sanitize-html';
 
 const postsDirectory = path.join(process.cwd(), 'content/blog');
 
@@ -115,6 +116,27 @@ export function getPostBySlug(slug: string): BlogPost | null {
     const processedContent = remark().use(html).processSync(content);
     const contentHtml = processedContent.toString();
 
+    // SECURITY: Sanitize HTML to prevent XSS attacks
+    const sanitizedContent = sanitizeHtml(contentHtml, {
+      allowedTags: [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'p', 'br', 'strong', 'em', 'u', 'del', 'ins',
+        'ul', 'ol', 'li',
+        'a', 'code', 'pre', 'blockquote',
+        'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
+        'div', 'span',
+      ],
+      allowedAttributes: {
+        'a': ['href', 'title', 'target', 'rel'],
+        'img': ['src', 'alt', 'title', 'width', 'height'],
+        'code': ['class'],
+        'pre': ['class'],
+        'div': ['class'],
+        'span': ['class'],
+      },
+      allowedSchemes: ['http', 'https', 'mailto'],
+    });
+
     return {
       slug,
       title: data.title,
@@ -123,7 +145,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       author: data.author || 'CardTempo Team',
       tags: data.tags || [],
       readTime: calculateReadTime(content),
-      content: contentHtml,
+      content: sanitizedContent,
       headings,
     };
   } catch (error) {

@@ -25,14 +25,17 @@ import {
 
 const PRICING = {
   monthly: {
+    originalAmount: 4.99,
     amount: 3.99,
     label: 'month',
+    savings: '20%',
   },
   annual: {
+    originalAmount: 39.99,
     amount: 29.99,
     monthlyEquivalent: 2.50,
     label: 'year',
-    savings: '37%',
+    savings: '25%',
   },
 };
 
@@ -89,26 +92,25 @@ function PricingPageContent() {
   const { isAuthenticated } = useAuthStore();
   const { isPremium, isGrandfathered, subscription } = useSubscriptionStore();
 
-  const [isAnnual, setIsAnnual] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMonthly, setIsLoadingMonthly] = useState(false);
+  const [isLoadingAnnual, setIsLoadingAnnual] = useState(false);
 
   const upgradeCanceled = searchParams.get('upgrade') === 'canceled';
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (interval: 'monthly' | 'annual') => {
     if (!isAuthenticated) {
       router.push('/login?redirect=/pricing');
       return;
     }
 
-    setIsLoading(true);
+    const setLoading = interval === 'annual' ? setIsLoadingAnnual : setIsLoadingMonthly;
+    setLoading(true);
 
     try {
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          interval: isAnnual ? 'annual' : 'monthly',
-        }),
+        body: JSON.stringify({ interval }),
       });
 
       const data = await response.json();
@@ -117,16 +119,17 @@ function PricingPageContent() {
         window.location.href = data.url;
       } else {
         console.error('[Pricing] No checkout URL returned');
-        setIsLoading(false);
+        setLoading(false);
       }
     } catch (error) {
       console.error('[Pricing] Error creating checkout session:', error);
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const handleManageSubscription = async () => {
-    setIsLoading(true);
+    setIsLoadingMonthly(true);
+    setIsLoadingAnnual(true);
 
     try {
       const response = await fetch('/api/stripe/portal', {
@@ -139,11 +142,13 @@ function PricingPageContent() {
         window.location.href = data.url;
       } else {
         console.error('[Pricing] No portal URL returned');
-        setIsLoading(false);
+        setIsLoadingMonthly(false);
+        setIsLoadingAnnual(false);
       }
     } catch (error) {
       console.error('[Pricing] Error creating portal session:', error);
-      setIsLoading(false);
+      setIsLoadingMonthly(false);
+      setIsLoadingAnnual(false);
     }
   };
 
@@ -236,10 +241,10 @@ function PricingPageContent() {
                   variant="outline"
                   size="sm"
                   onClick={handleManageSubscription}
-                  disabled={isLoading}
+                  disabled={isLoadingMonthly || isLoadingAnnual}
                   className="border-emerald-300 text-emerald-700 hover:bg-emerald-100"
                 >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {(isLoadingMonthly || isLoadingAnnual) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Manage Subscription
                 </Button>
               </motion.div>
@@ -266,61 +271,28 @@ function PricingPageContent() {
           </div>
         </RevealOnScroll>
 
-        {/* Billing Toggle */}
-        {!isPremium && (
-          <RevealOnScroll delay={0.1}>
-            <div className="flex items-center justify-center gap-4 mb-12">
-              <button
-                onClick={() => setIsAnnual(false)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  !isAnnual
-                    ? 'bg-stone-900 text-white shadow-md'
-                    : 'text-stone-600 hover:text-stone-900'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setIsAnnual(true)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                  isAnnual
-                    ? 'bg-stone-900 text-white shadow-md'
-                    : 'text-stone-600 hover:text-stone-900'
-                }`}
-              >
-                Annual
-                {isAnnual && (
-                  <Badge className="bg-emerald-500 text-white text-[10px] px-1.5 py-0 font-semibold">
-                    SAVE {PRICING.annual.savings}
-                  </Badge>
-                )}
-              </button>
-            </div>
-          </RevealOnScroll>
-        )}
-
         {/* Pricing Cards */}
-        <div className="mx-auto max-w-5xl">
-          <div className="grid gap-8 lg:grid-cols-2">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-6 lg:grid-cols-3">
             {/* Free Tier */}
-            <RevealOnScroll delay={0.2}>
-              <Card className="relative border-stone-200 bg-white h-full">
-                <CardContent className="p-8">
+            <RevealOnScroll delay={0.1}>
+              <Card className="relative border-stone-200 bg-white h-full flex flex-col">
+                <CardContent className="p-6 flex-1 flex flex-col">
                   <div className="mb-6">
                     <h3 className="font-display text-2xl text-stone-900 mb-2">Free</h3>
-                    <p className="text-stone-500">Perfect for getting started</p>
+                    <p className="text-sm text-stone-500">Perfect for getting started</p>
                   </div>
 
-                  <div className="mb-8">
+                  <div className="mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="font-display text-5xl text-stone-900">$0</span>
+                      <span className="font-display text-4xl text-stone-900">$0</span>
                       <span className="text-stone-500">/forever</span>
                     </div>
                   </div>
 
-                  <ul className="space-y-4 mb-8">
+                  <ul className="space-y-3 mb-6 flex-1">
                     {features.map(({ key, free }) => (
-                      <li key={key} className="flex items-start gap-3">
+                      <li key={key} className="flex items-start gap-2">
                         {free ? (
                           <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <Check className="h-3 w-3 text-emerald-600" />
@@ -342,7 +314,7 @@ function PricingPageContent() {
 
                   {!isAuthenticated ? (
                     <Button
-                      className="w-full h-12 rounded-xl border-stone-300 text-stone-700 hover:bg-stone-100"
+                      className="w-full h-11 rounded-xl border-stone-300 text-stone-700 hover:bg-stone-100"
                       variant="outline"
                       onClick={() => router.push('/signup')}
                     >
@@ -350,7 +322,7 @@ function PricingPageContent() {
                     </Button>
                   ) : (
                     <Button
-                      className="w-full h-12 rounded-xl border-stone-300 text-stone-500"
+                      className="w-full h-11 rounded-xl border-stone-300 text-stone-500"
                       variant="outline"
                       disabled
                     >
@@ -361,67 +333,33 @@ function PricingPageContent() {
               </Card>
             </RevealOnScroll>
 
-            {/* Premium Tier */}
-            <RevealOnScroll delay={0.3}>
-              <div className="relative">
-                {/* Badge - changes based on billing period */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                  <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-1.5 text-sm font-semibold shadow-lg shadow-emerald-500/25 border-0">
-                    {isAnnual ? (
-                      <>
-                        <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                        Best Value
-                      </>
-                    ) : (
-                      <>
-                        <Check className="mr-1.5 h-3.5 w-3.5" />
-                        Full Access
-                      </>
-                    )}
-                  </Badge>
-                </div>
-
-                <Card className="relative border-2 border-emerald-500 bg-white h-full overflow-hidden">
-                  {/* Gradient accent line */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" />
-
-                {/* Subtle background pattern */}
-                <div className="absolute inset-0 opacity-[0.02]">
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage: `radial-gradient(circle at 1px 1px, #10b981 1px, transparent 0)`,
-                      backgroundSize: '24px 24px',
-                    }}
-                  />
-                </div>
-
-                <CardContent className="p-8 pt-10 relative">
+            {/* Monthly Premium */}
+            <RevealOnScroll delay={0.2}>
+              <Card className="relative border-stone-300 bg-white h-full overflow-hidden flex flex-col">
+                <CardContent className="p-6 relative flex-1 flex flex-col">
                   <div className="mb-6">
-                    <h3 className="font-display text-2xl text-stone-900 mb-2">Premium</h3>
-                    <p className="text-stone-500">For serious credit optimizers</p>
+                    <h3 className="font-display text-2xl text-stone-900 mb-2">Monthly</h3>
+                    <p className="text-sm text-stone-500">Pay as you go</p>
                   </div>
 
-                  <div className="mb-8">
+                  <div className="mb-6">
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-lg text-stone-400 line-through">${PRICING.monthly.originalAmount}</span>
+                      <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">
+                        Save {PRICING.monthly.savings} • Early Adopter
+                      </Badge>
+                    </div>
                     <div className="flex items-baseline gap-1">
-                      <span className="font-display text-5xl text-stone-900">
-                        ${isAnnual ? PRICING.annual.monthlyEquivalent.toFixed(2) : PRICING.monthly.amount.toFixed(2)}
+                      <span className="font-display text-4xl text-stone-900">
+                        ${PRICING.monthly.amount.toFixed(2)}
                       </span>
                       <span className="text-stone-500">/month</span>
                     </div>
-                    {isAnnual && (
-                      <p className="mt-2 text-sm text-stone-500">
-                        Billed ${PRICING.annual.amount}/year
-                        <span className="ml-2 text-emerald-600 font-medium">
-                          Save ${((PRICING.monthly.amount * 12) - PRICING.annual.amount).toFixed(2)}/year
-                        </span>
-                      </p>
-                    )}
                   </div>
 
-                  <ul className="space-y-4 mb-8">
+                  <ul className="space-y-3 mb-6 flex-1">
                     {features.map(({ key, premium }) => (
-                      <li key={key} className="flex items-start gap-3">
+                      <li key={key} className="flex items-start gap-2">
                         <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="h-3 w-3 text-emerald-600" />
                         </div>
@@ -437,29 +375,123 @@ function PricingPageContent() {
 
                   {isPremium && !isGrandfathered ? (
                     <Button
-                      className="w-full h-12 rounded-xl border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                      className="w-full h-11 rounded-xl border-emerald-300 text-emerald-700 hover:bg-emerald-50"
                       variant="outline"
                       onClick={handleManageSubscription}
-                      disabled={isLoading}
+                      disabled={isLoadingMonthly}
                     >
-                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isLoadingMonthly && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Manage Subscription
                     </Button>
                   ) : (
                     <Button
-                      className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40"
-                      onClick={handleUpgrade}
-                      disabled={isLoading}
+                      className="w-full h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40"
+                      onClick={() => handleUpgrade('monthly')}
+                      disabled={isLoadingMonthly}
                     >
-                      {isLoading ? (
+                      {isLoadingMonthly ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
                         <Crown className="mr-2 h-4 w-4" />
                       )}
-                      {isGrandfathered ? 'Subscribe Now' : 'Upgrade to Premium'}
+                      {isGrandfathered ? 'Subscribe Now' : 'Get Monthly'}
                     </Button>
                   )}
                 </CardContent>
+              </Card>
+            </RevealOnScroll>
+
+            {/* Annual Premium - Best Value */}
+            <RevealOnScroll delay={0.3}>
+              <div className="relative">
+                {/* Best Value Badge */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                  <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-1.5 text-sm font-semibold shadow-lg shadow-emerald-500/25 border-0">
+                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                    Best Value
+                  </Badge>
+                </div>
+
+                <Card className="relative border-2 border-emerald-500 bg-white h-full overflow-hidden flex flex-col">
+                  {/* Gradient accent line */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" />
+
+                  {/* Subtle background pattern */}
+                  <div className="absolute inset-0 opacity-[0.02]">
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage: `radial-gradient(circle at 1px 1px, #10b981 1px, transparent 0)`,
+                        backgroundSize: '24px 24px',
+                      }}
+                    />
+                  </div>
+
+                  <CardContent className="p-6 pt-8 relative flex-1 flex flex-col">
+                    <div className="mb-6">
+                      <h3 className="font-display text-2xl text-stone-900 mb-2">Annual</h3>
+                      <p className="text-sm text-stone-500">Save the most</p>
+                    </div>
+
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-lg text-stone-400 line-through">${PRICING.annual.originalAmount}</span>
+                        <Badge className="bg-blue-500 text-white border-0 text-xs">
+                          Save {PRICING.annual.savings} • Early Adopter
+                        </Badge>
+                      </div>
+                      <div className="flex items-baseline gap-1 mb-1">
+                        <span className="font-display text-4xl text-stone-900">
+                          ${PRICING.annual.monthlyEquivalent.toFixed(2)}
+                        </span>
+                        <span className="text-stone-500">/month</span>
+                      </div>
+                      <p className="text-xs text-stone-500">
+                        ${PRICING.annual.amount}/year • Save ${((PRICING.monthly.amount * 12) - PRICING.annual.amount).toFixed(2)}/year
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3 mb-6 flex-1">
+                      {features.map(({ key, premium }) => (
+                        <li key={key} className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check className="h-3 w-3 text-emerald-600" />
+                          </div>
+                          <span className="text-sm text-stone-700">
+                            {FEATURE_DESCRIPTIONS[key].title}
+                            {typeof premium === 'string' && (
+                              <span className="ml-1 text-emerald-600 font-medium">({premium})</span>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {isPremium && !isGrandfathered ? (
+                      <Button
+                        className="w-full h-11 rounded-xl border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                        variant="outline"
+                        onClick={handleManageSubscription}
+                        disabled={isLoadingAnnual}
+                      >
+                        {isLoadingAnnual && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Manage Subscription
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40"
+                        onClick={() => handleUpgrade('annual')}
+                        disabled={isLoadingAnnual}
+                      >
+                        {isLoadingAnnual ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Crown className="mr-2 h-4 w-4" />
+                        )}
+                        {isGrandfathered ? 'Subscribe Now' : 'Get Annual'}
+                      </Button>
+                    )}
+                  </CardContent>
                 </Card>
               </div>
             </RevealOnScroll>
@@ -529,16 +561,11 @@ function PricingPageContent() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
-                  onClick={handleUpgrade}
-                  disabled={isLoading}
+                  onClick={() => router.push('/pricing')}
                   className="h-12 px-8 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40"
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Crown className="mr-2 h-4 w-4" />
-                  )}
-                  Get Premium
+                  <Crown className="mr-2 h-4 w-4" />
+                  View Plans
                 </Button>
                 <Link href="/calculator">
                   <Button

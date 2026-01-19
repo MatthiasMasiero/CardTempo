@@ -163,7 +163,7 @@ export function UpgradePrompt({
             Upgrade to Premium
           </Button>
           <p className="mt-4 text-xs text-stone-400">
-            Starting at $2.50/month with annual billing
+            From $3.99/month • Annual plans save 25%
           </p>
         </CardContent>
       </Card>

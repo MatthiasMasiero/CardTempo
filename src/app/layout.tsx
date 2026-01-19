@@ -4,6 +4,7 @@ import { DM_Serif_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthSync } from "@/components/AuthSync";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -80,6 +81,7 @@ export default function RootLayout({
         <AuthSync />
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

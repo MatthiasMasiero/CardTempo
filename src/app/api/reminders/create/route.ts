@@ -140,31 +140,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // In a real implementation, store these in the database
-    // For MVP, we'll store them in localStorage on the client side
-    // and use a cron job to check and send emails
+    // Store reminders in Supabase database
+    const { data: savedReminders, error: reminderError } = await supabase
+      .from('payment_reminders')
+      .insert(reminders.map(r => ({
+        user_id: user.id,
+        card_id: null, // We don't have card_id from the form, it's optional
+        card_name: r.cardName,
+        email: r.email,
+        payment_date: r.paymentDate,
+        amount: r.amount,
+        payment_purpose: r.purpose,
+        description: r.description,
+        reminder_date: r.reminderDate,
+        email_sent: false,
+      })))
+      .select();
 
-    // TODO: Store in Supabase database when auth is connected
-    // const { data, error } = await supabase
-    //   .from('payment_reminders')
-    //   .insert(reminders.map(r => ({
-    //     user_id: userId,
-    //     card_id: r.cardId,
-    //     payment_date: r.paymentDate,
-    //     amount: r.amount,
-    //     payment_purpose: r.purpose,
-    //     reminder_date: r.reminderDate,
-    //     email_sent: false,
-    //   })));
+    if (reminderError) {
+      console.error('[Reminders Create] Database error:', reminderError);
+      return NextResponse.json(
+        { error: 'Failed to save reminders to database' },
+        { status: 500 }
+      );
+    }
 
-    // TODO: Store reminder preferences
-    // await supabase
-    //   .from('reminder_preferences')
-    //   .upsert({
-    //     user_id: userId,
-    //     days_before_payment: daysBefore,
-    //     send_tips_emails: sendTips,
-    //   });
+    // Store reminder preferences
+    const { error: prefError } = await supabase
+      .from('reminder_preferences')
+      .upsert({
+        user_id: user.id,
+        days_before_payment: daysBefore,
+        send_tips_emails: sendTips,
+      });
+
+    if (prefError) {
+      console.error('[Reminders Create] Preferences error:', prefError);
+      // Don't fail the request if preferences fail, reminders are still saved
+    }
 
     return NextResponse.json({
       success: true,

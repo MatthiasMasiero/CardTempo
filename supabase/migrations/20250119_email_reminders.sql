@@ -23,9 +23,12 @@ CREATE TABLE IF NOT EXISTS payment_reminders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   card_id UUID REFERENCES credit_cards(id) ON DELETE CASCADE,
+  card_name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL,
   payment_date DATE NOT NULL,
   amount DECIMAL(10, 2) NOT NULL,
   payment_purpose VARCHAR(50) NOT NULL CHECK (payment_purpose IN ('optimization', 'balance')),
+  description TEXT,
   reminder_date DATE NOT NULL,
   email_sent BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW()

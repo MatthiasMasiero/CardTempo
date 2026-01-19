@@ -13,7 +13,9 @@ function getResendClient() {
 }
 
 // Default sender email - Update this to your verified domain
-const FROM_EMAIL = 'CardTempo <onboarding@resend.dev>'; // Change to your domain
+// For development: Use 'onboarding@resend.dev' (no domain verification needed)
+// For production: Use your verified domain (e.g., 'CardTempo <reminders@cardtempo.com>')
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'CardTempo <onboarding@resend.dev>';
 
 interface SendPaymentReminderParams {
   to: string;

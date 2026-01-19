@@ -87,11 +87,6 @@ export function EmailReminderModal({
 
       setSuccess(true);
       setScheduledDates(data.scheduledDates || []);
-
-      // Store reminders in localStorage for now (until database is connected)
-      if (data.reminders) {
-        localStorage.setItem('payment-reminders', JSON.stringify(data.reminders));
-      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to set reminders');
     } finally {

@@ -123,8 +123,12 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // Refresh Supabase session (keeps auth cookies fresh)
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  // Skip Supabase auth for webhook/cron routes (they don't use user sessions)
+  const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks/') ||
+                    request.nextUrl.pathname.startsWith('/api/cron/');
+
+  // Refresh Supabase session (keeps auth cookies fresh) - but not for webhooks
+  if (!isWebhook && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -157,8 +161,8 @@ export async function middleware(request: NextRequest) {
   // Get client IP address
   const ip = request.ip ?? request.headers.get('x-forwarded-for') ?? 'unknown';
 
-  // Apply rate limiting to API routes
-  if (request.nextUrl.pathname.startsWith('/api/')) {
+  // Apply rate limiting to API routes (except webhooks/cron)
+  if (request.nextUrl.pathname.startsWith('/api/') && !isWebhook) {
     const rateLimitResult = await rateLimitCheck(ip);
 
     // Add rate limit headers to all API responses

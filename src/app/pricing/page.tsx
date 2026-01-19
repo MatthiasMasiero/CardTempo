@@ -241,10 +241,10 @@ function PricingPageContent() {
                   variant="outline"
                   size="sm"
                   onClick={handleManageSubscription}
-                  disabled={isLoading}
+                  disabled={isLoadingMonthly || isLoadingAnnual}
                   className="border-emerald-300 text-emerald-700 hover:bg-emerald-100"
                 >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {(isLoadingMonthly || isLoadingAnnual) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Manage Subscription
                 </Button>
               </motion.div>

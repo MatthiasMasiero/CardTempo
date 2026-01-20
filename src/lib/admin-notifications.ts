@@ -1,6 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+/**
+ * Lazy initialize Resend client to avoid build-time errors
+ * Only creates the instance when actually needed
+ */
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('[Admin Alert] RESEND_API_KEY not configured - email alerts disabled');
+    return null;
+  }
+  return new Resend(apiKey);
+}
 
 /**
  * Send admin notification about critical webhook failures
@@ -20,6 +31,13 @@ export async function sendWebhookFailureAlert({
   // Only send in production to avoid spam during development
   if (process.env.NODE_ENV !== 'production') {
     console.log('[Admin Alert] Skipping in development:', { eventType, userId, error });
+    return;
+  }
+
+  // Get Resend client (returns null if API key not configured)
+  const resend = getResendClient();
+  if (!resend) {
+    console.log('[Admin Alert] Email alerts disabled - RESEND_API_KEY not configured');
     return;
   }
 
@@ -87,6 +105,13 @@ export async function sendSubscriptionCreationFailureAlert({
 }) {
   if (process.env.NODE_ENV !== 'production') {
     console.log('[Admin Alert] Skipping in development:', { userId, email, error });
+    return;
+  }
+
+  // Get Resend client (returns null if API key not configured)
+  const resend = getResendClient();
+  if (!resend) {
+    console.log('[Admin Alert] Email alerts disabled - RESEND_API_KEY not configured');
     return;
   }
 

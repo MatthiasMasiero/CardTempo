@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
+import { sendWebhookFailureAlert } from '@/lib/admin-notifications';
 
 // Use service role to bypass RLS for webhook operations
 // Lazy initialization to avoid errors during build when env vars aren't set
@@ -116,16 +117,43 @@ export async function POST(request: NextRequest) {
       .update({ processed: true })
       .eq('stripe_event_id', event.id);
 
+    console.log('[Webhook] ✅ Successfully processed event:', event.type, 'ID:', event.id);
     return NextResponse.json({ received: true, processed: true });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
     // Log the full error server-side but don't expose details to client
-    console.error('[Webhook] Error processing event:', error);
+    console.error('[Webhook] ❌ Error processing event:', {
+      eventType: event.type,
+      eventId: event.id,
+      error: errorMessage,
+    });
 
     // Log the error to database for debugging
     await supabaseAdmin
       .from('stripe_events')
-      .update({ error: error instanceof Error ? error.message : 'Unknown error' })
+      .update({ error: errorMessage })
       .eq('stripe_event_id', event.id);
+
+    // Extract userId if available for better alerting
+    let userId: string | undefined;
+    try {
+      const eventData = event.data.object as any;
+      userId = eventData.metadata?.userId || eventData.customer?.metadata?.userId;
+    } catch {
+      // Ignore if we can't extract userId
+    }
+
+    // Send admin notification for critical webhook failures
+    // This runs in the background - won't delay the webhook response
+    sendWebhookFailureAlert({
+      eventType: event.type,
+      userId,
+      error: errorMessage,
+      eventId: event.id,
+    }).catch((alertError) => {
+      console.error('[Webhook] Failed to send alert email:', alertError);
+    });
 
     // Return 500 to trigger Stripe retry for transient errors
     return NextResponse.json(
@@ -147,22 +175,38 @@ async function handleStripeEvent(
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.userId;
 
+      console.log('[Webhook] Processing checkout.session.completed:', {
+        sessionId: session.id,
+        customerId: session.customer,
+        subscriptionId: session.subscription,
+        userId,
+      });
+
       if (!userId) {
-        console.error('[Webhook] checkout.session.completed missing userId in metadata');
-        return;
+        console.error('[Webhook] ❌ checkout.session.completed missing userId in metadata');
+        console.error('[Webhook] Session metadata:', session.metadata);
+        throw new Error('Missing userId in checkout session metadata');
       }
 
       // Validate userId is a valid UUID format to prevent injection
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
-        console.error('[Webhook] Invalid userId format in metadata');
-        return;
+        console.error('[Webhook] ❌ Invalid userId format:', userId);
+        throw new Error('Invalid userId format in metadata');
       }
 
       // Fetch the full subscription to get billing interval
       const subscriptionId = session.subscription as string;
+      console.log('[Webhook] Fetching subscription details:', subscriptionId);
+
       const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId) as Stripe.Subscription;
       const subscriptionItem = stripeSubscription.items.data[0];
       const interval = subscriptionItem?.price?.recurring?.interval;
+
+      console.log('[Webhook] Subscription details:', {
+        interval,
+        status: stripeSubscription.status,
+        customerId: stripeSubscription.customer,
+      });
 
       const { error } = await supabaseAdmin
         .from('subscriptions')
@@ -183,11 +227,11 @@ async function handleStripeEvent(
         });
 
       if (error) {
-        console.error('[Webhook] Error updating subscription after checkout:', error);
+        console.error('[Webhook] ❌ Error updating subscription after checkout:', error);
         throw error;
       }
 
-      console.log('[Webhook] Subscription activated for user:', userId);
+      console.log('[Webhook] ✅ Subscription activated for user:', userId, 'Tier: premium, Interval:', interval);
       break;
     }
 

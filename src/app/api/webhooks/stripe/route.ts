@@ -117,13 +117,13 @@ export async function POST(request: NextRequest) {
       .update({ processed: true })
       .eq('stripe_event_id', event.id);
 
-    console.log('[Webhook] ✅ Successfully processed event:', event.type, 'ID:', event.id);
+    console.log('[Webhook] Successfully processed event:', event.type, 'ID:', event.id);
     return NextResponse.json({ received: true, processed: true });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // Log the full error server-side but don't expose details to client
-    console.error('[Webhook] ❌ Error processing event:', {
+    console.error('[Webhook] Error processing event:', {
       eventType: event.type,
       eventId: event.id,
       error: errorMessage,
@@ -183,14 +183,14 @@ async function handleStripeEvent(
       });
 
       if (!userId) {
-        console.error('[Webhook] ❌ checkout.session.completed missing userId in metadata');
+        console.error('[Webhook] checkout.session.completed missing userId in metadata');
         console.error('[Webhook] Session metadata:', session.metadata);
         throw new Error('Missing userId in checkout session metadata');
       }
 
       // Validate userId is a valid UUID format to prevent injection
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
-        console.error('[Webhook] ❌ Invalid userId format:', userId);
+        console.error('[Webhook] Invalid userId format:', userId);
         throw new Error('Invalid userId format in metadata');
       }
 
@@ -227,11 +227,11 @@ async function handleStripeEvent(
         });
 
       if (error) {
-        console.error('[Webhook] ❌ Error updating subscription after checkout:', error);
+        console.error('[Webhook] Error updating subscription after checkout:', error);
         throw error;
       }
 
-      console.log('[Webhook] ✅ Subscription activated for user:', userId, 'Tier: premium, Interval:', interval);
+      console.log('[Webhook] Subscription activated for user:', userId, 'Tier: premium, Interval:', interval);
       break;
     }
 

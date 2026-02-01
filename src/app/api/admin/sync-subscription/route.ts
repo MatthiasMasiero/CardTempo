@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
       throw updateError;
     }
 
-    console.log('[Sync] ✅ Successfully synced subscription for user:', userId);
+    console.log('[Sync] Successfully synced subscription for user:', userId);
 
     return NextResponse.json({
       success: true,

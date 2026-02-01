@@ -35,8 +35,8 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 // Clean up old entries every 5 minutes (only used if Redis not available)
 if (!ratelimiter) {
-  console.warn('⚠️  Using in-memory rate limiting - NOT suitable for production!');
-  console.warn('⚠️  Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for production.');
+  console.warn('WARNING: Using in-memory rate limiting - NOT suitable for production!');
+  console.warn('WARNING: Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for production.');
 
   setInterval(() => {
     const now = Date.now();
